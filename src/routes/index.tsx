@@ -152,10 +152,11 @@ const PAGE_CSS = `
 .curbism-root .hero-logo img { height: 100%; width: auto; display: block; }
 
 .curbism-root .hero-title {
-  position: absolute; left: 36px; bottom: 36px; z-index: 3;
-  color: rgba(255, 255, 255, 0.33);
-  font-size: clamp(40px, 7.5vw, 96px);
-  font-weight: 900; letter-spacing: -0.045em; line-height: 0.9; text-transform: uppercase;
+  position: absolute; left: 0; top: 140px; right: 36px; z-index: 3;
+  padding-left: 36px;
+  color: rgba(255, 255, 255, 0.45);
+  font-size: clamp(28px, 5vw, 64px);
+  font-weight: 900; letter-spacing: -0.04em; line-height: 0.95; text-transform: uppercase;
   pointer-events: none;
 }
 .curbism-root .hero-counter {
