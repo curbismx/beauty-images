@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
+import { searchPublicImages, type PublicSearchResult } from "@/lib/search.functions";
 
 export const Route = createFileRoute("/")({
   head: () => ({
