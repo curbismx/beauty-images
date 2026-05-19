@@ -1,5 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { PageHeader } from "./admin";
@@ -9,6 +9,8 @@ import {
   publishAllReady,
   unpublishAll,
   deleteImages,
+  updateImage,
+  type LibraryImage,
 } from "@/lib/images.functions";
 
 const stripExt = (name: string) => name.replace(/\.[^.]+$/, "");
