@@ -69,7 +69,7 @@ function Dashboard() {
             disabled={batchMutation.isPending || (imgStats.data?.pending ?? 0) === 0}
             onClick={() => { setLastResult(null); batchMutation.mutate(); }}
           >
-            {batchMutation.isPending ? "Sending…" : "Send 25 to Gemini"}
+            {batchMutation.isPending ? "Sending…" : `Keyword ${Math.min(imgStats.data?.pending ?? 0, 25)} now`}
           </button>
         </div>
         {lastResult && (

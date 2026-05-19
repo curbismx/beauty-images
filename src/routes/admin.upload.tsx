@@ -145,7 +145,9 @@ function Upload() {
               opacity: batchMutation.isPending || !stats.data?.pending ? 0.5 : 1,
             }}
           >
-            {batchMutation.isPending ? "Sending…" : "Send 25 to Gemini"}
+            {batchMutation.isPending
+              ? "Sending…"
+              : `Keyword ${Math.min(stats.data?.pending ?? 0, 25)} now`}
           </button>
         </div>
       </div>
