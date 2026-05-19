@@ -207,14 +207,33 @@ function FeaturedMasonry() {
 
   return (
     <section className="featured-masonry">
-      <div className="featured-masonry-grid">
-        {items.map((it) => (
-          <img key={it.id} src={it.url} alt={it.alt} loading="lazy" />
-        ))}
-      </div>
+      <MasonryColumns items={items} />
       {!done && <div ref={sentinelRef} className="featured-masonry-sentinel" aria-hidden="true" />}
       {loading && <div className="featured-masonry-loading">Loading…</div>}
     </section>
+  );
+}
+
+function MasonryColumns({ items }: { items: Array<{ id: string; url: string; alt: string }> }) {
+  const [cols, setCols] = useState(3);
+  useEffect(() => {
+    const update = () => setCols(window.innerWidth <= 768 ? 2 : 3);
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
+  const buckets: typeof items[] = Array.from({ length: cols }, () => []);
+  items.forEach((it, i) => buckets[i % cols].push(it));
+  return (
+    <div className="featured-masonry-grid">
+      {buckets.map((col, i) => (
+        <div key={i} className="featured-masonry-col">
+          {col.map((it) => (
+            <img key={it.id} src={it.url} alt={it.alt} loading="lazy" />
+          ))}
+        </div>
+      ))}
+    </div>
   );
 }
 
@@ -483,23 +502,27 @@ const PAGE_CSS = `
 /* FEATURED MASONRY */
 .curbism-root .featured-masonry { background: white; padding: 0 40px 60px; }
 .curbism-root .featured-masonry-grid {
-  column-count: 3;
-  column-gap: 12px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
 }
-.curbism-root .featured-masonry-grid img {
+.curbism-root .featured-masonry-col {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.curbism-root .featured-masonry-col img {
   width: 100%;
   height: auto;
   display: block;
-  margin: 0 0 12px;
-  break-inside: avoid;
-  -webkit-column-break-inside: avoid;
-  page-break-inside: avoid;
 }
 .curbism-root .featured-masonry-sentinel { height: 1px; }
 .curbism-root .featured-masonry-loading { padding: 24px 0; font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; color: #777; text-align: center; }
 @media (max-width: 768px) {
   .curbism-root .featured-masonry { padding: 0 24px 40px; }
-  .curbism-root .featured-masonry-grid { column-count: 2; column-gap: 8px; }
-  .curbism-root .featured-masonry-grid img { margin-bottom: 8px; }
+  .curbism-root .featured-masonry-grid { gap: 8px; }
+  .curbism-root .featured-masonry-col { gap: 8px; }
 }
 `;
