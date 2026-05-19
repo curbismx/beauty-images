@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "./admin";
-import { listFeatured, deleteFeatured } from "@/lib/featured.functions";
+import { listFeatured, deleteFeatured, reorderFeatured, type FeaturedImage } from "@/lib/featured.functions";
 
 export const Route = createFileRoute("/admin/featured")({
   component: Featured,
@@ -32,6 +32,33 @@ function Featured() {
     mutationFn: (id: string) => del({ data: { id } }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["featured-images"] }),
   });
+
+  const reorder = useServerFn(reorderFeatured);
+  const reorderMut = useMutation({
+    mutationFn: (ids: string[]) => reorder({ data: { ids } }),
+  });
+
+  // Local ordered copy so drag-reorder feels instant.
+  const [ordered, setOrdered] = useState<FeaturedImage[]>([]);
+  useEffect(() => {
+    if (list.data) setOrdered(list.data);
+  }, [list.data]);
+  const [dragId, setDragId] = useState<string | null>(null);
+
+  const moveItem = (fromId: string, toId: string) => {
+    if (fromId === toId) return;
+    setOrdered((prev) => {
+      const from = prev.findIndex((x) => x.id === fromId);
+      const to = prev.findIndex((x) => x.id === toId);
+      if (from < 0 || to < 0) return prev;
+      const next = prev.slice();
+      const [m] = next.splice(from, 1);
+      next.splice(to, 0, m);
+      reorderMut.mutate(next.map((x) => x.id));
+      return next;
+    });
+  };
+
 
   const handleFiles = useCallback(
     async (files: FileList | File[]) => {
@@ -136,18 +163,37 @@ function Featured() {
 
       <div className="bi-section" style={{ marginTop: 32 }}>
         <h2 className="bi-section-title">
-          Featured pool {list.data ? `(${list.data.length})` : ""}
+          Featured pool {ordered.length ? `(${ordered.length})` : ""}
         </h2>
+        <p style={{ fontSize: 11, color: "#777", marginBottom: 12, textTransform: "uppercase", letterSpacing: "0.04em" }}>
+          Drag tiles to reorder. Top-left = first on homepage.
+          {reorderMut.isPending && " · Saving…"}
+        </p>
         {list.isLoading ? (
           <div className="bi-placeholder">Loading…</div>
-        ) : !list.data?.length ? (
+        ) : !ordered.length ? (
           <div className="bi-placeholder">No featured images yet</div>
         ) : (
           <div style={gridStyle}>
-            {list.data.map((r) => (
-              <div key={r.id} style={tileStyle}>
+            {ordered.map((r) => (
+              <div
+                key={r.id}
+                draggable
+                onDragStart={() => setDragId(r.id)}
+                onDragEnd={() => setDragId(null)}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  if (dragId) moveItem(dragId, r.id);
+                }}
+                style={{
+                  ...tileStyle,
+                  cursor: "grab",
+                  opacity: dragId === r.id ? 0.4 : 1,
+                }}
+              >
                 <div style={{ position: "relative", paddingBottom: "100%", background: "#f4f4f4" }}>
-                  <img src={r.url} alt={r.filename} style={imgStyle} loading="lazy" />
+                  <img src={r.url} alt={r.filename} style={imgStyle} loading="lazy" draggable={false} />
                 </div>
                 <div style={tileName} title={r.filename}>{r.filename}</div>
                 <button
