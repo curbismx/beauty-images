@@ -19,10 +19,32 @@ const STATS = [
 
 function Dashboard() {
   const fetchVisitors = useServerFn(getVisitors);
+  const fetchImageStats = useServerFn(getImageStats);
+  const runBatch = useServerFn(keywordPendingBatch);
+  const qc = useQueryClient();
+  const [lastResult, setLastResult] = useState<string | null>(null);
+
   const { data, isLoading } = useQuery({
     queryKey: ["visitors"],
     queryFn: () => fetchVisitors(),
     refetchInterval: 30_000,
+  });
+
+  const imgStats = useQuery({
+    queryKey: ["image-stats"],
+    queryFn: () => fetchImageStats(),
+    refetchInterval: 15_000,
+  });
+
+  const batchMutation = useMutation({
+    mutationFn: () => runBatch({ data: { limit: 25 } }),
+    onSuccess: (r) => {
+      setLastResult(
+        `Keyworded ${r.processed}, failed ${r.failed}${r.errors.length ? " — " + r.errors.slice(0, 3).join("; ") : ""}`,
+      );
+      qc.invalidateQueries({ queryKey: ["image-stats"] });
+    },
+    onError: (e) => setLastResult((e as Error).message),
   });
 
   return (
