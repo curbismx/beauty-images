@@ -434,7 +434,7 @@ const PAGE_CSS = `
 .curbism-root .appeared-in-label { font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase; color: #777; margin-bottom: 16px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
 .curbism-root .appeared-in-marquee { width: 100%; overflow: hidden; }
 .curbism-root .appeared-in-track { display: flex; width: max-content; animation: appeared-in-scroll 40s linear infinite; }
-.curbism-root .appeared-in-track img { height: auto; width: auto; max-width: none; display: block; flex-shrink: 0; padding-right: 80px; }
+.curbism-root .appeared-in-track img { height: 52px; width: auto; max-width: none; display: block; flex-shrink: 0; padding-right: 80px; }
 @keyframes appeared-in-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 .curbism-root .intro-text { background: white; padding: 32px 40px 80px; font-family: 'DIN Condensed', 'DIN Alternate', 'Barlow Condensed', 'Oswald', sans-serif; }
 .curbism-root .intro-text h2 { font-size: clamp(28px, 4.2vw, 56px); font-weight: 900; text-transform: uppercase; letter-spacing: -0.035em; line-height: 1.15; color: #000; margin-bottom: 24px; }
@@ -493,12 +493,9 @@ const PAGE_CSS = `
 }
 .curbism-root .featured-masonry-sentinel { height: 1px; }
 .curbism-root .featured-masonry-loading { padding: 24px 0; font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; color: #777; text-align: center; }
-@media (max-width: 900px) {
+@media (max-width: 768px) {
   .curbism-root .featured-masonry { padding: 0 24px 40px; }
   .curbism-root .featured-masonry-grid { column-count: 2; column-gap: 8px; }
   .curbism-root .featured-masonry-grid img { margin-bottom: 8px; }
-}
-@media (max-width: 520px) {
-  .curbism-root .featured-masonry-grid { column-count: 1; }
 }
 `;
