@@ -1,20 +1,18 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Curbism — Apps Design Photography" },
+      { title: "BEAUTYIMAGES" },
       {
         name: "description",
-        content:
-          "Curbism Ltd — apps, design and photography. A small studio building considered digital products.",
+        content: "BEAUTYIMAGES — photography.",
       },
-      { property: "og:title", content: "Curbism — Apps Design Photography" },
+      { property: "og:title", content: "BEAUTYIMAGES" },
       {
         property: "og:description",
-        content:
-          "Curbism Ltd — apps, design and photography. A small studio building considered digital products.",
+        content: "BEAUTYIMAGES — photography.",
       },
       { property: "og:type", content: "website" },
       { property: "og:image", content: "/hero-1.jpg" },
@@ -37,109 +35,22 @@ const HERO_IMAGES = [
   "/hero-10.jpg",
 ];
 
-type App = {
-  name: string;
-  desc: string;
-  url: string;
-  icon: string;
-};
-
-const APPS: App[] = [
-  {
-    name: "Parently",
-    desc: "Expert-led parenting advise",
-    url: "www.ourparently.com",
-    icon: "/icon-parently.png",
-  },
-  {
-    name: "Moonwalk",
-    desc: "Step counter, walk everywhere",
-    url: "—",
-    icon: "/icon-moonwalk.png",
-  },
-  {
-    name: "Dodo",
-    desc: "Legacy notes for the undead",
-    url: "www.mydodo.net",
-    icon: "/icon-dodo.png",
-  },
-  {
-    name: "Nuron",
-    desc: "Voice journal notes",
-    url: "www.nuron.life",
-    icon: "/icon-nuron.png",
-  },
-];
-
 function pad(n: number) {
   return String(n).padStart(2, "0");
 }
 
 function Index() {
-  const navigate = useNavigate();
   const [current, setCurrent] = useState(0);
-  const [activeApp, setActiveApp] = useState<App | null>(null);
-  const sectionAppsRef = useRef<HTMLElement | null>(null);
-  const appInfoRef = useRef<HTMLDivElement | null>(null);
-  const firstIconRef = useRef<HTMLImageElement | null>(null);
-  const designSectionRef = useRef<HTMLElement | null>(null);
-  const designStripLoRef = useRef<HTMLImageElement | null>(null);
-
-  // Align app-info left edge with the first icon's left edge
-  useEffect(() => {
-    const align = () => {
-      const section = sectionAppsRef.current;
-      const info = appInfoRef.current;
-      const firstIcon = firstIconRef.current;
-      if (!section || !info || !firstIcon) return;
-      const sectionRect = section.getBoundingClientRect();
-      const iconRect = firstIcon.getBoundingClientRect();
-      const leftOffset = Math.max(20, iconRect.left - sectionRect.left);
-      info.style.left = leftOffset + "px";
-    };
-    align();
-    window.addEventListener("resize", align);
-    window.addEventListener("load", align);
-    return () => {
-      window.removeEventListener("resize", align);
-      window.removeEventListener("load", align);
-    };
-  }, []);
-
-  // Design strip translation distance
-  useEffect(() => {
-    const section = designSectionRef.current;
-    const strip = designStripLoRef.current;
-    if (!section || !strip) return;
-    const update = () => {
-      const sectionWidth = section.clientWidth;
-      const stripWidth = strip.getBoundingClientRect().width;
-      const distance = Math.max(0, stripWidth - sectionWidth);
-      section.style.setProperty("--design-translate", `-${distance}px`);
-    };
-    if (strip.complete) update();
-    else strip.addEventListener("load", update);
-    window.addEventListener("resize", update);
-    return () => {
-      window.removeEventListener("resize", update);
-      strip.removeEventListener("load", update);
-    };
-  }, []);
 
   const goPrev = () =>
     setCurrent((c) => (c - 1 + HERO_IMAGES.length) % HERO_IMAGES.length);
   const goNext = () => setCurrent((c) => (c + 1) % HERO_IMAGES.length);
 
-  const showApp = (app: App) => setActiveApp(app);
-  const clearApp = () => setActiveApp(null);
-
-  const info = activeApp;
-  const hasActiveApp = activeApp !== null;
-
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: PAGE_CSS }} />
       <div className="curbism-root">
+
         {/* HERO */}
         <section className="hero">
           {HERO_IMAGES.map((src, i) => (
