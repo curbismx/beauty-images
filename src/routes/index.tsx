@@ -46,12 +46,31 @@ function Index() {
   const [current, setCurrent] = useState(0);
   const [searchFocused, setSearchFocused] = useState(false);
   const [searchValue, setSearchValue] = useState("");
+  const [submittedQuery, setSubmittedQuery] = useState("");
+  const [results, setResults] = useState<PublicSearchResult[]>([]);
+  const [searching, setSearching] = useState(false);
+  const runSearch = useServerFn(searchPublicImages);
 
   const goPrev = () =>
     setCurrent((c) => (c - 1 + HERO_IMAGES.length) % HERO_IMAGES.length);
   const goNext = () => setCurrent((c) => (c + 1) % HERO_IMAGES.length);
 
-  const searchActive = searchFocused || searchValue.length > 0;
+  const searchActive = searchFocused || searchValue.length > 0 || submittedQuery.length > 0;
+
+  const submitSearch = async () => {
+    const q = searchValue.trim();
+    if (!q) return;
+    setSubmittedQuery(q);
+    setSearching(true);
+    try {
+      const r = await runSearch({ data: { q, limit: 60 } });
+      setResults(r);
+    } catch {
+      setResults([]);
+    } finally {
+      setSearching(false);
+    }
+  };
 
   return (
     <>
