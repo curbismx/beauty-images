@@ -175,7 +175,8 @@ function Featured() {
         ) : !ordered.length ? (
           <div className="bi-placeholder">No featured images yet</div>
         ) : (
-          <div style={gridStyle}>
+          <div style={previewGridStyle}>
+
             {ordered.map((r) => {
               const isDragging = dragId === r.id;
               const isOver = overId === r.id && dragId && dragId !== r.id;
@@ -204,12 +205,19 @@ function Featured() {
                   opacity: isDragging ? 0.35 : 1,
                   outline: isOver ? "3px solid #D75F68" : "none",
                   outlineOffset: isOver ? "-3px" : 0,
-                  transform: isOver ? "scale(1.02)" : "none",
-                  transition: "transform 0.12s ease, outline-color 0.12s ease",
+                  transition: "outline-color 0.12s ease",
+                  breakInside: "avoid",
+                  marginBottom: 12,
                 }}
               >
-                <div style={{ position: "relative", paddingBottom: "100%", background: "#f4f4f4" }}>
-                  <img src={r.url} alt={r.filename} style={imgStyle} loading="lazy" draggable={false} />
+                <div style={{ background: "#f4f4f4", lineHeight: 0 }}>
+                  <img
+                    src={r.url}
+                    alt={r.filename}
+                    style={{ width: "100%", height: "auto", display: "block" }}
+                    loading="lazy"
+                    draggable={false}
+                  />
                 </div>
                 <div style={tileName} title={r.filename}>{r.filename}</div>
                 <button
@@ -251,6 +259,10 @@ function statusColor(s: QueueItem["status"]) {
   return "#aaa";
 }
 
+const previewGridStyle: React.CSSProperties = {
+  columnCount: 3,
+  columnGap: 12,
+};
 const gridStyle: React.CSSProperties = {
   display: "grid",
   gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))",
