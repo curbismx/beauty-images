@@ -1,8 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
+import { useState } from "react";
 import { PageHeader } from "./admin";
 import { getVisitors, type VisitorRow } from "@/lib/visitors.functions";
+import { getImageStats, keywordPendingBatch } from "@/lib/images.functions";
 
 export const Route = createFileRoute("/admin/")({
   component: Dashboard,
