@@ -31,6 +31,18 @@ function Upload() {
     queryFn: () => fetchRecent({ data: { limit: 60 } }),
   });
 
+  const fetchStats = useServerFn(getImageStats);
+  const stats = useQuery({ queryKey: ["image-stats"], queryFn: () => fetchStats() });
+
+  const runBatch = useServerFn(keywordPendingBatch);
+  const batchMutation = useMutation({
+    mutationFn: () => runBatch({ data: { batchSize: 25 } }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["recent-images"] });
+      qc.invalidateQueries({ queryKey: ["image-stats"] });
+    },
+  });
+
   // Revoke object URLs when component unmounts
   useEffect(() => {
     return () => {
