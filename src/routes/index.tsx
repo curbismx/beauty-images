@@ -248,6 +248,7 @@ function FeaturedMasonry() {
     const { data, error } = await supabase
       .from("featured_images")
       .select("id, storage_path, filename")
+      .order("sort_order", { ascending: false })
       .order("filename", { ascending: true })
       .range(from, to);
     if (!error && data) {
