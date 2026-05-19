@@ -16,8 +16,7 @@ export const listFeatured = createServerFn({ method: "GET" })
     const { data, error } = await context.supabase
       .from("featured_images")
       .select("id, filename, storage_path, sort_order")
-      .order("sort_order", { ascending: false })
-      .order("created_at", { ascending: false });
+      .order("filename", { ascending: true });
     if (error) throw new Error(error.message);
     return (data ?? []).map((r) => ({
       ...r,
