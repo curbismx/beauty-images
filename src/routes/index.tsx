@@ -124,7 +124,12 @@ function Index() {
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
               onFocus={() => setSearchFocused(true)}
-              onBlur={() => setSearchFocused(false)}
+              onBlur={() => {
+                setSearchFocused(false);
+                setSearchValue("");
+                setSubmittedQuery("");
+                setResults([]);
+              }}
               aria-label="Search images"
             />
             <button
