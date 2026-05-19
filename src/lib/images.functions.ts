@@ -108,6 +108,7 @@ export const listImages = createServerFn({ method: "GET" })
       image_number: r.image_number as number,
       filename: r.filename,
       title: r.title,
+      caption: r.caption,
       keyworded_at: r.keyworded_at,
       created_at: r.created_at,
       category: r.category,
