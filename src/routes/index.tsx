@@ -142,7 +142,7 @@ const PAGE_SIZE = 15;
 
 function FeaturedMasonry() {
   const [items, setItems] = useState<Array<{ id: string; url: string; alt: string }>>([]);
-  const [page, setPage] = useState(0);
+  const [, setPage] = useState(0);
   const [done, setDone] = useState(false);
   const [loading, setLoading] = useState(false);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
@@ -213,8 +213,6 @@ function FeaturedMasonry() {
     </section>
   );
 }
-_unusedPage();
-function _unusedPage() { void 0; }
 
 const PAGE_CSS = `
 .curbism-root, .curbism-root * { box-sizing: border-box; margin: 0; padding: 0; }
