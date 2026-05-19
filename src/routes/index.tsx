@@ -107,24 +107,30 @@ function Index() {
           </div>
         </section>
 
-        <div className="appeared-in">
-          <div className="appeared-in-label">PUBLISHED IN</div>
-          <div className="appeared-in-marquee">
-            <div className="appeared-in-track">
-              <img src="/appeared-in.png" alt="Published in Vogue, Thalgo, El País, Lexus, Apple" />
-              <img src="/appeared-in.png" alt="" aria-hidden="true" />
+        <div className={`home-fade${searchActive ? " home-fade--hidden" : ""}`}>
+          <div className="appeared-in">
+            <div className="appeared-in-label">PUBLISHED IN</div>
+            <div className="appeared-in-marquee">
+              <div className="appeared-in-track">
+                <img src="/appeared-in.png" alt="Published in Vogue, Thalgo, El País, Lexus, Apple" />
+                <img src="/appeared-in.png" alt="" aria-hidden="true" />
+              </div>
             </div>
           </div>
+
+          <div className="intro-text">
+            <h2>ADVERTISING DESIGN &amp; EDITORIAL IMAGES</h2>
+            <p>
+              BEAUTY IMAGES IS A COLLECTIVE OF PHOTOGRAPHERS PROVIDING IMAGES FOR HIGH-END PUBLICATIONS FOR OVER 20 YEARS. ALL OUR IMAGES ARE EXCLUSIVE TO BEAUTY IMAGES AND ARE SOLD ON A RIGHTS MANAGED BASIS.
+            </p>
+          </div>
+
+          <FeaturedMasonry />
         </div>
 
-        <div className="intro-text">
-          <h2>ADVERTISING DESIGN &amp; EDITORIAL IMAGES</h2>
-          <p>
-            BEAUTY IMAGES IS A COLLECTIVE OF PHOTOGRAPHERS PROVIDING IMAGES FOR HIGH-END PUBLICATIONS FOR OVER 20 YEARS. ALL OUR IMAGES ARE EXCLUSIVE TO BEAUTY IMAGES AND ARE SOLD ON A RIGHTS MANAGED BASIS.
-          </p>
-        </div>
-
-        <FeaturedMasonry />
+        {searchActive && (
+          <div className="search-results-placeholder">SEARCH RESULTS</div>
+        )}
 
         <div className="line-thin" />
 
@@ -524,5 +530,21 @@ const PAGE_CSS = `
 .curbism-root .featured-masonry-loading { padding: 24px 0; font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; color: #777; text-align: center; }
 @media (max-width: 768px) {
   .curbism-root .featured-masonry { padding: 0 0 40px; }
+}
+
+.curbism-root .home-fade { opacity: 1; transition: opacity 3.5s ease; }
+.curbism-root .home-fade--hidden { opacity: 0; pointer-events: none; }
+.curbism-root .search-results-placeholder {
+  padding: 80px 40px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.4em;
+  color: #000;
+  animation: searchResultsIn 1.2s ease 1.8s both;
+}
+@keyframes searchResultsIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 `;
