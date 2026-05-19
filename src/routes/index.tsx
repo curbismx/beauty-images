@@ -95,9 +95,9 @@ function Index() {
         </div>
 
         <div className="intro-text">
-          <h2>Advertising Design &amp; Editorial Images</h2>
+          <h2>ADVERTISING DESIGN &amp; EDITORIAL IMAGES</h2>
           <p>
-            Beauty Images is a collective of photographers providing images for high-end publications for over 20 years. All our images are exclusive to Beauty Images and are sold on a Rights Managed basis.
+            BEAUTY IMAGES IS A COLLECTIVE OF PHOTOGRAPHERS PROVIDING IMAGES FOR HIGH-END PUBLICATIONS FOR OVER 20 YEARS. ALL OUR IMAGES ARE EXCLUSIVE TO BEAUTY IMAGES AND ARE SOLD ON A RIGHTS MANAGED BASIS.
           </p>
         </div>
 
@@ -293,9 +293,9 @@ const PAGE_CSS = `
 /* FOOTER */
 .curbism-root .appeared-in { background: white; padding: 40px 40px 20px; display: flex; justify-content: flex-start; }
 .curbism-root .appeared-in img { width: 66.666%; max-width: 66.666%; height: auto; display: block; }
-.curbism-root .intro-text { background: white; padding: 20px 40px 60px; max-width: 66.666%; }
-.curbism-root .intro-text h2 { font-size: 22px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.02em; color: #222; margin-bottom: 16px; }
-.curbism-root .intro-text p { font-size: 16px; line-height: 1.55; color: #555; }
+.curbism-root .intro-text { background: white; padding: 32px 40px 80px; max-width: 66.666%; }
+.curbism-root .intro-text h2 { font-size: clamp(28px, 4.2vw, 56px); font-weight: 900; text-transform: uppercase; letter-spacing: -0.035em; line-height: 0.95; color: #000; margin-bottom: 24px; }
+.curbism-root .intro-text p { font-size: clamp(14px, 1.4vw, 18px); font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em; line-height: 1.4; color: #111; }
 @media (max-width: 768px) {
   .curbism-root .appeared-in { padding: 24px 24px 12px; }
   .curbism-root .appeared-in img { width: 90%; max-width: 90%; }
