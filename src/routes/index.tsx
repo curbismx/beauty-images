@@ -107,7 +107,8 @@ function Index() {
         </section>
 
         <div className="appeared-in">
-          <img src="/appeared-in.png" alt="Appeared in Vogue, Thalgo, El País, Lexus, Apple" />
+          <div className="appeared-in-label">PUBLISHED IN</div>
+          <img src="/appeared-in.png" alt="Published in Vogue, Thalgo, El País, Lexus, Apple" />
         </div>
 
         <div className="intro-text">
@@ -351,6 +352,7 @@ const PAGE_CSS = `
 
 /* FOOTER */
 .curbism-root .appeared-in { background: white; padding: 40px 40px 20px; display: block; overflow: hidden; }
+.curbism-root .appeared-in-label { font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase; color: #777; margin-bottom: 16px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
 .curbism-root .appeared-in img { width: 100%; max-width: 100%; height: auto; display: block; }
 .curbism-root .intro-text { background: white; padding: 32px 40px 80px; font-family: 'DIN Condensed', 'DIN Alternate', 'Barlow Condensed', 'Oswald', sans-serif; }
 .curbism-root .intro-text h2 { font-size: clamp(28px, 4.2vw, 56px); font-weight: 900; text-transform: uppercase; letter-spacing: -0.035em; line-height: 1.15; color: #000; margin-bottom: 24px; }
