@@ -59,6 +59,141 @@ export const getRecentImages = createServerFn({ method: "GET" })
     })) as RecentImage[];
   });
 
+export type LibraryImage = RecentImage & {
+  category: string | null;
+  availability: string;
+  public: boolean;
+  keywords: string[];
+};
+
+export const listImages = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(
+    z
+      .object({
+        filter: z
+          .enum(["all", "pending", "ready", "published", "unpublished"])
+          .default("all"),
+        search: z.string().trim().max(200).default(""),
+        limit: z.number().int().min(1).max(500).default(200),
+      })
+      .parse,
+  )
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+    let q = supabase
+      .from("images")
+      .select(
+        "id, image_number, filename, title, keyworded_at, created_at, storage_path, category, availability, public, keywords",
+      )
+      .order("image_number", { ascending: false })
+      .limit(data.limit);
+    if (data.filter === "pending") q = q.is("keyworded_at", null);
+    if (data.filter === "ready") q = q.not("keyworded_at", "is", null).eq("public", false);
+    if (data.filter === "published") q = q.eq("public", true);
+    if (data.filter === "unpublished") q = q.eq("public", false);
+    if (data.search) {
+      const s = data.search.replace(/[%,]/g, " ");
+      q = q.or(`title.ilike.%${s}%,filename.ilike.%${s}%,category.ilike.%${s}%`);
+    }
+    const { data: rows, error } = await q;
+    if (error) throw new Error(error.message);
+    const paths = (rows ?? []).map((r) => r.storage_path);
+    const signed = paths.length
+      ? await supabase.storage.from("images-private").createSignedUrls(paths, 3600)
+      : { data: [] as Array<{ signedUrl: string | null }> };
+    return (rows ?? []).map((r, i) => ({
+      id: r.id,
+      image_number: r.image_number as number,
+      filename: r.filename,
+      title: r.title,
+      keyworded_at: r.keyworded_at,
+      created_at: r.created_at,
+      category: r.category,
+      availability: r.availability,
+      public: r.public,
+      keywords: (r.keywords ?? []) as string[],
+      signed_url: signed.data?.[i]?.signedUrl ?? null,
+    })) as LibraryImage[];
+  });
+
+export type ImageDetail = {
+  id: string;
+  image_number: number;
+  filename: string;
+  title: string | null;
+  caption: string | null;
+  keywords: string[];
+  category: string | null;
+  availability: string;
+  pricing_tier: string | null;
+  model_release: boolean;
+  admin_notes: string | null;
+  featured: boolean;
+  public: boolean;
+  keyworded_at: string | null;
+  created_at: string;
+  signed_url: string | null;
+};
+
+export const getImage = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(z.object({ id: z.string().uuid() }).parse)
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+    const { data: row, error } = await supabase
+      .from("images")
+      .select("*")
+      .eq("id", data.id)
+      .single();
+    if (error) throw new Error(error.message);
+    const signed = await supabase.storage
+      .from("images-private")
+      .createSignedUrl(row.storage_path, 3600);
+    return {
+      id: row.id,
+      image_number: row.image_number as number,
+      filename: row.filename,
+      title: row.title,
+      caption: row.caption,
+      keywords: (row.keywords ?? []) as string[],
+      category: row.category,
+      availability: row.availability,
+      pricing_tier: row.pricing_tier,
+      model_release: row.model_release,
+      admin_notes: row.admin_notes,
+      featured: row.featured,
+      public: row.public,
+      keyworded_at: row.keyworded_at,
+      created_at: row.created_at,
+      signed_url: signed.data?.signedUrl ?? null,
+    } as ImageDetail;
+  });
+
+export const updateImage = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(
+    z.object({
+      id: z.string().uuid(),
+      title: z.string().max(240).nullable().optional(),
+      caption: z.string().max(2000).nullable().optional(),
+      keywords: z.array(z.string().min(1).max(60)).max(60).optional(),
+      category: z.string().max(50).nullable().optional(),
+      availability: z.enum(["available", "on_hold", "licensed"]).optional(),
+      pricing_tier: z.string().max(50).nullable().optional(),
+      model_release: z.boolean().optional(),
+      admin_notes: z.string().max(5000).nullable().optional(),
+      featured: z.boolean().optional(),
+      public: z.boolean().optional(),
+    }).parse,
+  )
+  .handler(async ({ data, context }) => {
+    const { id, ...patch } = data;
+    const { error } = await context.supabase.from("images").update(patch).eq("id", id);
+    if (error) throw new Error(error.message);
+    return { ok: true as const };
+  });
+
 const KEYWORD_PROMPT = `You are a professional stock-photo keyworder. Analyze the image and return strict JSON with this exact shape:
 {
   "title": "short descriptive headline, max 12 words, no trailing period",

@@ -36,7 +36,7 @@ function Upload() {
 
   const runBatch = useServerFn(keywordPendingBatch);
   const batchMutation = useMutation({
-    mutationFn: () => runBatch({ data: { batchSize: 25 } }),
+    mutationFn: () => runBatch({ data: { limit: 25 } }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["recent-images"] });
       qc.invalidateQueries({ queryKey: ["image-stats"] });
