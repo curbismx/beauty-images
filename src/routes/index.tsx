@@ -65,13 +65,11 @@ function Index() {
           <div
             className="hero-zone hero-zone--left"
             aria-label="Previous image"
-            onMouseEnter={goPrev}
             onClick={goPrev}
           />
           <div
             className="hero-zone hero-zone--right"
             aria-label="Next image"
-            onMouseEnter={goNext}
             onClick={goNext}
           />
 
