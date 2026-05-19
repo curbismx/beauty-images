@@ -172,102 +172,10 @@ function Index() {
           </div>
         </section>
 
-        {/* APPS */}
-        <section
-          ref={sectionAppsRef}
-          className={`section section--apps${hasActiveApp ? " has-active-app" : ""}`}
-          onMouseLeave={clearApp}
-        >
-          <div className="apps-row">
-            {APPS.map((app, i) => (
-              <div
-                key={app.name}
-                className="app-slot"
-                onMouseEnter={() => showApp(app)}
-              >
-                <img
-                  ref={i === 0 ? firstIconRef : undefined}
-                  className="app-icon"
-                  src={app.icon}
-                  alt={app.name}
-                />
-              </div>
-            ))}
-          </div>
-
-          <div
-            ref={appInfoRef}
-            className={`app-info${hasActiveApp ? " visible" : ""}`}
-          >
-            <div className="info-name">{info?.name ?? ""}</div>
-            <div className="info-desc">{info?.desc ?? ""}</div>
-            {info?.url && info.url !== "—" ? (
-              <a
-                className="info-url-link"
-                href={`https://${info.url.replace(/^https?:\/\//, "")}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <span className="info-url-text">{info.url}</span>
-                <svg
-                  className="info-url-arrow"
-                  viewBox="0 0 20 20"
-                  aria-hidden="true"
-                >
-                  <line
-                    x1="4"
-                    y1="16"
-                    x2="16"
-                    y2="4"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  />
-                  <polyline
-                    points="8,4 16,4 16,12"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  />
-                </svg>
-              </a>
-            ) : info?.url === "—" ? (
-              <span className="info-url-link" style={{ cursor: "default" }}>
-                <span className="info-url-text">{info.url}</span>
-              </span>
-            ) : null}
-          </div>
-
-          <span className="section-label">Apps</span>
-        </section>
-
-        
-
-        {/* DESIGN */}
-        <section
-          ref={designSectionRef}
-          className="section section--white section--design"
-          onClick={() => navigate({ to: "/design" })}
-        >
-          <div className="design-area">
-            <img
-              ref={designStripLoRef}
-              className="design-strip design-strip--lo"
-              src="/design-bw.png"
-              alt=""
-            />
-            <img
-              className="design-strip design-strip--hi"
-              src="/design-colour.png"
-              alt=""
-            />
-          </div>
-          <span className="section-label">Design</span>
-        </section>
-
         {/* PHOTOGRAPHY */}
         <section className="section section--white">
-          <span className="section-label">Photography</span>
         </section>
+
 
         <div className="line-thin" />
 
