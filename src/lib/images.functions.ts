@@ -85,7 +85,7 @@ export const listImages = createServerFn({ method: "GET" })
     let q = supabase
       .from("images")
       .select(
-        "id, image_number, filename, title, keyworded_at, created_at, storage_path, category, availability, public, keywords",
+        "id, image_number, filename, title, caption, keyworded_at, created_at, storage_path, category, availability, public, keywords",
       )
       .order("image_number", { ascending: false })
       .limit(data.limit);
