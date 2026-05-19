@@ -1,10 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "./admin";
-import { getRecentImages } from "@/lib/images.functions";
+import { getRecentImages, getImageStats, keywordPendingBatch } from "@/lib/images.functions";
 
 export const Route = createFileRoute("/admin/upload")({
   component: Upload,
@@ -29,6 +29,18 @@ function Upload() {
   const recent = useQuery({
     queryKey: ["recent-images"],
     queryFn: () => fetchRecent({ data: { limit: 60 } }),
+  });
+
+  const fetchStats = useServerFn(getImageStats);
+  const stats = useQuery({ queryKey: ["image-stats"], queryFn: () => fetchStats() });
+
+  const runBatch = useServerFn(keywordPendingBatch);
+  const batchMutation = useMutation({
+    mutationFn: () => runBatch({ data: { batchSize: 25 } }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["recent-images"] });
+      qc.invalidateQueries({ queryKey: ["image-stats"] });
+    },
   });
 
   // Revoke object URLs when component unmounts
@@ -91,6 +103,53 @@ function Upload() {
   return (
     <>
       <PageHeader title="Upload" />
+
+      <div
+        style={{
+          border: "1px solid #000",
+          padding: 16,
+          marginBottom: 16,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 16,
+          flexWrap: "wrap",
+        }}
+      >
+        <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: "0.04em", textTransform: "uppercase" }}>
+          {stats.data
+            ? `${stats.data.pending} un-keyworded · ${stats.data.total} total`
+            : "Loading stats…"}
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          {batchMutation.data && (
+            <span style={{ fontSize: 11 }}>
+              Last run: {batchMutation.data.processed} done
+              {batchMutation.data.failed ? `, ${batchMutation.data.failed} failed` : ""}
+            </span>
+          )}
+          <button
+            type="button"
+            onClick={() => batchMutation.mutate()}
+            disabled={batchMutation.isPending || !stats.data?.pending}
+            style={{
+              background: "#000",
+              color: "#fff",
+              border: "1px solid #000",
+              padding: "10px 16px",
+              fontSize: 11,
+              fontWeight: 800,
+              letterSpacing: "0.04em",
+              textTransform: "uppercase",
+              cursor: batchMutation.isPending || !stats.data?.pending ? "not-allowed" : "pointer",
+              opacity: batchMutation.isPending || !stats.data?.pending ? 0.5 : 1,
+            }}
+          >
+            {batchMutation.isPending ? "Sending…" : "Send 25 to Gemini"}
+          </button>
+        </div>
+      </div>
+
       <div
         className="bi-drop"
         style={{
