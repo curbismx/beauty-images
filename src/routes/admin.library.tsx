@@ -29,11 +29,13 @@ type FilterId = (typeof FILTERS)[number]["id"];
 function Library() {
   const [active, setActive] = useState<FilterId>("all");
   const [search, setSearch] = useState("");
+  const [selected, setSelected] = useState<Set<string>>(new Set());
   const qc = useQueryClient();
   const fetchList = useServerFn(listImages);
   const fetchStats = useServerFn(getImageStats);
   const runPublish = useServerFn(publishAllReady);
   const runUnpublish = useServerFn(unpublishAll);
+  const runDelete = useServerFn(deleteImages);
 
   const q = useQuery({
     queryKey: ["library-images", active, search],
@@ -57,10 +59,33 @@ function Library() {
     mutationFn: () => runUnpublish({}),
     onSuccess: invalidate,
   });
+  const deleteMut = useMutation({
+    mutationFn: (ids: string[]) => runDelete({ data: { ids } }),
+    onSuccess: () => {
+      setSelected(new Set());
+      invalidate();
+    },
+  });
+
+  const rows = q.data ?? [];
+  const allSelected = rows.length > 0 && rows.every((r) => selected.has(r.id));
+  const toggleAll = () => {
+    if (allSelected) setSelected(new Set());
+    else setSelected(new Set(rows.map((r) => r.id)));
+  };
+  const toggleOne = (id: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   return (
     <>
       <PageHeader title="Library" />
+
 
       <div style={batchBar}>
         <div style={{ fontSize: 12, letterSpacing: "0.04em", textTransform: "uppercase" }}>
