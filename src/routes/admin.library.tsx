@@ -8,7 +8,10 @@ import {
   getImageStats,
   publishAllReady,
   unpublishAll,
+  deleteImages,
 } from "@/lib/images.functions";
+
+const stripExt = (name: string) => name.replace(/\.[^.]+$/, "");
 
 export const Route = createFileRoute("/admin/library")({
   component: Library,
@@ -26,11 +29,13 @@ type FilterId = (typeof FILTERS)[number]["id"];
 function Library() {
   const [active, setActive] = useState<FilterId>("all");
   const [search, setSearch] = useState("");
+  const [selected, setSelected] = useState<Set<string>>(new Set());
   const qc = useQueryClient();
   const fetchList = useServerFn(listImages);
   const fetchStats = useServerFn(getImageStats);
   const runPublish = useServerFn(publishAllReady);
   const runUnpublish = useServerFn(unpublishAll);
+  const runDelete = useServerFn(deleteImages);
 
   const q = useQuery({
     queryKey: ["library-images", active, search],
@@ -54,10 +59,33 @@ function Library() {
     mutationFn: () => runUnpublish({}),
     onSuccess: invalidate,
   });
+  const deleteMut = useMutation({
+    mutationFn: (ids: string[]) => runDelete({ data: { ids } }),
+    onSuccess: () => {
+      setSelected(new Set());
+      invalidate();
+    },
+  });
+
+  const rows = q.data ?? [];
+  const allSelected = rows.length > 0 && rows.every((r) => selected.has(r.id));
+  const toggleAll = () => {
+    if (allSelected) setSelected(new Set());
+    else setSelected(new Set(rows.map((r) => r.id)));
+  };
+  const toggleOne = (id: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   return (
     <>
       <PageHeader title="Library" />
+
 
       <div style={batchBar}>
         <div style={{ fontSize: 12, letterSpacing: "0.04em", textTransform: "uppercase" }}>
@@ -111,48 +139,85 @@ function Library() {
         ))}
       </div>
 
+      <div style={selBar}>
+        <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, fontWeight: 700, letterSpacing: "0.04em", textTransform: "uppercase", cursor: "pointer" }}>
+          <input type="checkbox" checked={allSelected} onChange={toggleAll} />
+          Select all ({rows.length})
+        </label>
+        <div style={{ fontSize: 12, opacity: 0.7 }}>{selected.size} selected</div>
+        <button
+          style={{ ...btnDark, background: selected.size ? "#a32020" : "#ccc", borderColor: selected.size ? "#a32020" : "#ccc", cursor: selected.size ? "pointer" : "not-allowed" }}
+          disabled={!selected.size || deleteMut.isPending}
+          onClick={() => {
+            if (confirm(`Delete ${selected.size} image(s)? This cannot be undone.`))
+              deleteMut.mutate(Array.from(selected));
+          }}
+        >
+          {deleteMut.isPending ? "Deleting…" : `Delete selected`}
+        </button>
+      </div>
+      {deleteMut.data && (
+        <div style={notice}>Deleted {deleteMut.data.deleted} images.</div>
+      )}
+
       {q.isLoading ? (
         <div className="bi-placeholder">Loading…</div>
-      ) : !q.data?.length ? (
+      ) : !rows.length ? (
         <div className="bi-placeholder">No images</div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          {q.data.map((r) => (
-            <Link
-              key={r.id}
-              to="/admin/image/$id"
-              params={{ id: r.id }}
-              style={rowStyle}
-            >
-              <div style={thumbWrap}>
-                {r.signed_url ? (
-                  <img src={r.signed_url} alt={r.filename} style={thumbImg} loading="lazy" />
-                ) : (
-                  <div style={{ ...thumbImg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11 }}>
-                    NO PREVIEW
-                  </div>
-                )}
-              </div>
-              <div style={contentCol}>
-                <div style={topRow}>
-                  <span style={numBadge}>#{r.image_number}</span>
-                  {!r.keyworded_at && <span style={{ ...statusBadge, background: "#D75F68" }}>PENDING</span>}
-                  {r.keyworded_at && r.public && <span style={{ ...statusBadge, background: "#1f7a3d" }}>LIVE</span>}
-                  {r.keyworded_at && !r.public && <span style={{ ...statusBadge, background: "#888" }}>READY</span>}
-                  {r.category && <span style={catBadge}>{r.category}</span>}
+          {rows.map((r) => {
+            const isSel = selected.has(r.id);
+            return (
+              <div key={r.id} style={{ ...rowStyle, outline: isSel ? "2px solid #a32020" : "none" }}>
+                <div
+                  style={{ display: "flex", alignItems: "center", justifyContent: "center", borderRight: "1px solid #000", padding: "0 10px", cursor: "pointer" }}
+                  onClick={() => toggleOne(r.id)}
+                >
+                  <input
+                    type="checkbox"
+                    checked={isSel}
+                    onChange={() => toggleOne(r.id)}
+                    onClick={(e) => e.stopPropagation()}
+                    style={{ width: 18, height: 18 }}
+                  />
                 </div>
-                <div style={titleStyle}>{r.title ?? r.filename}</div>
-                {r.caption && <div style={captionStyle}>{r.caption}</div>}
-                {r.keywords?.length > 0 && (
-                  <div style={kwWrap}>
-                    {r.keywords.map((k, i) => (
-                      <span key={i} style={kwChip}>{k}</span>
-                    ))}
+                <Link
+                  to="/admin/image/$id"
+                  params={{ id: r.id }}
+                  style={{ display: "contents", textDecoration: "none", color: "#000" }}
+                >
+                  <div style={thumbWrap}>
+                    {r.signed_url ? (
+                      <img src={r.signed_url} alt={r.filename} style={thumbImg} loading="lazy" />
+                    ) : (
+                      <div style={{ ...thumbImg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11 }}>
+                        NO PREVIEW
+                      </div>
+                    )}
                   </div>
-                )}
+                  <div style={contentCol}>
+                    <div style={topRow}>
+                      <span style={numBadge}>{r.image_number}</span>
+                      {!r.keyworded_at && <span style={{ ...statusBadge, background: "#D75F68" }}>PENDING</span>}
+                      {r.keyworded_at && r.public && <span style={{ ...statusBadge, background: "#1f7a3d" }}>LIVE</span>}
+                      {r.keyworded_at && !r.public && <span style={{ ...statusBadge, background: "#888" }}>READY</span>}
+                      {r.category && <span style={catBadge}>{r.category}</span>}
+                    </div>
+                    <div style={titleStyle}>{r.title ?? stripExt(r.filename)}</div>
+                    {r.caption && <div style={captionStyle}>{r.caption}</div>}
+                    {r.keywords?.length > 0 && (
+                      <div style={kwWrap}>
+                        {r.keywords.map((k, i) => (
+                          <span key={i} style={kwChip}>{k}</span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </Link>
               </div>
-            </Link>
-          ))}
+            );
+          })}
         </div>
       )}
     </>
@@ -188,10 +253,20 @@ const notice: React.CSSProperties = {
   marginBottom: 12,
   fontSize: 12,
 };
+const selBar: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: 16,
+  padding: "10px 14px",
+  border: "1px solid #000",
+  marginBottom: 12,
+  justifyContent: "space-between",
+  flexWrap: "wrap",
+};
 const rowStyle: React.CSSProperties = {
   display: "grid",
-  gridTemplateColumns: "200px 1fr",
-  gap: 16,
+  gridTemplateColumns: "50px 200px 1fr",
+  gap: 0,
   border: "1px solid #000",
   textDecoration: "none",
   color: "#000",
