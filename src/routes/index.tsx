@@ -137,6 +137,85 @@ function Index() {
   );
 }
 
+type FeaturedRow = { id: string; storage_path: string; filename: string };
+const PAGE_SIZE = 15;
+
+function FeaturedMasonry() {
+  const [items, setItems] = useState<Array<{ id: string; url: string; alt: string }>>([]);
+  const [page, setPage] = useState(0);
+  const [done, setDone] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  const loadingRef = useRef(false);
+  const doneRef = useRef(false);
+  const pageRef = useRef(0);
+
+  const loadMore = async () => {
+    if (loadingRef.current || doneRef.current) return;
+    loadingRef.current = true;
+    setLoading(true);
+    const from = pageRef.current * PAGE_SIZE;
+    const to = from + PAGE_SIZE - 1;
+    const { data, error } = await supabase
+      .from("featured_images")
+      .select("id, storage_path, filename")
+      .order("sort_order", { ascending: false })
+      .order("created_at", { ascending: false })
+      .range(from, to);
+    if (!error && data) {
+      const rows = data as FeaturedRow[];
+      const next = rows.map((r) => ({
+        id: r.id,
+        url: supabase.storage.from("featured-images").getPublicUrl(r.storage_path).data.publicUrl,
+        alt: r.filename,
+      }));
+      setItems((prev) => [...prev, ...next]);
+      pageRef.current += 1;
+      setPage(pageRef.current);
+      if (rows.length < PAGE_SIZE) {
+        doneRef.current = true;
+        setDone(true);
+      }
+    }
+    loadingRef.current = false;
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    loadMore();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) loadMore();
+      },
+      { rootMargin: "600px" },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  if (items.length === 0 && done) return null;
+
+  return (
+    <section className="featured-masonry">
+      <div className="featured-masonry-grid">
+        {items.map((it) => (
+          <img key={it.id} src={it.url} alt={it.alt} loading="lazy" />
+        ))}
+      </div>
+      {!done && <div ref={sentinelRef} className="featured-masonry-sentinel" aria-hidden="true" />}
+      {loading && <div className="featured-masonry-loading">Loading…</div>}
+    </section>
+  );
+}
+_unusedPage();
+function _unusedPage() { void 0; }
+
 const PAGE_CSS = `
 .curbism-root, .curbism-root * { box-sizing: border-box; margin: 0; padding: 0; }
 .curbism-root { background: white; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; color: black; }
