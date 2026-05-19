@@ -161,14 +161,14 @@ const PAGE_CSS = `
 .curbism-root .hero-search {
   position: absolute;
   left: 0;
-  top: calc(140px + clamp(28px, 5vw, 64px) * 3 + 72px);
+  top: calc(140px + clamp(28px, 5vw, 64px) * 3 + 147px);
   padding-left: 36px;
   width: 50%;
   z-index: 4;
 }
 .curbism-root .hero-search input {
   width: 100%;
-  background: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.3);
   border: none;
   padding: 16px 20px;
   font-family: inherit;
