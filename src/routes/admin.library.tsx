@@ -8,7 +8,10 @@ import {
   getImageStats,
   publishAllReady,
   unpublishAll,
+  deleteImages,
 } from "@/lib/images.functions";
+
+const stripExt = (name: string) => name.replace(/\.[^.]+$/, "");
 
 export const Route = createFileRoute("/admin/library")({
   component: Library,
