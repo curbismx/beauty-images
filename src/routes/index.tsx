@@ -95,10 +95,12 @@ function Index() {
         </div>
 
         <div className="intro-text">
-          <h2>ADVERTISING DESIGN &amp; EDITORIAL IMAGES</h2>
-          <p>
-            BEAUTY IMAGES IS A COLLECTIVE OF PHOTOGRAPHERS PROVIDING IMAGES FOR HIGH-END PUBLICATIONS FOR OVER 20 YEARS. ALL OUR IMAGES ARE EXCLUSIVE TO BEAUTY IMAGES AND ARE SOLD ON A RIGHTS MANAGED BASIS.
-          </p>
+          <h2>
+            RIGHTS MANAGED IMAGES<br />
+            REAL PEOPLE<br />
+            REAL PHOTOGRAPHY<br />
+            NO AI
+          </h2>
         </div>
 
         {/* PHOTOGRAPHY */}
