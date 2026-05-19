@@ -41,10 +41,14 @@ function pad(n: number) {
 
 function Index() {
   const [current, setCurrent] = useState(0);
+  const [searchFocused, setSearchFocused] = useState(false);
+  const [searchValue, setSearchValue] = useState("");
 
   const goPrev = () =>
     setCurrent((c) => (c - 1 + HERO_IMAGES.length) % HERO_IMAGES.length);
   const goNext = () => setCurrent((c) => (c + 1) % HERO_IMAGES.length);
+
+  const searchActive = searchFocused || searchValue.length > 0;
 
   return (
     <>
@@ -52,15 +56,20 @@ function Index() {
       <div className="curbism-root">
 
         {/* HERO */}
-        <section className="hero">
+        <section className={`hero${searchActive ? " hero--search" : ""}`}>
           {HERO_IMAGES.map((src, i) => (
             <img
               key={src}
-              className={`bg-img${i === current ? " active" : ""}`}
+              className={`bg-img${i === current && !searchActive ? " active" : ""}`}
               src={src}
               alt=""
             />
           ))}
+          <img
+            className={`bg-img bg-img--search${searchActive ? " active" : ""}`}
+            src="/hero-search.jpg"
+            alt=""
+          />
 
           <div
             className="hero-zone hero-zone--left"
@@ -79,6 +88,19 @@ function Index() {
           <h1 className="hero-title">
             Rights Managed Images / Real People / Real Photography / No AI
           </h1>
+
+          <div className="hero-search">
+            <input
+              type="search"
+              placeholder="Search images…"
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              onFocus={() => setSearchFocused(true)}
+              onBlur={() => setSearchFocused(false)}
+              aria-label="Search images"
+            />
+          </div>
+
           <div className="hero-counter">
             {pad(current + 1)} / {pad(HERO_IMAGES.length)}
           </div>
