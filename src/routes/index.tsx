@@ -165,7 +165,7 @@ function Index() {
           />
 
           <div className="hero-logo">
-            <img src="/curbism-logo.jpg" alt="Curbism" />
+            <img src="/beauty-logo.png" alt="Beauty Images" />
           </div>
           <h1 className="hero-title">
             Apps
@@ -320,9 +320,9 @@ const PAGE_CSS = `
 
 .curbism-root .hero-logo {
   position: absolute; top: 70px; left: 0;
-  width: 240px; z-index: 3; pointer-events: none;
+  height: 56px; z-index: 3; pointer-events: none;
 }
-.curbism-root .hero-logo img { width: 100%; height: auto; display: block; }
+.curbism-root .hero-logo img { height: 100%; width: auto; display: block; }
 
 .curbism-root .hero-title {
   position: absolute; left: 36px; bottom: 36px; z-index: 3;
@@ -467,7 +467,7 @@ const PAGE_CSS = `
 }
 
 @media (max-width: 768px) {
-  .curbism-root .hero-logo  { top: 40px; left: 0; width: 170px; }
+  .curbism-root .hero-logo  { top: 40px; left: 0; height: 40px; }
   .curbism-root .hero-title { left: 22px; bottom: 22px; }
   .curbism-root .hero-counter { bottom: 22px; right: 22px; font-size: 10px; }
   .curbism-root .section { min-height: 380px; }
