@@ -90,9 +90,14 @@ function Index() {
           </div>
         </section>
 
+        <div className="appeared-in">
+          <img src="/appeared-in.png" alt="Appeared in Vogue, Thalgo, El País, Lexus, Apple" />
+        </div>
+
         {/* PHOTOGRAPHY */}
         <section className="section section--white">
         </section>
+
 
 
         <div className="line-thin" />
