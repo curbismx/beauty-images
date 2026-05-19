@@ -493,12 +493,9 @@ const PAGE_CSS = `
 }
 .curbism-root .featured-masonry-sentinel { height: 1px; }
 .curbism-root .featured-masonry-loading { padding: 24px 0; font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; color: #777; text-align: center; }
-@media (max-width: 900px) {
+@media (max-width: 768px) {
   .curbism-root .featured-masonry { padding: 0 24px 40px; }
   .curbism-root .featured-masonry-grid { column-count: 2; column-gap: 8px; }
   .curbism-root .featured-masonry-grid img { margin-bottom: 8px; }
-}
-@media (max-width: 520px) {
-  .curbism-root .featured-masonry-grid { column-count: 1; }
 }
 `;
