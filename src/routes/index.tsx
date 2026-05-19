@@ -129,7 +129,10 @@ function Index() {
         </div>
 
         {searchActive && (
-          <div className="search-results-placeholder">SEARCH RESULTS</div>
+          <div className="search-results-placeholder">
+            SEARCH RESULTS
+            {searchValue.length === 0 && <span className="srp-hint"> WILL APPEAR HERE</span>}
+          </div>
         )}
 
         <div className="line-thin" />
