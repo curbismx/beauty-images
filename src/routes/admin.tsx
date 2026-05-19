@@ -18,6 +18,7 @@ const NAV = [
   { to: "/admin", label: "Dashboard" },
   { to: "/admin/library", label: "Library" },
   { to: "/admin/upload", label: "Upload" },
+  { to: "/admin/featured", label: "Featured" },
   { to: "/admin/sales", label: "Sales" },
   { to: "/admin/customers", label: "Customers" },
   { to: "/admin/settings", label: "Settings" },
