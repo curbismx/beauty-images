@@ -537,8 +537,10 @@ const PAGE_CSS = `
   .curbism-root .featured-masonry { padding: 0 0 40px; }
 }
 
+.curbism-root .home-stack { position: relative; }
 .curbism-root .home-fade { opacity: 1; transition: opacity 3.5s ease; }
 .curbism-root .home-fade--hidden { opacity: 0; pointer-events: none; }
+.curbism-root .home-stack:has(.search-results-placeholder) .home-fade { position: absolute; inset: 0; width: 100%; }
 .curbism-root .search-results-placeholder {
   padding: 80px 40px;
   text-align: center;
