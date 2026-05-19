@@ -167,62 +167,181 @@ function Library() {
       ) : !rows.length ? (
         <div className="bi-placeholder">No images</div>
       ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          {rows.map((r) => {
-            const isSel = selected.has(r.id);
-            return (
-              <div key={r.id} style={{ ...rowStyle, outline: isSel ? "2px solid #a32020" : "none" }}>
-                <div
-                  style={{ display: "flex", alignItems: "center", justifyContent: "center", borderRight: "1px solid #000", padding: "0 10px", cursor: "pointer" }}
-                  onClick={() => toggleOne(r.id)}
-                >
-                  <input
-                    type="checkbox"
-                    checked={isSel}
-                    onChange={() => toggleOne(r.id)}
-                    onClick={(e) => e.stopPropagation()}
-                    style={{ width: 18, height: 18 }}
-                  />
-                </div>
-                <Link
-                  to="/admin/image/$id"
-                  params={{ id: r.id }}
-                  style={{ display: "contents", textDecoration: "none", color: "#000" }}
-                >
-                  <div style={thumbWrap}>
-                    {r.signed_url ? (
-                      <img src={r.signed_url} alt={r.filename} style={thumbImg} loading="lazy" />
-                    ) : (
-                      <div style={{ ...thumbImg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11 }}>
-                        NO PREVIEW
-                      </div>
-                    )}
-                  </div>
-                  <div style={contentCol}>
-                    <div style={topRow}>
-                      <span style={numBadge}>{r.image_number}</span>
-                      {!r.keyworded_at && <span style={{ ...statusBadge, background: "#D75F68" }}>PENDING</span>}
-                      {r.keyworded_at && r.public && <span style={{ ...statusBadge, background: "#1f7a3d" }}>LIVE</span>}
-                      {r.keyworded_at && !r.public && <span style={{ ...statusBadge, background: "#888" }}>READY</span>}
-                      {r.category && <span style={catBadge}>{r.category}</span>}
-                    </div>
-                    <div style={titleStyle}>{r.title ?? stripExt(r.filename)}</div>
-                    {r.caption && <div style={captionStyle}>{r.caption}</div>}
-                    {r.keywords?.length > 0 && (
-                      <div style={kwWrap}>
-                        {r.keywords.map((k, i) => (
-                          <span key={i} style={kwChip}>{k}</span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </Link>
-              </div>
-            );
-          })}
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          {rows.map((r) => (
+            <EditableRow
+              key={r.id}
+              row={r}
+              selected={selected.has(r.id)}
+              onToggle={() => toggleOne(r.id)}
+            />
+          ))}
         </div>
       )}
     </>
+  );
+}
+
+function EditableRow({
+  row,
+  selected,
+  onToggle,
+}: {
+  row: LibraryImage;
+  selected: boolean;
+  onToggle: () => void;
+}) {
+  const qc = useQueryClient();
+  const runUpdate = useServerFn(updateImage);
+  const [editing, setEditing] = useState(false);
+  const [title, setTitle] = useState(row.title ?? "");
+  const [caption, setCaption] = useState(row.caption ?? "");
+  const [keywordsText, setKeywordsText] = useState((row.keywords ?? []).join(", "));
+  const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Sync local state when row data refreshes from server
+  useEffect(() => {
+    if (!editing) {
+      setTitle(row.title ?? "");
+      setCaption(row.caption ?? "");
+      setKeywordsText((row.keywords ?? []).join(", "));
+    }
+  }, [row.title, row.caption, row.keywords, editing]);
+
+  const save = useMutation({
+    mutationFn: () =>
+      runUpdate({
+        data: {
+          id: row.id,
+          title: title.trim() || null,
+          caption: caption.trim() || null,
+          keywords: keywordsText
+            .split(",")
+            .map((k) => k.trim().toLowerCase())
+            .filter(Boolean)
+            .slice(0, 60),
+        },
+      }),
+    onMutate: () => setStatus("saving"),
+    onSuccess: () => {
+      setStatus("saved");
+      qc.invalidateQueries({ queryKey: ["library-images"] });
+      setTimeout(() => setStatus("idle"), 1500);
+    },
+    onError: () => setStatus("error"),
+  });
+
+  const scheduleSave = () => {
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = setTimeout(() => save.mutate(), 800);
+  };
+
+  const flushSave = () => {
+    if (timer.current) clearTimeout(timer.current);
+    save.mutate();
+  };
+
+  const displayKeywords = row.keywords ?? [];
+
+  return (
+    <div style={{ ...rowStyle, outline: selected ? "2px solid #a32020" : "none" }}>
+      <div
+        style={{ display: "flex", alignItems: "center", justifyContent: "center", borderRight: "1px solid #000", padding: "0 14px", cursor: "pointer", background: "#fafafa" }}
+        onClick={onToggle}
+      >
+        <input
+          type="checkbox"
+          checked={selected}
+          onChange={onToggle}
+          onClick={(e) => e.stopPropagation()}
+          style={{ width: 20, height: 20 }}
+        />
+      </div>
+      <div style={thumbWrap}>
+        {row.signed_url ? (
+          <img src={row.signed_url} alt={row.filename} style={thumbImg} loading="lazy" />
+        ) : (
+          <div style={{ ...thumbImg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11 }}>
+            NO PREVIEW
+          </div>
+        )}
+      </div>
+      <div style={contentCol}>
+        <div style={topRow}>
+          <span style={numBadge}>{row.image_number}</span>
+          {!row.keyworded_at && <span style={{ ...statusBadge, background: "#D75F68" }}>PENDING</span>}
+          {row.keyworded_at && row.public && <span style={{ ...statusBadge, background: "#1f7a3d" }}>LIVE</span>}
+          {row.keyworded_at && !row.public && <span style={{ ...statusBadge, background: "#888" }}>READY</span>}
+          {row.category && <span style={catBadge}>{row.category}</span>}
+          <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 10 }}>
+            {status !== "idle" && (
+              <span style={{
+                fontSize: 11,
+                fontWeight: 700,
+                letterSpacing: "0.06em",
+                textTransform: "uppercase",
+                color:
+                  status === "saving" ? "#666" :
+                  status === "saved" ? "#1f7a3d" : "#a32020",
+              }}>
+                {status === "saving" ? "Saving…" : status === "saved" ? "✓ Saved" : "Error"}
+              </span>
+            )}
+            <button
+              type="button"
+              style={editing ? btnDone : btnEdit}
+              onClick={() => {
+                if (editing) flushSave();
+                setEditing(!editing);
+              }}
+            >
+              {editing ? "Done" : "Edit"}
+            </button>
+          </div>
+        </div>
+
+        {editing ? (
+          <>
+            <input
+              value={title}
+              onChange={(e) => { setTitle(e.target.value); scheduleSave(); }}
+              placeholder="Title"
+              style={titleInput}
+            />
+            <textarea
+              value={caption}
+              onChange={(e) => { setCaption(e.target.value); scheduleSave(); }}
+              placeholder="Caption / description"
+              rows={3}
+              style={captionInput}
+            />
+            <div>
+              <div style={fieldLabel}>Keywords (comma-separated)</div>
+              <textarea
+                value={keywordsText}
+                onChange={(e) => { setKeywordsText(e.target.value); scheduleSave(); }}
+                placeholder="keyword1, keyword2, …"
+                rows={2}
+                style={kwInput}
+              />
+            </div>
+          </>
+        ) : (
+          <>
+            <div style={titleStyle}>{row.title ?? stripExt(row.filename)}</div>
+            {row.caption && <div style={captionStyle}>{row.caption}</div>}
+            {displayKeywords.length > 0 && (
+              <div style={kwWrap}>
+                {displayKeywords.map((k, i) => (
+                  <span key={i} style={kwChip}>{k}</span>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </div>
   );
 }
 
