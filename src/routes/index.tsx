@@ -79,11 +79,13 @@ function Index() {
             <img src="/beauty-logo.png" alt="Beauty Images" />
           </div>
           <h1 className="hero-title">
-            Apps
+            Rights Managed Images
             <br />
-            Design
+            Real People
             <br />
-            Photography
+            Real Photography
+            <br />
+            No AI
           </h1>
           <div className="hero-counter">
             {pad(current + 1)} / {pad(HERO_IMAGES.length)}
