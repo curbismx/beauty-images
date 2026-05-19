@@ -41,6 +41,30 @@ export type Database = {
         }
         Relationships: []
       }
+      featured_images: {
+        Row: {
+          created_at: string
+          filename: string
+          id: string
+          sort_order: number
+          storage_path: string
+        }
+        Insert: {
+          created_at?: string
+          filename: string
+          id?: string
+          sort_order?: number
+          storage_path: string
+        }
+        Update: {
+          created_at?: string
+          filename?: string
+          id?: string
+          sort_order?: number
+          storage_path?: string
+        }
+        Relationships: []
+      }
       images: {
         Row: {
           admin_notes: string | null
