@@ -108,7 +108,12 @@ function Index() {
 
         <div className="appeared-in">
           <div className="appeared-in-label">PUBLISHED IN</div>
-          <img src="/appeared-in.png" alt="Published in Vogue, Thalgo, El País, Lexus, Apple" />
+          <div className="appeared-in-marquee">
+            <div className="appeared-in-track">
+              <img src="/appeared-in.png" alt="Published in Vogue, Thalgo, El País, Lexus, Apple" />
+              <img src="/appeared-in.png" alt="" aria-hidden="true" />
+            </div>
+          </div>
         </div>
 
         <div className="intro-text">
@@ -353,7 +358,10 @@ const PAGE_CSS = `
 /* FOOTER */
 .curbism-root .appeared-in { background: white; padding: 40px 40px 20px; display: block; overflow: hidden; }
 .curbism-root .appeared-in-label { font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase; color: #777; margin-bottom: 16px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
-.curbism-root .appeared-in img { width: 100%; max-width: 100%; height: auto; display: block; }
+.curbism-root .appeared-in-marquee { width: 100%; overflow: hidden; }
+.curbism-root .appeared-in-track { display: flex; width: max-content; animation: appeared-in-scroll 40s linear infinite; }
+.curbism-root .appeared-in-track img { height: auto; width: auto; max-width: none; display: block; flex-shrink: 0; padding-right: 80px; }
+@keyframes appeared-in-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 .curbism-root .intro-text { background: white; padding: 32px 40px 80px; font-family: 'DIN Condensed', 'DIN Alternate', 'Barlow Condensed', 'Oswald', sans-serif; }
 .curbism-root .intro-text h2 { font-size: clamp(28px, 4.2vw, 56px); font-weight: 900; text-transform: uppercase; letter-spacing: -0.035em; line-height: 1.15; color: #000; margin-bottom: 24px; }
 .curbism-root .intro-text p { font-size: clamp(28px, 4.2vw, 56px); font-weight: 900; text-transform: uppercase; letter-spacing: -0.035em; line-height: 1.15; color: #111; }
