@@ -253,10 +253,20 @@ const notice: React.CSSProperties = {
   marginBottom: 12,
   fontSize: 12,
 };
+const selBar: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: 16,
+  padding: "10px 14px",
+  border: "1px solid #000",
+  marginBottom: 12,
+  justifyContent: "space-between",
+  flexWrap: "wrap",
+};
 const rowStyle: React.CSSProperties = {
   display: "grid",
-  gridTemplateColumns: "200px 1fr",
-  gap: 16,
+  gridTemplateColumns: "50px 200px 1fr",
+  gap: 0,
   border: "1px solid #000",
   textDecoration: "none",
   color: "#000",
