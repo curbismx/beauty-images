@@ -78,7 +78,7 @@ function Index() {
       <div className="curbism-root">
 
         {/* HERO */}
-        <section className={`hero${searchActive ? " hero--search" : ""}${submittedQuery ? " hero--results" : ""}`}>
+        <section className={`hero${searchActive ? " hero--search" : ""}${submittedQuery && searchValue.length > 0 ? " hero--results" : ""}`}>
           {HERO_IMAGES.map((src, i) => (
             <img
               key={src}
