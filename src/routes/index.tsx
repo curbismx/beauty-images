@@ -95,9 +95,9 @@ function Index() {
         </div>
 
         <div className="intro-text">
-          <h2>Advertising Design &amp; Editorial Images</h2>
+          <h2>ADVERTISING DESIGN &amp; EDITORIAL IMAGES</h2>
           <p>
-            Beauty Images is a collective of photographers providing images for high-end publications for over 20 years. All our images are exclusive to Beauty Images and are sold on a Rights Managed basis.
+            BEAUTY IMAGES IS A COLLECTIVE OF PHOTOGRAPHERS PROVIDING IMAGES FOR HIGH-END PUBLICATIONS FOR OVER 20 YEARS. ALL OUR IMAGES ARE EXCLUSIVE TO BEAUTY IMAGES AND ARE SOLD ON A RIGHTS MANAGED BASIS.
           </p>
         </div>
 
