@@ -152,7 +152,7 @@ const PAGE_CSS = `
 .curbism-root .hero-logo img { height: 100%; width: auto; display: block; }
 
 .curbism-root .hero-title {
-  position: absolute; left: 0; top: 140px; right: 36px; z-index: 3;
+  position: absolute; left: 0; top: 140px; z-index: 3; max-width: 50%;
   padding-left: 36px;
   color: rgba(255, 255, 255, 0.45);
   font-size: clamp(28px, 5vw, 64px);
@@ -309,7 +309,7 @@ const PAGE_CSS = `
 
 @media (max-width: 768px) {
   .curbism-root .hero-logo  { top: 40px; left: 0; height: 40px; }
-  .curbism-root .hero-title { left: 0; top: 100px; padding-left: 22px; right: 22px; font-size: clamp(20px, 5.5vw, 36px); }
+  .curbism-root .hero-title { left: 0; top: 100px; padding-left: 22px; max-width: 60%; font-size: clamp(20px, 5.5vw, 36px); }
   .curbism-root .hero-counter { bottom: 22px; right: 22px; font-size: 10px; }
   .curbism-root .section { min-height: 380px; }
   .curbism-root .section--apps { min-height: 460px; }
