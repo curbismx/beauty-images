@@ -235,7 +235,8 @@ function Featured() {
                   Delete
                 </button>
               </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
