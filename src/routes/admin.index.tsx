@@ -50,6 +50,35 @@ function Dashboard() {
   return (
     <>
       <PageHeader title="Dashboard" />
+
+      <div className="bi-section">
+        <h2 className="bi-section-title">Keywording</h2>
+        <div style={{ border: "1px solid #000", padding: 24, display: "grid", gridTemplateColumns: "1fr 1fr auto", gap: 24, alignItems: "center" }}>
+          <div>
+            <div className="bi-stat-label">Total images</div>
+            <div className="bi-stat-value">{imgStats.isLoading ? "…" : imgStats.data?.total ?? 0}</div>
+          </div>
+          <div>
+            <div className="bi-stat-label">Pending keywords</div>
+            <div className="bi-stat-value" style={{ color: (imgStats.data?.pending ?? 0) > 0 ? "#D75F68" : "#000" }}>
+              {imgStats.isLoading ? "…" : imgStats.data?.pending ?? 0}
+            </div>
+          </div>
+          <button
+            className="bi-btn bi-btn--accent"
+            disabled={batchMutation.isPending || (imgStats.data?.pending ?? 0) === 0}
+            onClick={() => { setLastResult(null); batchMutation.mutate(); }}
+          >
+            {batchMutation.isPending ? "Sending…" : "Send 25 to Gemini"}
+          </button>
+        </div>
+        {lastResult && (
+          <div style={{ marginTop: 12, padding: 12, border: "1px solid #000", fontSize: 12, fontWeight: 800, letterSpacing: "0.02em", textTransform: "uppercase" }}>
+            {lastResult}
+          </div>
+        )}
+      </div>
+
       <div className="bi-stat-row">
         {STATS.map((s) => (
           <div key={s.label} className="bi-stat">
