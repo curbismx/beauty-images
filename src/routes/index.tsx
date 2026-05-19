@@ -92,7 +92,7 @@ function Index() {
           <div className="hero-search">
             <input
               type="search"
-              placeholder="Search images…"
+              placeholder="SEARCH"
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
               onFocus={() => setSearchFocused(true)}
@@ -161,30 +161,35 @@ const PAGE_CSS = `
 .curbism-root .hero-search {
   position: absolute;
   left: 0;
-  top: calc(140px + clamp(28px, 5vw, 64px) * 3 + 24px);
+  top: calc(140px + clamp(28px, 5vw, 64px) * 3 + 72px);
   padding-left: 36px;
   width: 50%;
   z-index: 4;
 }
 .curbism-root .hero-search input {
   width: 100%;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.5);
   border: none;
   padding: 16px 20px;
   font-family: inherit;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
   color: #000;
   outline: none;
   -webkit-appearance: none;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+  transition: background 0.25s ease;
 }
 .curbism-root .hero-search input::placeholder {
-  color: #999;
-  letter-spacing: 0.02em;
+  color: #000;
+  opacity: 0.7;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  font-size: 14px;
 }
 .curbism-root .hero-search input:focus {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  background: rgba(255, 255, 255, 0.8);
 }
 
 
