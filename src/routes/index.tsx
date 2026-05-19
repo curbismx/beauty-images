@@ -94,6 +94,13 @@ function Index() {
           <img src="/appeared-in.png" alt="Appeared in Vogue, Thalgo, El País, Lexus, Apple" />
         </div>
 
+        <div className="intro-text">
+          <h2>Advertising Design &amp; Editorial Images</h2>
+          <p>
+            Beauty Images is a collective of photographers providing images for high-end publications for over 20 years. All our images are exclusive to Beauty Images and are sold on a Rights Managed basis.
+          </p>
+        </div>
+
         {/* PHOTOGRAPHY */}
         <section className="section section--white">
         </section>
