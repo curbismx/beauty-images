@@ -291,11 +291,11 @@ const PAGE_CSS = `
 }
 
 /* FOOTER */
-.curbism-root .appeared-in { background: white; padding: 40px 40px 20px; display: flex; justify-content: flex-start; }
-.curbism-root .appeared-in img { width: 66.666%; max-width: 66.666%; height: auto; display: block; }
+.curbism-root .appeared-in { background: white; padding: 40px 40px 20px; display: flex; justify-content: flex-start; overflow: hidden; }
+.curbism-root .appeared-in img { width: 66.666%; max-width: 66.666%; height: auto; display: block; margin-left: -50px; }
 .curbism-root .intro-text { background: white; padding: 32px 40px 80px; max-width: 66.666%; }
 .curbism-root .intro-text h2 { font-size: clamp(28px, 4.2vw, 56px); font-weight: 900; text-transform: uppercase; letter-spacing: -0.035em; line-height: 0.95; color: #000; margin-bottom: 24px; }
-.curbism-root .intro-text p { font-size: clamp(14px, 1.4vw, 18px); font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em; line-height: 1.4; color: #111; }
+.curbism-root .intro-text p { font-size: clamp(28px, 4.2vw, 56px); font-weight: 900; text-transform: uppercase; letter-spacing: -0.035em; line-height: 0.95; color: #111; }
 @media (max-width: 768px) {
   .curbism-root .appeared-in { padding: 24px 24px 12px; }
   .curbism-root .appeared-in img { width: 90%; max-width: 90%; }
