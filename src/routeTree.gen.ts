@@ -19,6 +19,7 @@ import { Route as AdminSalesRouteImport } from './routes/admin.sales'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminLibraryRouteImport } from './routes/admin.library'
 import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
+import { Route as ApiPublicTrackRouteImport } from './routes/api/public/track'
 import { Route as AdminImageIdRouteImport } from './routes/admin.image.$id'
 
 const DesignRoute = DesignRouteImport.update({
@@ -71,6 +72,11 @@ const AdminCustomersRoute = AdminCustomersRouteImport.update({
   path: '/customers',
   getParentRoute: () => AdminRoute,
 } as any)
+const ApiPublicTrackRoute = ApiPublicTrackRouteImport.update({
+  id: '/api/public/track',
+  path: '/api/public/track',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminImageIdRoute = AdminImageIdRouteImport.update({
   id: '/image/$id',
   path: '/image/$id',
@@ -89,6 +95,7 @@ export interface FileRoutesByFullPath {
   '/admin/upload': typeof AdminUploadRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/image/$id': typeof AdminImageIdRoute
+  '/api/public/track': typeof ApiPublicTrackRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -101,6 +108,7 @@ export interface FileRoutesByTo {
   '/admin/upload': typeof AdminUploadRoute
   '/admin': typeof AdminIndexRoute
   '/admin/image/$id': typeof AdminImageIdRoute
+  '/api/public/track': typeof ApiPublicTrackRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -115,6 +123,7 @@ export interface FileRoutesById {
   '/admin/upload': typeof AdminUploadRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/image/$id': typeof AdminImageIdRoute
+  '/api/public/track': typeof ApiPublicTrackRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -130,6 +139,7 @@ export interface FileRouteTypes {
     | '/admin/upload'
     | '/admin/'
     | '/admin/image/$id'
+    | '/api/public/track'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -142,6 +152,7 @@ export interface FileRouteTypes {
     | '/admin/upload'
     | '/admin'
     | '/admin/image/$id'
+    | '/api/public/track'
   id:
     | '__root__'
     | '/'
@@ -155,12 +166,14 @@ export interface FileRouteTypes {
     | '/admin/upload'
     | '/admin/'
     | '/admin/image/$id'
+    | '/api/public/track'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
   DesignRoute: typeof DesignRoute
+  ApiPublicTrackRoute: typeof ApiPublicTrackRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -235,6 +248,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCustomersRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/api/public/track': {
+      id: '/api/public/track'
+      path: '/api/public/track'
+      fullPath: '/api/public/track'
+      preLoaderRoute: typeof ApiPublicTrackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/image/$id': {
       id: '/admin/image/$id'
       path: '/image/$id'
@@ -273,7 +293,18 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
   DesignRoute: DesignRoute,
+  ApiPublicTrackRoute: ApiPublicTrackRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
