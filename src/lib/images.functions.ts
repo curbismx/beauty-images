@@ -1,0 +1,136 @@
+import { createServerFn } from "@tanstack/react-start";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { z } from "zod";
+
+export type PendingImage = {
+  id: string;
+  image_number: number;
+  filename: string;
+  storage_path: string;
+};
+
+export const getImageStats = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase } = context;
+    const [{ count: total }, { count: pending }] = await Promise.all([
+      supabase.from("images").select("id", { count: "exact", head: true }),
+      supabase
+        .from("images")
+        .select("id", { count: "exact", head: true })
+        .is("keyworded_at", null),
+    ]);
+    return { total: total ?? 0, pending: pending ?? 0 };
+  });
+
+const KEYWORD_PROMPT = `You are a professional stock-photo keyworder. Analyze the image and return strict JSON with this exact shape:
+{
+  "title": "short descriptive headline, max 12 words, no trailing period",
+  "description": "1-2 sentence natural caption suitable as alt text",
+  "keywords": ["20 to 30 single or short multi-word stock keywords, lowercase, no duplicates"],
+  "category": "one of: Nature, Portrait, Lifestyle, Architecture, Travel, Food, Business, Fashion, Abstract, Sport, Animal, Other"
+}
+Return ONLY the JSON object, no markdown, no commentary.`;
+
+async function keywordOne(dataUrl: string): Promise<{
+  title: string;
+  description: string;
+  keywords: string[];
+  category: string;
+} | null> {
+  const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${process.env.LOVABLE_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "google/gemini-2.5-flash",
+      messages: [
+        {
+          role: "user",
+          content: [
+            { type: "text", text: KEYWORD_PROMPT },
+            { type: "image_url", image_url: { url: dataUrl } },
+          ],
+        },
+      ],
+      response_format: { type: "json_object" },
+    }),
+  });
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`AI gateway ${res.status}: ${body.slice(0, 200)}`);
+  }
+  const json = (await res.json()) as {
+    choices?: Array<{ message?: { content?: string } }>;
+  };
+  const content = json.choices?.[0]?.message?.content;
+  if (!content) return null;
+  const cleaned = content.trim().replace(/^```json\s*/i, "").replace(/```$/, "").trim();
+  const parsed = JSON.parse(cleaned);
+  return {
+    title: String(parsed.title ?? "").slice(0, 240),
+    description: String(parsed.description ?? "").slice(0, 1000),
+    keywords: Array.isArray(parsed.keywords)
+      ? parsed.keywords.map((k: unknown) => String(k).toLowerCase().trim()).filter(Boolean).slice(0, 40)
+      : [],
+    category: String(parsed.category ?? "Other").slice(0, 50),
+  };
+}
+
+function guessMime(filename: string): string {
+  const ext = filename.toLowerCase().split(".").pop() ?? "";
+  if (ext === "jpg" || ext === "jpeg") return "image/jpeg";
+  if (ext === "png") return "image/png";
+  if (ext === "webp") return "image/webp";
+  if (ext === "gif") return "image/gif";
+  return "image/jpeg";
+}
+
+export const keywordPendingBatch = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(z.object({ limit: z.number().int().min(1).max(50) }).parse)
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+    const { data: rows, error } = await supabase
+      .from("images")
+      .select("id, image_number, filename, storage_path")
+      .is("keyworded_at", null)
+      .order("image_number", { ascending: true })
+      .limit(data.limit);
+    if (error) throw new Error(error.message);
+    if (!rows || rows.length === 0) return { processed: 0, failed: 0, errors: [] as string[] };
+
+    let processed = 0;
+    let failed = 0;
+    const errors: string[] = [];
+
+    for (const row of rows) {
+      try {
+        const dl = await supabase.storage.from("images-private").download(row.storage_path);
+        if (dl.error || !dl.data) throw new Error(dl.error?.message ?? "download failed");
+        const buf = Buffer.from(await dl.data.arrayBuffer());
+        const dataUrl = `data:${guessMime(row.filename)};base64,${buf.toString("base64")}`;
+        const result = await keywordOne(dataUrl);
+        if (!result) throw new Error("empty AI response");
+        const { error: upErr } = await supabase
+          .from("images")
+          .update({
+            title: result.title,
+            caption: result.description,
+            keywords: result.keywords,
+            category: result.category,
+            keyworded_at: new Date().toISOString(),
+          })
+          .eq("id", row.id);
+        if (upErr) throw new Error(upErr.message);
+        processed += 1;
+      } catch (e) {
+        failed += 1;
+        errors.push(`#${row.image_number}: ${(e as Error).message}`);
+      }
+    }
+
+    return { processed, failed, errors };
+  });

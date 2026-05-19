@@ -1,8 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
+import { useState } from "react";
 import { PageHeader } from "./admin";
 import { getVisitors, type VisitorRow } from "@/lib/visitors.functions";
+import { getImageStats, keywordPendingBatch } from "@/lib/images.functions";
 
 export const Route = createFileRoute("/admin/")({
   component: Dashboard,
@@ -17,15 +19,66 @@ const STATS = [
 
 function Dashboard() {
   const fetchVisitors = useServerFn(getVisitors);
+  const fetchImageStats = useServerFn(getImageStats);
+  const runBatch = useServerFn(keywordPendingBatch);
+  const qc = useQueryClient();
+  const [lastResult, setLastResult] = useState<string | null>(null);
+
   const { data, isLoading } = useQuery({
     queryKey: ["visitors"],
     queryFn: () => fetchVisitors(),
     refetchInterval: 30_000,
   });
 
+  const imgStats = useQuery({
+    queryKey: ["image-stats"],
+    queryFn: () => fetchImageStats(),
+    refetchInterval: 15_000,
+  });
+
+  const batchMutation = useMutation({
+    mutationFn: () => runBatch({ data: { limit: 25 } }),
+    onSuccess: (r) => {
+      setLastResult(
+        `Keyworded ${r.processed}, failed ${r.failed}${r.errors.length ? " — " + r.errors.slice(0, 3).join("; ") : ""}`,
+      );
+      qc.invalidateQueries({ queryKey: ["image-stats"] });
+    },
+    onError: (e) => setLastResult((e as Error).message),
+  });
+
   return (
     <>
       <PageHeader title="Dashboard" />
+
+      <div className="bi-section">
+        <h2 className="bi-section-title">Keywording</h2>
+        <div style={{ border: "1px solid #000", padding: 24, display: "grid", gridTemplateColumns: "1fr 1fr auto", gap: 24, alignItems: "center" }}>
+          <div>
+            <div className="bi-stat-label">Total images</div>
+            <div className="bi-stat-value">{imgStats.isLoading ? "…" : imgStats.data?.total ?? 0}</div>
+          </div>
+          <div>
+            <div className="bi-stat-label">Pending keywords</div>
+            <div className="bi-stat-value" style={{ color: (imgStats.data?.pending ?? 0) > 0 ? "#D75F68" : "#000" }}>
+              {imgStats.isLoading ? "…" : imgStats.data?.pending ?? 0}
+            </div>
+          </div>
+          <button
+            className="bi-btn bi-btn--accent"
+            disabled={batchMutation.isPending || (imgStats.data?.pending ?? 0) === 0}
+            onClick={() => { setLastResult(null); batchMutation.mutate(); }}
+          >
+            {batchMutation.isPending ? "Sending…" : "Send 25 to Gemini"}
+          </button>
+        </div>
+        {lastResult && (
+          <div style={{ marginTop: 12, padding: 12, border: "1px solid #000", fontSize: 12, fontWeight: 800, letterSpacing: "0.02em", textTransform: "uppercase" }}>
+            {lastResult}
+          </div>
+        )}
+      </div>
+
       <div className="bi-stat-row">
         {STATS.map((s) => (
           <div key={s.label} className="bi-stat">
