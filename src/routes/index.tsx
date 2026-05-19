@@ -90,9 +90,14 @@ function Index() {
           </div>
         </section>
 
+        <div className="appeared-in">
+          <img src="/appeared-in.png" alt="Appeared in Vogue, Thalgo, El País, Lexus, Apple" />
+        </div>
+
         {/* PHOTOGRAPHY */}
         <section className="section section--white">
         </section>
+
 
 
         <div className="line-thin" />
@@ -279,6 +284,10 @@ const PAGE_CSS = `
 }
 
 /* FOOTER */
+.curbism-root .appeared-in { background: white; padding: 40px 24px; display: flex; justify-content: center; }
+.curbism-root .appeared-in img { max-width: 100%; height: auto; display: block; }
+@media (max-width: 768px) { .curbism-root .appeared-in { padding: 24px 16px; } }
+
 .curbism-root .footer {
   display: flex; justify-content: space-between; align-items: center;
   padding: 20px 40px; background: white;
