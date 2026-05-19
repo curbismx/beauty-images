@@ -218,9 +218,6 @@ function Library() {
               </div>
             );
           })}
-              </div>
-            </Link>
-          ))}
         </div>
       )}
     </>
