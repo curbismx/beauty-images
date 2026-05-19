@@ -187,11 +187,7 @@ const PAGE_CSS = `
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
 }
 
-  width: 100%; height: 100%;
-  object-fit: cover; opacity: 0;
-  transition: opacity 0.5s ease; will-change: opacity;
-}
-.curbism-root .hero .bg-img.active { opacity: 1; }
+
 
 .curbism-root .hero-zone {
   position: absolute; top: 0;
