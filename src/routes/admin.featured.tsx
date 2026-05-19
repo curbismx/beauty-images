@@ -207,7 +207,7 @@ function Featured() {
                   outlineOffset: isOver ? "-3px" : 0,
                   transition: "outline-color 0.12s ease",
                   breakInside: "avoid",
-                  WebkitColumnBreakInside: "avoid",
+                  WebkitColumnBreakInside: "avoid" as const,
                   marginBottom: 12,
                 }}
               >
