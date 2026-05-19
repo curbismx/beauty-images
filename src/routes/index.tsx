@@ -78,7 +78,7 @@ function Index() {
       <div className="curbism-root">
 
         {/* HERO */}
-        <section className={`hero${searchActive ? " hero--search" : ""}`}>
+        <section className={`hero${searchActive ? " hero--search" : ""}${submittedQuery ? " hero--results" : ""}`}>
           {HERO_IMAGES.map((src, i) => (
             <img
               key={src}
@@ -329,10 +329,13 @@ const PAGE_CSS = `
   position: relative; width: 100%;
   aspect-ratio: 1200 / 1600;
   overflow: hidden; background: black;
-  transition: aspect-ratio 0.6s ease;
+  transition: aspect-ratio 0.6s ease, background-color 0.6s ease;
 }
 .curbism-root .hero--search {
   aspect-ratio: 1920 / 1080;
+}
+.curbism-root .hero--results {
+  background: white;
 }
 .curbism-root .hero .bg-img {
   position: absolute; inset: 0;
@@ -342,6 +345,7 @@ const PAGE_CSS = `
 }
 .curbism-root .hero .bg-img.active { opacity: 1; }
 .curbism-root .hero .bg-img--search { z-index: 1; }
+.curbism-root .hero--results .bg-img--search.active { opacity: 0.5; }
 
 /* SEARCH BOX */
 .curbism-root .hero-search {
