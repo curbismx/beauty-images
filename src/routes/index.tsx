@@ -537,7 +537,7 @@ const PAGE_CSS = `
 
 .curbism-root .home-fade { opacity: 1; transition: opacity 3.5s ease; }
 .curbism-root .home-fade--hidden { opacity: 0; pointer-events: none; }
-.curbism-root .search-results-placeholder {
+.curbism-root .search-results-placeholder .srp-hint { color: #d8d8d8; font-weight: 800; transition: opacity 0.4s ease; }
   padding: 80px 40px;
   text-align: center;
   font-size: 13px;
