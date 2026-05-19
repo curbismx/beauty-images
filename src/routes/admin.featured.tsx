@@ -175,69 +175,99 @@ function Featured() {
         ) : !ordered.length ? (
           <div className="bi-placeholder">No featured images yet</div>
         ) : (
-          <div style={previewGridStyle}>
-            {(() => {
-              const cols = 3;
-              const buckets: FeaturedImage[][] = Array.from({ length: cols }, () => []);
-              ordered.forEach((r, i) => buckets[i % cols].push(r));
-              return buckets.map((col, ci) => (
-                <div key={ci} style={{ flex: "1 1 0", minWidth: 0, display: "flex", flexDirection: "column", gap: 12 }}>
-                  {col.map((r) => {
-                    const isDragging = dragId === r.id;
-                    const isOver = overId === r.id && dragId && dragId !== r.id;
-                    return (
-                      <div
-                        key={r.id}
-                        draggable
-                        onDragStart={() => setDragId(r.id)}
-                        onDragEnd={() => { setDragId(null); setOverId(null); }}
-                        onDragEnter={() => { if (dragId) setOverId(r.id); }}
-                        onDragOver={(e) => { e.preventDefault(); if (overId !== r.id) setOverId(r.id); }}
-                        onDragLeave={(e) => {
-                          if (!(e.currentTarget as HTMLElement).contains(e.relatedTarget as Node)) {
-                            setOverId((o) => (o === r.id ? null : o));
-                          }
-                        }}
-                        onDrop={(e) => {
-                          e.preventDefault();
-                          if (dragId) moveItem(dragId, r.id);
-                          setOverId(null);
-                        }}
-                        style={{
-                          ...tileStyle,
-                          cursor: "grab",
-                          opacity: isDragging ? 0.35 : 1,
-                          outline: isOver ? "3px solid #D75F68" : "none",
-                          outlineOffset: isOver ? "-3px" : 0,
-                          transition: "outline-color 0.12s ease",
-                        }}
-                      >
-                        <div style={{ background: "#f4f4f4", lineHeight: 0 }}>
-                          <img
-                            src={r.url}
-                            alt={r.filename}
-                            style={{ width: "100%", height: "auto", display: "block" }}
-                            loading="lazy"
-                            draggable={false}
-                          />
-                        </div>
-                        <div style={tileName} title={r.filename}>{r.filename}</div>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (confirm("Delete this featured image?")) delMut.mutate(r.id);
-                          }}
-                          style={{
-                            width: "100%",
-                            background: "#fff",
-                            color: "#D75F68",
-                            border: "none",
-                            borderTop: "1px solid #000",
-                            padding: "8px 10px",
-                            fontSize: 11,
-                            fontWeight: 800,
-                            letterSpacing: "0.04em",
-                            textTransform: "uppercase",
+          <div style={flatGridStyle}>
+            {ordered.map((r, idx) => {
+              const isDragging = dragId === r.id;
+              const dragIdx = dragId ? ordered.findIndex((x) => x.id === dragId) : -1;
+              const overIdx = overId ? ordered.findIndex((x) => x.id === overId) : -1;
+              // Show insertion indicator on the "over" tile; side depends on
+              // whether the dragged item is coming from before or after it.
+              const showIndicator = isOver(r.id);
+              const indicatorSide: "left" | "right" =
+                dragIdx >= 0 && overIdx >= 0 && dragIdx < overIdx ? "right" : "left";
+              return (
+                <div
+                  key={r.id}
+                  style={{ position: "relative" }}
+                  onDragEnter={(e) => {
+                    e.preventDefault();
+                    if (dragId && dragId !== r.id) setOverId(r.id);
+                  }}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = "move";
+                    if (dragId && dragId !== r.id && overId !== r.id) setOverId(r.id);
+                  }}
+                  onDragLeave={(e) => {
+                    if (!(e.currentTarget as HTMLElement).contains(e.relatedTarget as Node)) {
+                      setOverId((o) => (o === r.id ? null : o));
+                    }
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    if (dragId && dragId !== r.id) moveItem(dragId, r.id);
+                    setDragId(null);
+                    setOverId(null);
+                  }}
+                >
+                  {showIndicator && (
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: -4,
+                        bottom: -4,
+                        [indicatorSide]: -8,
+                        width: 4,
+                        background: "#D75F68",
+                        borderRadius: 2,
+                        zIndex: 2,
+                        pointerEvents: "none",
+                      }}
+                    />
+                  )}
+                  <div
+                    draggable
+                    onDragStart={(e) => {
+                      e.dataTransfer.effectAllowed = "move";
+                      e.dataTransfer.setData("text/plain", r.id);
+                      setDragId(r.id);
+                    }}
+                    onDragEnd={() => { setDragId(null); setOverId(null); }}
+                    style={{
+                      ...tileStyle,
+                      cursor: "grab",
+                      opacity: isDragging ? 0.35 : 1,
+                      background: "#fff",
+                    }}
+                  >
+                    <div style={{ background: "#f4f4f4", lineHeight: 0, pointerEvents: "none" }}>
+                      <img
+                        src={r.url}
+                        alt={r.filename}
+                        style={{ width: "100%", height: "auto", display: "block" }}
+                        loading="lazy"
+                        draggable={false}
+                      />
+                    </div>
+                    <div style={{ ...tileName, pointerEvents: "none" }} title={r.filename}>
+                      #{idx + 1} · {r.filename}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (confirm("Delete this featured image?")) delMut.mutate(r.id);
+                      }}
+                      style={{
+                        width: "100%",
+                        background: "#fff",
+                        color: "#D75F68",
+                        border: "none",
+                        borderTop: "1px solid #000",
+                        padding: "8px 10px",
+                        fontSize: 11,
+                        fontWeight: 800,
+                        letterSpacing: "0.04em",
+                        textTransform: "uppercase",
                             cursor: "pointer",
                             fontFamily: "inherit",
                           }}
