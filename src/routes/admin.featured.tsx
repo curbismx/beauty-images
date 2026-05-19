@@ -206,6 +206,9 @@ function Featured() {
                   outline: isOver ? "3px solid #D75F68" : "none",
                   outlineOffset: isOver ? "-3px" : 0,
                   transition: "outline-color 0.12s ease",
+                  breakInside: "avoid",
+                  
+                  marginBottom: 12,
                 }}
               >
                 <div style={{ background: "#f4f4f4", lineHeight: 0 }}>
@@ -258,10 +261,8 @@ function statusColor(s: QueueItem["status"]) {
 }
 
 const previewGridStyle: React.CSSProperties = {
-  display: "grid",
-  gridTemplateColumns: "repeat(3, 1fr)",
-  gap: 12,
-  alignItems: "start",
+  columnCount: 3,
+  columnGap: 12,
 };
 const gridStyle: React.CSSProperties = {
   display: "grid",
