@@ -108,7 +108,12 @@ function Index() {
 
         <div className="appeared-in">
           <div className="appeared-in-label">PUBLISHED IN</div>
-          <img src="/appeared-in.png" alt="Published in Vogue, Thalgo, El País, Lexus, Apple" />
+          <div className="appeared-in-marquee">
+            <div className="appeared-in-track">
+              <img src="/appeared-in.png" alt="Published in Vogue, Thalgo, El País, Lexus, Apple" />
+              <img src="/appeared-in.png" alt="" aria-hidden="true" />
+            </div>
+          </div>
         </div>
 
         <div className="intro-text">
