@@ -285,8 +285,8 @@ const PAGE_CSS = `
 
 /* FOOTER */
 .curbism-root .appeared-in { background: white; padding: 40px 24px; display: flex; justify-content: center; }
-.curbism-root .appeared-in img { max-width: 100%; height: auto; display: block; }
-@media (max-width: 768px) { .curbism-root .appeared-in { padding: 24px 16px; } }
+.curbism-root .appeared-in img { width: 66.666%; max-width: 66.666%; height: auto; display: block; }
+@media (max-width: 768px) { .curbism-root .appeared-in { padding: 24px 16px; } .curbism-root .appeared-in img { width: 90%; max-width: 90%; } }
 
 .curbism-root .footer {
   display: flex; justify-content: space-between; align-items: center;
