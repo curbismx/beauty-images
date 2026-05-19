@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -123,11 +124,7 @@ function Index() {
           </p>
         </div>
 
-        {/* PHOTOGRAPHY */}
-        <section className="section section--white">
-        </section>
-
-
+        <FeaturedMasonry />
 
         <div className="line-thin" />
 
