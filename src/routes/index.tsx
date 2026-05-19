@@ -542,15 +542,18 @@ const PAGE_CSS = `
 .curbism-root .home-fade--hidden { opacity: 0; pointer-events: none; }
 .curbism-root .home-stack:has(.search-results-placeholder) .home-fade { position: absolute; inset: 0; width: 100%; }
 .curbism-root .search-results-placeholder {
-  padding: 80px 40px;
-  text-align: center;
-  font-size: 13px;
-  font-weight: 800;
-  letter-spacing: 0.4em;
+  padding: 32px 40px 400px;
+  text-align: left;
+  font-family: 'DIN Condensed', 'DIN Alternate', 'Barlow Condensed', 'Oswald', sans-serif;
+  font-size: clamp(28px, 4.2vw, 56px);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.035em;
+  line-height: 1.15;
   color: #000;
   animation: searchResultsIn 1.2s ease 1.8s both;
 }
-.curbism-root .search-results-placeholder .srp-hint { color: #e0e0e0; font-weight: 800; }
+.curbism-root .search-results-placeholder .srp-hint { color: #e0e0e0; font-weight: 900; }
 @keyframes searchResultsIn {
   from { opacity: 0; }
   to { opacity: 1; }
