@@ -404,7 +404,7 @@ const PAGE_CSS = `
 .curbism-root .hero-logo img { height: 100%; width: auto; display: block; }
 
 .curbism-root .hero-title {
-  position: absolute; left: 0; top: 140px; z-index: 3; max-width: 50%;
+  position: absolute; left: 0; top: 155px; z-index: 3; max-width: 50%;
   padding-left: 36px;
   color: rgba(255, 255, 255, 0.45);
   font-size: clamp(28px, 5vw, 64px);
