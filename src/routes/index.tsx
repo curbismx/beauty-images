@@ -516,6 +516,8 @@ const PAGE_CSS = `
 .curbism-root .featured-masonry-col img {
   width: 100%;
   height: auto;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
   display: block;
 }
 .curbism-root .featured-masonry-sentinel { height: 1px; }
