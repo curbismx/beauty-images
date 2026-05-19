@@ -180,7 +180,7 @@ function Index() {
         <div className="line-thin" />
 
         <footer className="footer">
-          <span>Curbism Ltd</span>
+          <span>BEAUTYIMAGES</span>
           <span>UK · 2026</span>
         </footer>
       </div>
