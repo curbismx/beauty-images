@@ -107,7 +107,8 @@ function Index() {
         </section>
 
         <div className="appeared-in">
-          <img src="/appeared-in.png" alt="Appeared in Vogue, Thalgo, El País, Lexus, Apple" />
+          <div className="appeared-in-label">PUBLISHED IN</div>
+          <img src="/appeared-in.png" alt="Published in Vogue, Thalgo, El País, Lexus, Apple" />
         </div>
 
         <div className="intro-text">
