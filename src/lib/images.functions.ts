@@ -307,3 +307,28 @@ export const keywordPendingBatch = createServerFn({ method: "POST" })
 
     return { processed, failed, errors };
   });
+
+export const publishAllReady = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase
+      .from("images")
+      .update({ public: true })
+      .not("keyworded_at", "is", null)
+      .eq("public", false)
+      .select("id");
+    if (error) throw new Error(error.message);
+    return { published: data?.length ?? 0 };
+  });
+
+export const unpublishAll = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase
+      .from("images")
+      .update({ public: false })
+      .eq("public", true)
+      .select("id");
+    if (error) throw new Error(error.message);
+    return { unpublished: data?.length ?? 0 };
+  });
