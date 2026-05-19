@@ -94,6 +94,13 @@ function Index() {
           <img src="/appeared-in.png" alt="Appeared in Vogue, Thalgo, El País, Lexus, Apple" />
         </div>
 
+        <div className="intro-text">
+          <h2>Advertising Design &amp; Editorial Images</h2>
+          <p>
+            Beauty Images is a collective of photographers providing images for high-end publications for over 20 years. All our images are exclusive to Beauty Images and are sold on a Rights Managed basis.
+          </p>
+        </div>
+
         {/* PHOTOGRAPHY */}
         <section className="section section--white">
         </section>
@@ -284,9 +291,18 @@ const PAGE_CSS = `
 }
 
 /* FOOTER */
-.curbism-root .appeared-in { background: white; padding: 40px 24px; display: flex; justify-content: center; }
+.curbism-root .appeared-in { background: white; padding: 40px 40px 20px; display: flex; justify-content: flex-start; }
 .curbism-root .appeared-in img { width: 66.666%; max-width: 66.666%; height: auto; display: block; }
-@media (max-width: 768px) { .curbism-root .appeared-in { padding: 24px 16px; } .curbism-root .appeared-in img { width: 90%; max-width: 90%; } }
+.curbism-root .intro-text { background: white; padding: 20px 40px 60px; max-width: 66.666%; }
+.curbism-root .intro-text h2 { font-size: 22px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.02em; color: #222; margin-bottom: 16px; }
+.curbism-root .intro-text p { font-size: 16px; line-height: 1.55; color: #555; }
+@media (max-width: 768px) {
+  .curbism-root .appeared-in { padding: 24px 24px 12px; }
+  .curbism-root .appeared-in img { width: 90%; max-width: 90%; }
+  .curbism-root .intro-text { padding: 12px 24px 40px; max-width: 100%; }
+  .curbism-root .intro-text h2 { font-size: 16px; }
+  .curbism-root .intro-text p { font-size: 14px; }
+}
 
 .curbism-root .footer {
   display: flex; justify-content: space-between; align-items: center;
