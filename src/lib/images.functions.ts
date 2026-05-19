@@ -23,6 +23,42 @@ export const getImageStats = createServerFn({ method: "GET" })
     return { total: total ?? 0, pending: pending ?? 0 };
   });
 
+export type RecentImage = {
+  id: string;
+  image_number: number;
+  filename: string;
+  title: string | null;
+  keyworded_at: string | null;
+  created_at: string;
+  signed_url: string | null;
+};
+
+export const getRecentImages = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(z.object({ limit: z.number().int().min(1).max(200).default(50) }).parse)
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+    const { data: rows, error } = await supabase
+      .from("images")
+      .select("id, image_number, filename, title, keyworded_at, created_at, storage_path")
+      .order("created_at", { ascending: false })
+      .limit(data.limit);
+    if (error) throw new Error(error.message);
+    const paths = (rows ?? []).map((r) => r.storage_path);
+    const signed = paths.length
+      ? await supabase.storage.from("images-private").createSignedUrls(paths, 3600)
+      : { data: [] as Array<{ signedUrl: string | null }>, error: null };
+    return (rows ?? []).map((r, i) => ({
+      id: r.id,
+      image_number: r.image_number as number,
+      filename: r.filename,
+      title: r.title,
+      keyworded_at: r.keyworded_at,
+      created_at: r.created_at,
+      signed_url: signed.data?.[i]?.signedUrl ?? null,
+    })) as RecentImage[];
+  });
+
 const KEYWORD_PROMPT = `You are a professional stock-photo keyworder. Analyze the image and return strict JSON with this exact shape:
 {
   "title": "short descriptive headline, max 12 words, no trailing period",
