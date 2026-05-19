@@ -260,8 +260,10 @@ function statusColor(s: QueueItem["status"]) {
 }
 
 const previewGridStyle: React.CSSProperties = {
-  columnCount: 3,
-  columnGap: 12,
+  display: "grid",
+  gridTemplateColumns: "repeat(3, 1fr)",
+  gap: 12,
+  alignItems: "start",
 };
 const gridStyle: React.CSSProperties = {
   display: "grid",
