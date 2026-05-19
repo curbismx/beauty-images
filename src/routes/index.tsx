@@ -467,7 +467,7 @@ const PAGE_CSS = `
 }
 
 @media (max-width: 768px) {
-  .curbism-root .hero-logo  { top: 40px; left: 0; width: 170px; }
+  .curbism-root .hero-logo  { top: 40px; left: 0; height: 40px; }
   .curbism-root .hero-title { left: 22px; bottom: 22px; }
   .curbism-root .hero-counter { bottom: 22px; right: 22px; font-size: 10px; }
   .curbism-root .section { min-height: 380px; }
