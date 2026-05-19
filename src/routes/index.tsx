@@ -111,7 +111,13 @@ function Index() {
             Rights Managed Images / Real People / Real Photography / No AI
           </h1>
 
-          <div className="hero-search">
+          <form
+            className="hero-search"
+            onSubmit={(e) => {
+              e.preventDefault();
+              submitSearch();
+            }}
+          >
             <input
               type="search"
               placeholder="SEARCH"
@@ -121,7 +127,17 @@ function Index() {
               onBlur={() => setSearchFocused(false)}
               aria-label="Search images"
             />
-          </div>
+            <button
+              type="submit"
+              className="hero-search-submit"
+              aria-label="Submit search"
+              disabled={!searchValue.trim() || searching}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="square">
+                <path d="M5 12h14M13 5l7 7-7 7" />
+              </svg>
+            </button>
+          </form>
 
           <div className="hero-counter">
             {pad(current + 1)} / {pad(HERO_IMAGES.length)}
