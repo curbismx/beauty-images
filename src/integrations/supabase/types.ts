@@ -14,7 +14,165 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      customers: {
+        Row: {
+          company: string | null
+          created_at: string
+          email: string
+          id: string
+          industry: string | null
+          name: string | null
+        }
+        Insert: {
+          company?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          industry?: string | null
+          name?: string | null
+        }
+        Update: {
+          company?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          industry?: string | null
+          name?: string | null
+        }
+        Relationships: []
+      }
+      images: {
+        Row: {
+          admin_notes: string | null
+          availability: string
+          caption: string | null
+          category: string | null
+          created_at: string
+          featured: boolean
+          filename: string
+          id: string
+          keywords: string[]
+          model_release: boolean
+          model_release_pdf_path: string | null
+          pricing_tier: string | null
+          public: boolean
+          storage_path: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          availability?: string
+          caption?: string | null
+          category?: string | null
+          created_at?: string
+          featured?: boolean
+          filename: string
+          id?: string
+          keywords?: string[]
+          model_release?: boolean
+          model_release_pdf_path?: string | null
+          pricing_tier?: string | null
+          public?: boolean
+          storage_path: string
+        }
+        Update: {
+          admin_notes?: string | null
+          availability?: string
+          caption?: string | null
+          category?: string | null
+          created_at?: string
+          featured?: boolean
+          filename?: string
+          id?: string
+          keywords?: string[]
+          model_release?: boolean
+          model_release_pdf_path?: string | null
+          pricing_tier?: string | null
+          public?: boolean
+          storage_path?: string
+        }
+        Relationships: []
+      }
+      sales: {
+        Row: {
+          amount: number | null
+          created_at: string
+          currency: string
+          customer_id: string | null
+          duration_months: number | null
+          exclusivity: string | null
+          id: string
+          image_id: string | null
+          license_ends: string | null
+          license_starts: string | null
+          status: string
+          stripe_payment_id: string | null
+          territory: string | null
+          usage_type: string | null
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string
+          currency?: string
+          customer_id?: string | null
+          duration_months?: number | null
+          exclusivity?: string | null
+          id?: string
+          image_id?: string | null
+          license_ends?: string | null
+          license_starts?: string | null
+          status?: string
+          stripe_payment_id?: string | null
+          territory?: string | null
+          usage_type?: string | null
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string
+          currency?: string
+          customer_id?: string | null
+          duration_months?: number | null
+          exclusivity?: string | null
+          id?: string
+          image_id?: string | null
+          license_ends?: string | null
+          license_starts?: string | null
+          status?: string
+          stripe_payment_id?: string | null
+          territory?: string | null
+          usage_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_image_id_fkey"
+            columns: ["image_id"]
+            isOneToOne: false
+            referencedRelation: "images"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      settings: {
+        Row: {
+          key: string
+          value: Json | null
+        }
+        Insert: {
+          key: string
+          value?: Json | null
+        }
+        Update: {
+          key?: string
+          value?: Json | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
