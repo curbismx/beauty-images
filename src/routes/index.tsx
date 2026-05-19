@@ -500,10 +500,10 @@ const PAGE_CSS = `
 }
 
 /* FEATURED MASONRY */
-.curbism-root .featured-masonry { background: white; padding: 0 40px 60px; }
+.curbism-root .featured-masonry { background: white; padding: 0 0 60px; }
 .curbism-root .featured-masonry-grid {
   display: flex;
-  gap: 12px;
+  gap: 0;
   align-items: flex-start;
 }
 .curbism-root .featured-masonry-col {
@@ -511,7 +511,7 @@ const PAGE_CSS = `
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 0;
 }
 .curbism-root .featured-masonry-col img {
   width: 100%;
@@ -521,8 +521,6 @@ const PAGE_CSS = `
 .curbism-root .featured-masonry-sentinel { height: 1px; }
 .curbism-root .featured-masonry-loading { padding: 24px 0; font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; color: #777; text-align: center; }
 @media (max-width: 768px) {
-  .curbism-root .featured-masonry { padding: 0 24px 40px; }
-  .curbism-root .featured-masonry-grid { gap: 8px; }
-  .curbism-root .featured-masonry-col { gap: 8px; }
+  .curbism-root .featured-masonry { padding: 0 0 40px; }
 }
 `;
