@@ -268,18 +268,16 @@ function Featured() {
                         fontWeight: 800,
                         letterSpacing: "0.04em",
                         textTransform: "uppercase",
-                            cursor: "pointer",
-                            fontFamily: "inherit",
-                          }}
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    );
-                  })}
+                        cursor: "pointer",
+                        fontFamily: "inherit",
+                      }}
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
-              ));
-            })()}
+              );
+            })}
           </div>
         )}
       </div>
