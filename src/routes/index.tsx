@@ -143,9 +143,50 @@ const PAGE_CSS = `
   position: relative; width: 100%;
   aspect-ratio: 1200 / 1600;
   overflow: hidden; background: black;
+  transition: aspect-ratio 0.6s ease;
+}
+.curbism-root .hero--search {
+  aspect-ratio: 1920 / 1080;
 }
 .curbism-root .hero .bg-img {
   position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover; opacity: 0;
+  transition: opacity 0.5s ease; will-change: opacity;
+}
+.curbism-root .hero .bg-img.active { opacity: 1; }
+.curbism-root .hero .bg-img--search { z-index: 1; }
+
+/* SEARCH BOX */
+.curbism-root .hero-search {
+  position: absolute;
+  left: 0;
+  top: calc(140px + clamp(28px, 5vw, 64px) * 3 + 24px);
+  padding-left: 36px;
+  width: 50%;
+  z-index: 4;
+}
+.curbism-root .hero-search input {
+  width: 100%;
+  background: #fff;
+  border: none;
+  padding: 16px 20px;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 500;
+  color: #000;
+  outline: none;
+  -webkit-appearance: none;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+}
+.curbism-root .hero-search input::placeholder {
+  color: #999;
+  letter-spacing: 0.02em;
+}
+.curbism-root .hero-search input:focus {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+
   width: 100%; height: 100%;
   object-fit: cover; opacity: 0;
   transition: opacity 0.5s ease; will-change: opacity;
