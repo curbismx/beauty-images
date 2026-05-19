@@ -60,6 +60,7 @@ export const getRecentImages = createServerFn({ method: "GET" })
   });
 
 export type LibraryImage = RecentImage & {
+  caption: string | null;
   category: string | null;
   availability: string;
   public: boolean;
@@ -84,7 +85,7 @@ export const listImages = createServerFn({ method: "GET" })
     let q = supabase
       .from("images")
       .select(
-        "id, image_number, filename, title, keyworded_at, created_at, storage_path, category, availability, public, keywords",
+        "id, image_number, filename, title, caption, keyworded_at, created_at, storage_path, category, availability, public, keywords",
       )
       .order("image_number", { ascending: false })
       .limit(data.limit);
@@ -107,6 +108,7 @@ export const listImages = createServerFn({ method: "GET" })
       image_number: r.image_number as number,
       filename: r.filename,
       title: r.title,
+      caption: r.caption,
       keyworded_at: r.keyworded_at,
       created_at: r.created_at,
       category: r.category,
@@ -304,4 +306,29 @@ export const keywordPendingBatch = createServerFn({ method: "POST" })
     }
 
     return { processed, failed, errors };
+  });
+
+export const publishAllReady = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase
+      .from("images")
+      .update({ public: true })
+      .not("keyworded_at", "is", null)
+      .eq("public", false)
+      .select("id");
+    if (error) throw new Error(error.message);
+    return { published: data?.length ?? 0 };
+  });
+
+export const unpublishAll = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase
+      .from("images")
+      .update({ public: false })
+      .eq("public", true)
+      .select("id");
+    if (error) throw new Error(error.message);
+    return { unpublished: data?.length ?? 0 };
   });

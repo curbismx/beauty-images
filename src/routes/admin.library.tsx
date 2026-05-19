@@ -1,9 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { PageHeader } from "./admin";
-import { listImages } from "@/lib/images.functions";
+import {
+  listImages,
+  getImageStats,
+  publishAllReady,
+  unpublishAll,
+} from "@/lib/images.functions";
 
 export const Route = createFileRoute("/admin/library")({
   component: Library,
@@ -21,15 +26,73 @@ type FilterId = (typeof FILTERS)[number]["id"];
 function Library() {
   const [active, setActive] = useState<FilterId>("all");
   const [search, setSearch] = useState("");
+  const qc = useQueryClient();
   const fetchList = useServerFn(listImages);
+  const fetchStats = useServerFn(getImageStats);
+  const runPublish = useServerFn(publishAllReady);
+  const runUnpublish = useServerFn(unpublishAll);
+
   const q = useQuery({
     queryKey: ["library-images", active, search],
-    queryFn: () => fetchList({ data: { filter: active, search, limit: 300 } }),
+    queryFn: () => fetchList({ data: { filter: active, search, limit: 500 } }),
+  });
+  const stats = useQuery({
+    queryKey: ["image-stats"],
+    queryFn: () => fetchStats({}),
+  });
+
+  const invalidate = () => {
+    qc.invalidateQueries({ queryKey: ["library-images"] });
+    qc.invalidateQueries({ queryKey: ["image-stats"] });
+  };
+
+  const publishMut = useMutation({
+    mutationFn: () => runPublish({}),
+    onSuccess: invalidate,
+  });
+  const unpublishMut = useMutation({
+    mutationFn: () => runUnpublish({}),
+    onSuccess: invalidate,
   });
 
   return (
     <>
       <PageHeader title="Library" />
+
+      <div style={batchBar}>
+        <div style={{ fontSize: 12, letterSpacing: "0.04em", textTransform: "uppercase" }}>
+          {stats.data
+            ? `${stats.data.total} total · ${stats.data.pending} pending keywords`
+            : "—"}
+        </div>
+        <div style={{ display: "flex", gap: 8 }}>
+          <button
+            style={btnDark}
+            disabled={publishMut.isPending}
+            onClick={() => {
+              if (confirm("Publish ALL keyworded images to the site?")) publishMut.mutate();
+            }}
+          >
+            {publishMut.isPending ? "Publishing…" : "Publish all ready"}
+          </button>
+          <button
+            style={btnGhost}
+            disabled={unpublishMut.isPending}
+            onClick={() => {
+              if (confirm("Unpublish ALL images from the site?")) unpublishMut.mutate();
+            }}
+          >
+            {unpublishMut.isPending ? "…" : "Unpublish all"}
+          </button>
+        </div>
+      </div>
+      {publishMut.data && (
+        <div style={notice}>Published {publishMut.data.published} images.</div>
+      )}
+      {unpublishMut.data && (
+        <div style={notice}>Unpublished {unpublishMut.data.unpublished} images.</div>
+      )}
+
       <input
         className="bi-input"
         placeholder="Search title, filename, category…"
@@ -53,36 +116,41 @@ function Library() {
       ) : !q.data?.length ? (
         <div className="bi-placeholder">No images</div>
       ) : (
-        <div style={gridStyle}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           {q.data.map((r) => (
             <Link
               key={r.id}
               to="/admin/image/$id"
               params={{ id: r.id }}
-              style={tileStyle}
+              style={rowStyle}
             >
-              <div style={{ position: "relative", paddingBottom: "100%", background: "#f4f4f4" }}>
+              <div style={thumbWrap}>
                 {r.signed_url ? (
-                  <img src={r.signed_url} alt={r.filename} style={imgStyle} loading="lazy" />
+                  <img src={r.signed_url} alt={r.filename} style={thumbImg} loading="lazy" />
                 ) : (
-                  <div style={{ ...imgStyle, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11 }}>
+                  <div style={{ ...thumbImg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11 }}>
                     NO PREVIEW
                   </div>
                 )}
-                <span style={{ ...badgeStyle, background: "#000" }}>#{r.image_number}</span>
-                {!r.keyworded_at && (
-                  <span style={{ ...badgeStyle, background: "#D75F68", left: "auto", right: 8 }}>
-                    PENDING
-                  </span>
-                )}
-                {r.keyworded_at && r.public && (
-                  <span style={{ ...badgeStyle, background: "#1f7a3d", left: "auto", right: 8 }}>
-                    LIVE
-                  </span>
+              </div>
+              <div style={contentCol}>
+                <div style={topRow}>
+                  <span style={numBadge}>#{r.image_number}</span>
+                  {!r.keyworded_at && <span style={{ ...statusBadge, background: "#D75F68" }}>PENDING</span>}
+                  {r.keyworded_at && r.public && <span style={{ ...statusBadge, background: "#1f7a3d" }}>LIVE</span>}
+                  {r.keyworded_at && !r.public && <span style={{ ...statusBadge, background: "#888" }}>READY</span>}
+                  {r.category && <span style={catBadge}>{r.category}</span>}
+                </div>
+                <div style={titleStyle}>{r.title ?? r.filename}</div>
+                {r.caption && <div style={captionStyle}>{r.caption}</div>}
+                {r.keywords?.length > 0 && (
+                  <div style={kwWrap}>
+                    {r.keywords.map((k, i) => (
+                      <span key={i} style={kwChip}>{k}</span>
+                    ))}
+                  </div>
                 )}
               </div>
-              <div style={tileName}>{r.title ?? r.filename}</div>
-              {r.category && <div style={tileMeta}>{r.category}</div>}
             </Link>
           ))}
         </div>
@@ -91,49 +159,105 @@ function Library() {
   );
 }
 
-const gridStyle: React.CSSProperties = {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
-  gap: 12,
-};
-const tileStyle: React.CSSProperties = {
+const batchBar: React.CSSProperties = {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
   border: "1px solid #000",
-  display: "block",
+  padding: "12px 16px",
+  marginBottom: 12,
+  flexWrap: "wrap",
+  gap: 8,
+};
+const btnDark: React.CSSProperties = {
+  background: "#000",
+  color: "#fff",
+  border: "1px solid #000",
+  padding: "8px 14px",
+  fontSize: 11,
+  fontWeight: 800,
+  letterSpacing: "0.06em",
+  textTransform: "uppercase",
+  cursor: "pointer",
+};
+const btnGhost: React.CSSProperties = { ...btnDark, background: "#fff", color: "#000" };
+const notice: React.CSSProperties = {
+  padding: "8px 12px",
+  background: "#f4f4f4",
+  border: "1px solid #000",
+  marginBottom: 12,
+  fontSize: 12,
+};
+const rowStyle: React.CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "200px 1fr",
+  gap: 16,
+  border: "1px solid #000",
   textDecoration: "none",
   color: "#000",
+  background: "#fff",
 };
-const imgStyle: React.CSSProperties = {
-  position: "absolute",
-  inset: 0,
+const thumbWrap: React.CSSProperties = {
+  position: "relative",
+  width: 200,
+  height: 200,
+  background: "#f4f4f4",
+};
+const thumbImg: React.CSSProperties = {
   width: "100%",
   height: "100%",
   objectFit: "cover",
 };
-const badgeStyle: React.CSSProperties = {
-  position: "absolute",
-  top: 8,
-  left: 8,
+const contentCol: React.CSSProperties = {
+  padding: "12px 16px 14px 0",
+  display: "flex",
+  flexDirection: "column",
+  gap: 8,
+  minWidth: 0,
+};
+const topRow: React.CSSProperties = {
+  display: "flex",
+  gap: 6,
+  alignItems: "center",
+  flexWrap: "wrap",
+};
+const numBadge: React.CSSProperties = {
+  background: "#000",
   color: "#fff",
   fontSize: 10,
   fontWeight: 800,
+  padding: "3px 7px",
   letterSpacing: "0.02em",
-  padding: "4px 8px",
 };
-const tileName: React.CSSProperties = {
-  padding: "8px 10px",
-  fontSize: 11,
-  fontWeight: 800,
-  letterSpacing: "0.02em",
-  textTransform: "uppercase",
-  whiteSpace: "nowrap",
-  overflow: "hidden",
-  textOverflow: "ellipsis",
-  borderTop: "1px solid #000",
-};
-const tileMeta: React.CSSProperties = {
-  padding: "0 10px 8px",
+const statusBadge: React.CSSProperties = { ...numBadge };
+const catBadge: React.CSSProperties = {
+  border: "1px solid #000",
   fontSize: 10,
+  fontWeight: 700,
+  padding: "2px 6px",
   letterSpacing: "0.04em",
   textTransform: "uppercase",
-  color: "#666",
+};
+const titleStyle: React.CSSProperties = {
+  fontSize: 14,
+  fontWeight: 800,
+  letterSpacing: "0.01em",
+};
+const captionStyle: React.CSSProperties = {
+  fontSize: 13,
+  lineHeight: 1.45,
+  color: "#222",
+};
+const kwWrap: React.CSSProperties = {
+  display: "flex",
+  flexWrap: "wrap",
+  gap: 4,
+  marginTop: 2,
+};
+const kwChip: React.CSSProperties = {
+  fontSize: 10,
+  padding: "2px 6px",
+  background: "#f0f0f0",
+  border: "1px solid #ddd",
+  letterSpacing: "0.02em",
 };
