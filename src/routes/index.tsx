@@ -129,7 +129,10 @@ function Index() {
         </div>
 
         {searchActive && (
-          <div className="search-results-placeholder">SEARCH RESULTS</div>
+          <div className="search-results-placeholder">
+            SEARCH RESULTS
+            {searchValue.length === 0 && <span className="srp-hint"> WILL APPEAR HERE</span>}
+          </div>
         )}
 
         <div className="line-thin" />
@@ -543,6 +546,7 @@ const PAGE_CSS = `
   color: #000;
   animation: searchResultsIn 1.2s ease 1.8s both;
 }
+.curbism-root .search-results-placeholder .srp-hint { color: #e0e0e0; font-weight: 800; }
 @keyframes searchResultsIn {
   from { opacity: 0; }
   to { opacity: 1; }
