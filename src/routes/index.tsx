@@ -41,10 +41,14 @@ function pad(n: number) {
 
 function Index() {
   const [current, setCurrent] = useState(0);
+  const [searchFocused, setSearchFocused] = useState(false);
+  const [searchValue, setSearchValue] = useState("");
 
   const goPrev = () =>
     setCurrent((c) => (c - 1 + HERO_IMAGES.length) % HERO_IMAGES.length);
   const goNext = () => setCurrent((c) => (c + 1) % HERO_IMAGES.length);
+
+  const searchActive = searchFocused || searchValue.length > 0;
 
   return (
     <>
@@ -52,15 +56,20 @@ function Index() {
       <div className="curbism-root">
 
         {/* HERO */}
-        <section className="hero">
+        <section className={`hero${searchActive ? " hero--search" : ""}`}>
           {HERO_IMAGES.map((src, i) => (
             <img
               key={src}
-              className={`bg-img${i === current ? " active" : ""}`}
+              className={`bg-img${i === current && !searchActive ? " active" : ""}`}
               src={src}
               alt=""
             />
           ))}
+          <img
+            className={`bg-img bg-img--search${searchActive ? " active" : ""}`}
+            src="/hero-search.jpg"
+            alt=""
+          />
 
           <div
             className="hero-zone hero-zone--left"
@@ -79,6 +88,19 @@ function Index() {
           <h1 className="hero-title">
             Rights Managed Images / Real People / Real Photography / No AI
           </h1>
+
+          <div className="hero-search">
+            <input
+              type="search"
+              placeholder="Search images…"
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              onFocus={() => setSearchFocused(true)}
+              onBlur={() => setSearchFocused(false)}
+              aria-label="Search images"
+            />
+          </div>
+
           <div className="hero-counter">
             {pad(current + 1)} / {pad(HERO_IMAGES.length)}
           </div>
@@ -121,6 +143,10 @@ const PAGE_CSS = `
   position: relative; width: 100%;
   aspect-ratio: 1200 / 1600;
   overflow: hidden; background: black;
+  transition: aspect-ratio 0.6s ease;
+}
+.curbism-root .hero--search {
+  aspect-ratio: 1920 / 1080;
 }
 .curbism-root .hero .bg-img {
   position: absolute; inset: 0;
@@ -129,6 +155,39 @@ const PAGE_CSS = `
   transition: opacity 0.5s ease; will-change: opacity;
 }
 .curbism-root .hero .bg-img.active { opacity: 1; }
+.curbism-root .hero .bg-img--search { z-index: 1; }
+
+/* SEARCH BOX */
+.curbism-root .hero-search {
+  position: absolute;
+  left: 0;
+  top: calc(140px + clamp(28px, 5vw, 64px) * 3 + 24px);
+  padding-left: 36px;
+  width: 50%;
+  z-index: 4;
+}
+.curbism-root .hero-search input {
+  width: 100%;
+  background: #fff;
+  border: none;
+  padding: 16px 20px;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 500;
+  color: #000;
+  outline: none;
+  -webkit-appearance: none;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+}
+.curbism-root .hero-search input::placeholder {
+  color: #999;
+  letter-spacing: 0.02em;
+}
+.curbism-root .hero-search input:focus {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+
+
 
 .curbism-root .hero-zone {
   position: absolute; top: 0;
@@ -308,6 +367,8 @@ const PAGE_CSS = `
 @media (max-width: 768px) {
   .curbism-root .hero-logo  { top: 40px; left: 0; height: 40px; }
   .curbism-root .hero-title { left: 0; top: 100px; padding-left: 22px; max-width: 60%; font-size: clamp(20px, 5.5vw, 36px); }
+  .curbism-root .hero-search { padding-left: 22px; width: 80%; top: calc(100px + clamp(20px, 5.5vw, 36px) * 3 + 18px); }
+  .curbism-root .hero-search input { padding: 12px 14px; font-size: 14px; }
   .curbism-root .hero-counter { bottom: 22px; right: 22px; font-size: 10px; }
   .curbism-root .section { min-height: 380px; }
   .curbism-root .section--apps { min-height: 460px; }
