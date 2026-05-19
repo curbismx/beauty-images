@@ -297,6 +297,11 @@ const previewGridStyle: React.CSSProperties = {
   gap: 12,
   alignItems: "flex-start",
 };
+const flatGridStyle: React.CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+  gap: 12,
+};
 const gridStyle: React.CSSProperties = {
   display: "grid",
   gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))",
