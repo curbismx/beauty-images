@@ -44,6 +44,7 @@ function Featured() {
     if (list.data) setOrdered(list.data);
   }, [list.data]);
   const [dragId, setDragId] = useState<string | null>(null);
+  const [overId, setOverId] = useState<string | null>(null);
 
   const moveItem = (fromId: string, toId: string) => {
     if (fromId === toId) return;
@@ -175,21 +176,36 @@ function Featured() {
           <div className="bi-placeholder">No featured images yet</div>
         ) : (
           <div style={gridStyle}>
-            {ordered.map((r) => (
+            {ordered.map((r) => {
+              const isDragging = dragId === r.id;
+              const isOver = overId === r.id && dragId && dragId !== r.id;
+              return (
               <div
                 key={r.id}
                 draggable
                 onDragStart={() => setDragId(r.id)}
-                onDragEnd={() => setDragId(null)}
-                onDragOver={(e) => e.preventDefault()}
+                onDragEnd={() => { setDragId(null); setOverId(null); }}
+                onDragEnter={() => { if (dragId) setOverId(r.id); }}
+                onDragOver={(e) => { e.preventDefault(); if (overId !== r.id) setOverId(r.id); }}
+                onDragLeave={(e) => {
+                  // only clear if leaving the tile entirely
+                  if (!(e.currentTarget as HTMLElement).contains(e.relatedTarget as Node)) {
+                    setOverId((o) => (o === r.id ? null : o));
+                  }
+                }}
                 onDrop={(e) => {
                   e.preventDefault();
                   if (dragId) moveItem(dragId, r.id);
+                  setOverId(null);
                 }}
                 style={{
                   ...tileStyle,
                   cursor: "grab",
-                  opacity: dragId === r.id ? 0.4 : 1,
+                  opacity: isDragging ? 0.35 : 1,
+                  outline: isOver ? "3px solid #D75F68" : "none",
+                  outlineOffset: isOver ? "-3px" : 0,
+                  transform: isOver ? "scale(1.02)" : "none",
+                  transition: "transform 0.12s ease, outline-color 0.12s ease",
                 }}
               >
                 <div style={{ position: "relative", paddingBottom: "100%", background: "#f4f4f4" }}>
@@ -219,7 +235,8 @@ function Featured() {
                   Delete
                 </button>
               </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

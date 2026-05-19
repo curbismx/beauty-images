@@ -166,7 +166,11 @@ function FeaturedMasonry() {
       const rows = data as FeaturedRow[];
       const next = rows.map((r) => ({
         id: r.id,
-        url: supabase.storage.from("featured-images").getPublicUrl(r.storage_path).data.publicUrl,
+        url: supabase.storage
+          .from("featured-images")
+          .getPublicUrl(r.storage_path, {
+            transform: { height: 800, resize: "contain", quality: 75 },
+          }).data.publicUrl,
         alt: r.filename,
       }));
       setItems((prev) => [...prev, ...next]);
