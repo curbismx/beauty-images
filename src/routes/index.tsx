@@ -350,7 +350,7 @@ const PAGE_CSS = `
 }
 
 /* FOOTER */
-.curbism-root .appeared-in { background: white; padding: 40px 0 20px; display: block; overflow: hidden; }
+.curbism-root .appeared-in { background: white; padding: 40px 40px 20px; display: block; overflow: hidden; }
 .curbism-root .appeared-in img { width: 100%; max-width: 100%; height: auto; display: block; }
 .curbism-root .intro-text { background: white; padding: 32px 40px 80px; font-family: 'DIN Condensed', 'DIN Alternate', 'Barlow Condensed', 'Oswald', sans-serif; }
 .curbism-root .intro-text h2 { font-size: clamp(28px, 4.2vw, 56px); font-weight: 900; text-transform: uppercase; letter-spacing: -0.035em; line-height: 1.15; color: #000; margin-bottom: 24px; }
