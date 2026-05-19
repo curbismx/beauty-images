@@ -107,33 +107,35 @@ function Index() {
           </div>
         </section>
 
-        <div className={`home-fade${searchActive ? " home-fade--hidden" : ""}`}>
-          <div className="appeared-in">
-            <div className="appeared-in-label">PUBLISHED IN</div>
-            <div className="appeared-in-marquee">
-              <div className="appeared-in-track">
-                <img src="/appeared-in.png" alt="Published in Vogue, Thalgo, El País, Lexus, Apple" />
-                <img src="/appeared-in.png" alt="" aria-hidden="true" />
+        <div className="home-stack">
+          <div className={`home-fade${searchActive ? " home-fade--hidden" : ""}`}>
+            <div className="appeared-in">
+              <div className="appeared-in-label">PUBLISHED IN</div>
+              <div className="appeared-in-marquee">
+                <div className="appeared-in-track">
+                  <img src="/appeared-in.png" alt="Published in Vogue, Thalgo, El País, Lexus, Apple" />
+                  <img src="/appeared-in.png" alt="" aria-hidden="true" />
+                </div>
               </div>
             </div>
+
+            <div className="intro-text">
+              <h2>ADVERTISING DESIGN &amp; EDITORIAL IMAGES</h2>
+              <p>
+                BEAUTY IMAGES IS A COLLECTIVE OF PHOTOGRAPHERS PROVIDING IMAGES FOR HIGH-END PUBLICATIONS FOR OVER 20 YEARS. ALL OUR IMAGES ARE EXCLUSIVE TO BEAUTY IMAGES AND ARE SOLD ON A RIGHTS MANAGED BASIS.
+              </p>
+            </div>
+
+            <FeaturedMasonry />
           </div>
 
-          <div className="intro-text">
-            <h2>ADVERTISING DESIGN &amp; EDITORIAL IMAGES</h2>
-            <p>
-              BEAUTY IMAGES IS A COLLECTIVE OF PHOTOGRAPHERS PROVIDING IMAGES FOR HIGH-END PUBLICATIONS FOR OVER 20 YEARS. ALL OUR IMAGES ARE EXCLUSIVE TO BEAUTY IMAGES AND ARE SOLD ON A RIGHTS MANAGED BASIS.
-            </p>
-          </div>
-
-          <FeaturedMasonry />
+          {searchActive && (
+            <div className="search-results-placeholder">
+              SEARCH RESULTS
+              {searchValue.length === 0 && <span className="srp-hint"> WILL APPEAR HERE</span>}
+            </div>
+          )}
         </div>
-
-        {searchActive && (
-          <div className="search-results-placeholder">
-            SEARCH RESULTS
-            {searchValue.length === 0 && <span className="srp-hint"> WILL APPEAR HERE</span>}
-          </div>
-        )}
 
         <div className="line-thin" />
 
