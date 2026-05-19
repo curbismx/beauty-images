@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -123,11 +124,7 @@ function Index() {
           </p>
         </div>
 
-        {/* PHOTOGRAPHY */}
-        <section className="section section--white">
-        </section>
-
-
+        <FeaturedMasonry />
 
         <div className="line-thin" />
 
@@ -137,6 +134,83 @@ function Index() {
         </footer>
       </div>
     </>
+  );
+}
+
+type FeaturedRow = { id: string; storage_path: string; filename: string };
+const PAGE_SIZE = 15;
+
+function FeaturedMasonry() {
+  const [items, setItems] = useState<Array<{ id: string; url: string; alt: string }>>([]);
+  const [, setPage] = useState(0);
+  const [done, setDone] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  const loadingRef = useRef(false);
+  const doneRef = useRef(false);
+  const pageRef = useRef(0);
+
+  const loadMore = async () => {
+    if (loadingRef.current || doneRef.current) return;
+    loadingRef.current = true;
+    setLoading(true);
+    const from = pageRef.current * PAGE_SIZE;
+    const to = from + PAGE_SIZE - 1;
+    const { data, error } = await supabase
+      .from("featured_images")
+      .select("id, storage_path, filename")
+      .order("sort_order", { ascending: false })
+      .order("created_at", { ascending: false })
+      .range(from, to);
+    if (!error && data) {
+      const rows = data as FeaturedRow[];
+      const next = rows.map((r) => ({
+        id: r.id,
+        url: supabase.storage.from("featured-images").getPublicUrl(r.storage_path).data.publicUrl,
+        alt: r.filename,
+      }));
+      setItems((prev) => [...prev, ...next]);
+      pageRef.current += 1;
+      setPage(pageRef.current);
+      if (rows.length < PAGE_SIZE) {
+        doneRef.current = true;
+        setDone(true);
+      }
+    }
+    loadingRef.current = false;
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    loadMore();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) loadMore();
+      },
+      { rootMargin: "600px" },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  if (items.length === 0 && done) return null;
+
+  return (
+    <section className="featured-masonry">
+      <div className="featured-masonry-grid">
+        {items.map((it) => (
+          <img key={it.id} src={it.url} alt={it.alt} loading="lazy" />
+        ))}
+      </div>
+      {!done && <div ref={sentinelRef} className="featured-masonry-sentinel" aria-hidden="true" />}
+      {loading && <div className="featured-masonry-loading">Loading…</div>}
+    </section>
   );
 }
 
@@ -400,5 +474,31 @@ const PAGE_CSS = `
   .curbism-root .apps-row { margin-top: 0; }
   .curbism-root .design-strip { height: 240px; }
   .curbism-root .footer { padding: 16px 24px; font-size: 10px; }
+}
+
+/* FEATURED MASONRY */
+.curbism-root .featured-masonry { background: white; padding: 0 40px 60px; }
+.curbism-root .featured-masonry-grid {
+  column-count: 3;
+  column-gap: 12px;
+}
+.curbism-root .featured-masonry-grid img {
+  width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 0 12px;
+  break-inside: avoid;
+  -webkit-column-break-inside: avoid;
+  page-break-inside: avoid;
+}
+.curbism-root .featured-masonry-sentinel { height: 1px; }
+.curbism-root .featured-masonry-loading { padding: 24px 0; font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; color: #777; text-align: center; }
+@media (max-width: 900px) {
+  .curbism-root .featured-masonry { padding: 0 24px 40px; }
+  .curbism-root .featured-masonry-grid { column-count: 2; column-gap: 8px; }
+  .curbism-root .featured-masonry-grid img { margin-bottom: 8px; }
+}
+@media (max-width: 520px) {
+  .curbism-root .featured-masonry-grid { column-count: 1; }
 }
 `;

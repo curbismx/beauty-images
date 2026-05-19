@@ -18,6 +18,7 @@ import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminSalesRouteImport } from './routes/admin.sales'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminLibraryRouteImport } from './routes/admin.library'
+import { Route as AdminFeaturedRouteImport } from './routes/admin.featured'
 import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
 import { Route as ApiPublicTrackRouteImport } from './routes/api/public/track'
 import { Route as AdminImageIdRouteImport } from './routes/admin.image.$id'
@@ -67,6 +68,11 @@ const AdminLibraryRoute = AdminLibraryRouteImport.update({
   path: '/library',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminFeaturedRoute = AdminFeaturedRouteImport.update({
+  id: '/featured',
+  path: '/featured',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminCustomersRoute = AdminCustomersRouteImport.update({
   id: '/customers',
   path: '/customers',
@@ -88,6 +94,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/design': typeof DesignRoute
   '/admin/customers': typeof AdminCustomersRoute
+  '/admin/featured': typeof AdminFeaturedRoute
   '/admin/library': typeof AdminLibraryRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/sales': typeof AdminSalesRoute
@@ -101,6 +108,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/design': typeof DesignRoute
   '/admin/customers': typeof AdminCustomersRoute
+  '/admin/featured': typeof AdminFeaturedRoute
   '/admin/library': typeof AdminLibraryRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/sales': typeof AdminSalesRoute
@@ -116,6 +124,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/design': typeof DesignRoute
   '/admin/customers': typeof AdminCustomersRoute
+  '/admin/featured': typeof AdminFeaturedRoute
   '/admin/library': typeof AdminLibraryRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/sales': typeof AdminSalesRoute
@@ -132,6 +141,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/design'
     | '/admin/customers'
+    | '/admin/featured'
     | '/admin/library'
     | '/admin/login'
     | '/admin/sales'
@@ -145,6 +155,7 @@ export interface FileRouteTypes {
     | '/'
     | '/design'
     | '/admin/customers'
+    | '/admin/featured'
     | '/admin/library'
     | '/admin/login'
     | '/admin/sales'
@@ -159,6 +170,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/design'
     | '/admin/customers'
+    | '/admin/featured'
     | '/admin/library'
     | '/admin/login'
     | '/admin/sales'
@@ -241,6 +253,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLibraryRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/featured': {
+      id: '/admin/featured'
+      path: '/featured'
+      fullPath: '/admin/featured'
+      preLoaderRoute: typeof AdminFeaturedRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/customers': {
       id: '/admin/customers'
       path: '/customers'
@@ -267,6 +286,7 @@ declare module '@tanstack/react-router' {
 
 interface AdminRouteChildren {
   AdminCustomersRoute: typeof AdminCustomersRoute
+  AdminFeaturedRoute: typeof AdminFeaturedRoute
   AdminLibraryRoute: typeof AdminLibraryRoute
   AdminLoginRoute: typeof AdminLoginRoute
   AdminSalesRoute: typeof AdminSalesRoute
@@ -278,6 +298,7 @@ interface AdminRouteChildren {
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminCustomersRoute: AdminCustomersRoute,
+  AdminFeaturedRoute: AdminFeaturedRoute,
   AdminLibraryRoute: AdminLibraryRoute,
   AdminLoginRoute: AdminLoginRoute,
   AdminSalesRoute: AdminSalesRoute,
