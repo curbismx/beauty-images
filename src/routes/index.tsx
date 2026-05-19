@@ -165,7 +165,7 @@ function Index() {
           />
 
           <div className="hero-logo">
-            <img src="/curbism-logo.jpg" alt="Curbism" />
+            <img src="/beauty-logo.png" alt="Beauty Images" />
           </div>
           <h1 className="hero-title">
             Apps
