@@ -483,23 +483,20 @@ const PAGE_CSS = `
 /* FEATURED MASONRY */
 .curbism-root .featured-masonry { background: white; padding: 0 40px 60px; }
 .curbism-root .featured-masonry-grid {
-  column-count: 3;
-  column-gap: 12px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  align-items: start;
 }
 .curbism-root .featured-masonry-grid img {
   width: 100%;
   height: auto;
   display: block;
-  margin: 0 0 12px;
-  break-inside: avoid;
-  -webkit-column-break-inside: avoid;
-  page-break-inside: avoid;
 }
 .curbism-root .featured-masonry-sentinel { height: 1px; }
 .curbism-root .featured-masonry-loading { padding: 24px 0; font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; color: #777; text-align: center; }
 @media (max-width: 768px) {
   .curbism-root .featured-masonry { padding: 0 24px 40px; }
-  .curbism-root .featured-masonry-grid { column-count: 2; column-gap: 8px; }
-  .curbism-root .featured-masonry-grid img { margin-bottom: 8px; }
+  .curbism-root .featured-masonry-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
 }
 `;
