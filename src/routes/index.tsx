@@ -167,9 +167,44 @@ function Index() {
           </div>
 
           {searchActive && (
-            <div className="search-results-placeholder">
-              SEARCH RESULTS
-              {searchValue.length === 0 && <span className="srp-hint"> WILL APPEAR HERE</span>}
+            <div className="search-results">
+              <div className="search-results-header">
+                {submittedQuery ? (
+                  <>
+                    SEARCH RESULTS
+                    <span className="srp-meta">
+                      {" "}/ "{submittedQuery}"
+                      {!searching && <> · {results.length} {results.length === 1 ? "IMAGE" : "IMAGES"}</>}
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    SEARCH RESULTS
+                    <span className="srp-hint"> WILL APPEAR HERE</span>
+                  </>
+                )}
+              </div>
+              {searching && <div className="search-results-status">SEARCHING…</div>}
+              {!searching && submittedQuery && results.length === 0 && (
+                <div className="search-results-status">NO MATCHES — TRY ANOTHER TERM</div>
+              )}
+              {results.length > 0 && (
+                <div className="search-results-grid">
+                  {results.map((r) => (
+                    <figure key={r.id} className="search-result-card">
+                      {r.signed_url ? (
+                        <img src={r.signed_url} alt={r.title ?? r.caption ?? ""} loading="lazy" />
+                      ) : (
+                        <div className="search-result-fallback" />
+                      )}
+                      <figcaption>
+                        <div className="src-num">#{String(r.image_number).padStart(5, "0")}</div>
+                        {r.title && <div className="src-title">{r.title}</div>}
+                      </figcaption>
+                    </figure>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>
