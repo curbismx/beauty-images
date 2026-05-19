@@ -60,6 +60,7 @@ export const getRecentImages = createServerFn({ method: "GET" })
   });
 
 export type LibraryImage = RecentImage & {
+  caption: string | null;
   category: string | null;
   availability: string;
   public: boolean;
