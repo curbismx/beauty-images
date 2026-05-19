@@ -332,3 +332,22 @@ export const unpublishAll = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { unpublished: data?.length ?? 0 };
   });
+
+export const deleteImages = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(z.object({ ids: z.array(z.string().uuid()).min(1).max(1000) }).parse)
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+    const { data: rows, error: selErr } = await supabase
+      .from("images")
+      .select("id, storage_path")
+      .in("id", data.ids);
+    if (selErr) throw new Error(selErr.message);
+    const paths = (rows ?? []).map((r) => r.storage_path);
+    if (paths.length) {
+      await supabase.storage.from("images-private").remove(paths);
+    }
+    const { error: delErr } = await supabase.from("images").delete().in("id", data.ids);
+    if (delErr) throw new Error(delErr.message);
+    return { deleted: rows?.length ?? 0 };
+  });
