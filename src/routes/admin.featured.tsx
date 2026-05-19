@@ -182,7 +182,7 @@ function Featured() {
               const overIdx = overId ? ordered.findIndex((x) => x.id === overId) : -1;
               // Show insertion indicator on the "over" tile; side depends on
               // whether the dragged item is coming from before or after it.
-              const showIndicator = isOver(r.id);
+              const showIndicator = overId === r.id && dragId !== null && dragId !== r.id;
               const indicatorSide: "left" | "right" =
                 dragIdx >= 0 && overIdx >= 0 && dragIdx < overIdx ? "right" : "left";
               return (
