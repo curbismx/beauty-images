@@ -537,7 +537,7 @@ const PAGE_CSS = `
 
 .curbism-root .home-fade { opacity: 1; transition: opacity 3.5s ease; }
 .curbism-root .home-fade--hidden { opacity: 0; pointer-events: none; }
-.curbism-root .search-results-placeholder .srp-hint { color: #d8d8d8; font-weight: 800; transition: opacity 0.4s ease; }
+.curbism-root .search-results-placeholder {
   padding: 80px 40px;
   text-align: center;
   font-size: 13px;
@@ -546,6 +546,7 @@ const PAGE_CSS = `
   color: #000;
   animation: searchResultsIn 1.2s ease 1.8s both;
 }
+.curbism-root .search-results-placeholder .srp-hint { color: #e0e0e0; font-weight: 800; }
 @keyframes searchResultsIn {
   from { opacity: 0; }
   to { opacity: 1; }
