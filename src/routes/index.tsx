@@ -353,8 +353,8 @@ const PAGE_CSS = `
 .curbism-root .appeared-in { background: white; padding: 40px 40px 20px; display: flex; justify-content: flex-start; overflow: hidden; }
 .curbism-root .appeared-in img { width: 90%; max-width: 90%; height: auto; display: block; margin-left: -25px; }
 .curbism-root .intro-text { background: white; padding: 32px 40px 80px; }
-.curbism-root .intro-text h2 { font-size: clamp(28px, 4.2vw, 56px); font-weight: 900; text-transform: uppercase; letter-spacing: -0.035em; line-height: 0.95; color: #000; margin-bottom: 24px; }
-.curbism-root .intro-text p { font-size: clamp(28px, 4.2vw, 56px); font-weight: 900; text-transform: uppercase; letter-spacing: -0.035em; line-height: 0.95; color: #111; }
+.curbism-root .intro-text h2 { font-size: clamp(28px, 4.2vw, 56px); font-weight: 900; text-transform: uppercase; letter-spacing: -0.035em; line-height: 1.15; color: #000; margin-bottom: 24px; }
+.curbism-root .intro-text p { font-size: clamp(28px, 4.2vw, 56px); font-weight: 900; text-transform: uppercase; letter-spacing: -0.035em; line-height: 1.15; color: #111; }
 @media (max-width: 768px) {
   .curbism-root .appeared-in { padding: 24px 24px 12px; }
   .curbism-root .appeared-in img { width: 90%; max-width: 90%; }
