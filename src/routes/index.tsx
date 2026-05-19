@@ -320,9 +320,9 @@ const PAGE_CSS = `
 
 .curbism-root .hero-logo {
   position: absolute; top: 70px; left: 0;
-  width: 240px; z-index: 3; pointer-events: none;
+  height: 56px; z-index: 3; pointer-events: none;
 }
-.curbism-root .hero-logo img { width: 100%; height: auto; display: block; }
+.curbism-root .hero-logo img { height: 100%; width: auto; display: block; }
 
 .curbism-root .hero-title {
   position: absolute; left: 36px; bottom: 36px; z-index: 3;
