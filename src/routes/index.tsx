@@ -79,11 +79,13 @@ function Index() {
             <img src="/beauty-logo.png" alt="Beauty Images" />
           </div>
           <h1 className="hero-title">
-            Apps
+            Rights Managed Images
             <br />
-            Design
+            Real People
             <br />
-            Photography
+            Real Photography
+            <br />
+            No AI
           </h1>
           <div className="hero-counter">
             {pad(current + 1)} / {pad(HERO_IMAGES.length)}
@@ -95,12 +97,10 @@ function Index() {
         </div>
 
         <div className="intro-text">
-          <h2>
-            RIGHTS MANAGED IMAGES<br />
-            REAL PEOPLE<br />
-            REAL PHOTOGRAPHY<br />
-            NO AI
-          </h2>
+          <h2>ADVERTISING DESIGN &amp; EDITORIAL IMAGES</h2>
+          <p>
+            BEAUTY IMAGES IS A COLLECTIVE OF PHOTOGRAPHERS PROVIDING IMAGES FOR HIGH-END PUBLICATIONS FOR OVER 20 YEARS. ALL OUR IMAGES ARE EXCLUSIVE TO BEAUTY IMAGES AND ARE SOLD ON A RIGHTS MANAGED BASIS.
+          </p>
         </div>
 
         {/* PHOTOGRAPHY */}
@@ -295,7 +295,7 @@ const PAGE_CSS = `
 /* FOOTER */
 .curbism-root .appeared-in { background: white; padding: 40px 40px 20px; display: flex; justify-content: flex-start; overflow: hidden; }
 .curbism-root .appeared-in img { width: 90%; max-width: 90%; height: auto; display: block; margin-left: -25px; }
-.curbism-root .intro-text { background: white; padding: 0 40px 80px; }
+.curbism-root .intro-text { background: white; padding: 32px 40px 80px; }
 .curbism-root .intro-text h2 { font-size: clamp(28px, 4.2vw, 56px); font-weight: 900; text-transform: uppercase; letter-spacing: -0.035em; line-height: 0.95; color: #000; margin-bottom: 24px; }
 .curbism-root .intro-text p { font-size: clamp(28px, 4.2vw, 56px); font-weight: 900; text-transform: uppercase; letter-spacing: -0.035em; line-height: 0.95; color: #111; }
 @media (max-width: 768px) {
