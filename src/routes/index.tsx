@@ -531,4 +531,20 @@ const PAGE_CSS = `
 @media (max-width: 768px) {
   .curbism-root .featured-masonry { padding: 0 0 40px; }
 }
+
+.curbism-root .home-fade { opacity: 1; transition: opacity 3.5s ease; }
+.curbism-root .home-fade--hidden { opacity: 0; pointer-events: none; }
+.curbism-root .search-results-placeholder {
+  padding: 80px 40px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.4em;
+  color: #000;
+  animation: searchResultsIn 1.2s ease 1.8s both;
+}
+@keyframes searchResultsIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
 `;
