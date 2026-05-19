@@ -25,6 +25,22 @@ export const listFeatured = createServerFn({ method: "GET" })
     })) as FeaturedImage[];
   });
 
+export const reorderFeatured = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(z.object({ ids: z.array(z.string().uuid()).min(1).max(2000) }).parse)
+  .handler(async ({ data, context }) => {
+    // Assign sort_order so that index 0 (top of list) gets the highest value.
+    const total = data.ids.length;
+    for (let i = 0; i < data.ids.length; i++) {
+      const { error } = await context.supabase
+        .from("featured_images")
+        .update({ sort_order: total - i })
+        .eq("id", data.ids[i]);
+      if (error) throw new Error(error.message);
+    }
+    return { ok: true as const };
+  });
+
 export const deleteFeatured = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(z.object({ id: z.string().uuid() }).parse)
