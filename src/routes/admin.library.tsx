@@ -386,17 +386,18 @@ const selBar: React.CSSProperties = {
 };
 const rowStyle: React.CSSProperties = {
   display: "grid",
-  gridTemplateColumns: "50px 200px 1fr",
+  gridTemplateColumns: "60px 280px 1fr",
   gap: 0,
   border: "1px solid #000",
   textDecoration: "none",
   color: "#000",
   background: "#fff",
+  boxShadow: "0 1px 0 rgba(0,0,0,0.04)",
 };
 const thumbWrap: React.CSSProperties = {
   position: "relative",
-  width: 200,
-  height: 200,
+  width: 280,
+  height: 280,
   background: "#f4f4f4",
 };
 const thumbImg: React.CSSProperties = {
@@ -405,55 +406,104 @@ const thumbImg: React.CSSProperties = {
   objectFit: "cover",
 };
 const contentCol: React.CSSProperties = {
-  padding: "12px 16px 14px 0",
+  padding: "20px 24px 22px 24px",
   display: "flex",
   flexDirection: "column",
-  gap: 8,
+  gap: 12,
   minWidth: 0,
 };
 const topRow: React.CSSProperties = {
   display: "flex",
-  gap: 6,
+  gap: 8,
   alignItems: "center",
   flexWrap: "wrap",
 };
 const numBadge: React.CSSProperties = {
   background: "#000",
   color: "#fff",
-  fontSize: 10,
+  fontSize: 11,
   fontWeight: 800,
-  padding: "3px 7px",
+  padding: "4px 9px",
   letterSpacing: "0.02em",
 };
 const statusBadge: React.CSSProperties = { ...numBadge };
 const catBadge: React.CSSProperties = {
   border: "1px solid #000",
-  fontSize: 10,
+  fontSize: 11,
   fontWeight: 700,
-  padding: "2px 6px",
+  padding: "3px 8px",
   letterSpacing: "0.04em",
   textTransform: "uppercase",
 };
 const titleStyle: React.CSSProperties = {
-  fontSize: 14,
+  fontSize: 18,
   fontWeight: 800,
   letterSpacing: "0.01em",
+  lineHeight: 1.3,
 };
 const captionStyle: React.CSSProperties = {
-  fontSize: 13,
-  lineHeight: 1.45,
+  fontSize: 14,
+  lineHeight: 1.55,
   color: "#222",
 };
 const kwWrap: React.CSSProperties = {
   display: "flex",
   flexWrap: "wrap",
-  gap: 4,
-  marginTop: 2,
+  gap: 5,
+  marginTop: 4,
 };
 const kwChip: React.CSSProperties = {
-  fontSize: 10,
-  padding: "2px 6px",
+  fontSize: 11,
+  padding: "3px 8px",
   background: "#f0f0f0",
   border: "1px solid #ddd",
   letterSpacing: "0.02em",
+  borderRadius: 2,
+};
+const btnEdit: React.CSSProperties = {
+  background: "#fff",
+  color: "#000",
+  border: "1px solid #000",
+  padding: "8px 18px",
+  fontSize: 12,
+  fontWeight: 800,
+  letterSpacing: "0.08em",
+  textTransform: "uppercase",
+  cursor: "pointer",
+};
+const btnDone: React.CSSProperties = {
+  ...btnEdit,
+  background: "#1f7a3d",
+  color: "#fff",
+  borderColor: "#1f7a3d",
+};
+const titleInput: React.CSSProperties = {
+  width: "100%",
+  fontSize: 18,
+  fontWeight: 800,
+  padding: "8px 10px",
+  border: "1px solid #000",
+  background: "#fff",
+};
+const captionInput: React.CSSProperties = {
+  width: "100%",
+  fontSize: 14,
+  lineHeight: 1.5,
+  padding: "8px 10px",
+  border: "1px solid #000",
+  background: "#fff",
+  resize: "vertical",
+  fontFamily: "inherit",
+};
+const kwInput: React.CSSProperties = {
+  ...captionInput,
+  fontSize: 13,
+};
+const fieldLabel: React.CSSProperties = {
+  fontSize: 10,
+  fontWeight: 700,
+  letterSpacing: "0.08em",
+  textTransform: "uppercase",
+  color: "#666",
+  marginBottom: 4,
 };
