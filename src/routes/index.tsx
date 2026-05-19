@@ -207,14 +207,33 @@ function FeaturedMasonry() {
 
   return (
     <section className="featured-masonry">
-      <div className="featured-masonry-grid">
-        {items.map((it) => (
-          <img key={it.id} src={it.url} alt={it.alt} loading="lazy" />
-        ))}
-      </div>
+      <MasonryColumns items={items} />
       {!done && <div ref={sentinelRef} className="featured-masonry-sentinel" aria-hidden="true" />}
       {loading && <div className="featured-masonry-loading">Loading…</div>}
     </section>
+  );
+}
+
+function MasonryColumns({ items }: { items: Array<{ id: string; url: string; alt: string }> }) {
+  const [cols, setCols] = useState(3);
+  useEffect(() => {
+    const update = () => setCols(window.innerWidth <= 768 ? 2 : 3);
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
+  const buckets: typeof items[] = Array.from({ length: cols }, () => []);
+  items.forEach((it, i) => buckets[i % cols].push(it));
+  return (
+    <div className="featured-masonry-grid">
+      {buckets.map((col, i) => (
+        <div key={i} className="featured-masonry-col">
+          {col.map((it) => (
+            <img key={it.id} src={it.url} alt={it.alt} loading="lazy" />
+          ))}
+        </div>
+      ))}
+    </div>
   );
 }
 
