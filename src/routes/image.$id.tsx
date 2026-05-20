@@ -138,14 +138,7 @@ function ImageDetail() {
               className={`img-nav-link${inLightbox ? " img-nav-link--on" : ""}`}
               onClick={() => (inLightbox ? removeFromLightbox(id) : addToLightbox(id))}
             >
-              {inLightbox ? (
-                <>
-                  <Check size={12} style={{ marginRight: 6, verticalAlign: "-2px" }} />
-                  IN LIGHTBOX
-                </>
-              ) : (
-                "ADD TO LIGHTBOX"
-              )}
+              {inLightbox ? "IN LIGHTBOX" : "ADD TO LIGHTBOX"}
             </button>
             <span className="img-nav-sep">/</span>
             <a className="img-nav-link" href="/lightbox">LIGHTBOX</a>
