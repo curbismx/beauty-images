@@ -175,8 +175,7 @@ function ImageDetail() {
                           className={`lc-btn${active ? " lc-btn--active" : ""}`}
                           onClick={() => setTier(t.id)}
                         >
-                          <span className="lc-btn-label">{t.label.charAt(0).toUpperCase()}</span>
-                          <span className="lc-btn-sep">—</span>
+                          <span className="lc-btn-box">{t.label.charAt(0).toUpperCase()}</span>
                           <span className="lc-btn-price">{t.price}</span>
                         </button>
                       );
@@ -321,38 +320,63 @@ const CSS = `
 .lc-detail-text { font-size: 13px; line-height: 1.6; color: #e6e6e6; margin: 0 0 22px; max-width: 66%; }
 
 .lc-btn-row {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  display: inline-flex;
+  flex-wrap: wrap;
   gap: 10px;
   margin-top: 4px;
 }
 .lc-btn {
-  all: unset; cursor: pointer; text-align: center;
-  display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 8px;
-  height: 48px; padding: 0 12px;
-  white-space: nowrap;
+  all: unset; cursor: pointer;
+  display: inline-flex; align-items: stretch;
+  height: 44px;
   border: 1px dashed rgba(255,255,255,0.2);
   background: transparent;
   transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  overflow: hidden;
+}
+.lc-btn-box {
+  display: flex; align-items: center; justify-content: center;
+  width: 42px; height: 100%;
+  background: rgba(255,255,255,0.08);
+  font-size: 13px; font-weight: 700; letter-spacing: 0.05em; color: #fff;
+  border-right: 1px dashed rgba(255,255,255,0.2);
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.lc-btn-price {
+  display: flex; align-items: center;
+  padding: 0 16px;
+  font-size: 13px; font-weight: 500; color: #fff;
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.lc-btn-label {
+  display: flex; align-items: center;
+  padding: 0 16px;
+  font-size: 12px; font-weight: 700; letter-spacing: 0.2em;
+  text-transform: uppercase; color: #fff; white-space: nowrap;
 }
 .lc-btn:hover { background: #e8e8e8; border-color: #e8e8e8; border-style: solid; }
-.lc-btn:hover .lc-btn-label,
+.lc-btn:hover .lc-btn-box { background: #d4d4d4; color: #000; border-right-color: #b8b8b8; border-right-style: solid; }
 .lc-btn:hover .lc-btn-price,
-.lc-btn:hover .lc-btn-sep { color: #000; }
+.lc-btn:hover .lc-btn-label { color: #000; }
 .lc-btn--active { border-color: rgba(255,255,255,0.55); border-style: solid; }
-.lc-btn--cta { border-color: #D75F68; color: #D75F68; }
+
+.lc-btn--cta { border-color: #D75F68; }
 .lc-btn--cta:hover { background: rgba(215,95,104,0.12); border-color: #D75F68; border-style: dashed; }
+.lc-btn--cta .lc-btn-box { background: rgba(215,95,104,0.18); color: #D75F68; border-right-color: rgba(215,95,104,0.45); }
+.lc-btn--cta:hover .lc-btn-box { background: rgba(215,95,104,0.25); color: #D75F68; border-right-style: dashed; border-right-color: rgba(215,95,104,0.45); }
 .lc-btn--cta .lc-btn-label,
 .lc-btn--cta:hover .lc-btn-label { color: #D75F68; }
 .lc-btn--cta .lc-btn-price,
 .lc-btn--cta:hover .lc-btn-price { color: #D75F68; }
+
 .lc-btn--cta-on { background: #D75F68; border-color: #D75F68; border-style: solid; }
+.lc-btn--cta-on .lc-btn-box { background: rgba(0,0,0,0.18); color: #fff; border-right-color: rgba(255,255,255,0.3); border-right-style: solid; }
 .lc-btn--cta-on .lc-btn-label,
 .lc-btn--cta-on .lc-btn-price { color: #fff; }
 .lc-btn--cta-on:hover { background: #b94e56; border-color: #b94e56; }
-.lc-btn-label { font-size: 13px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: #fff; }
-.lc-btn-sep { font-size: 12px; color: #888; }
-.lc-btn-price { font-size: 13px; font-weight: 500; color: #fff; font-variant-numeric: tabular-nums; }
+.lc-btn--cta-on:hover .lc-btn-box { background: rgba(0,0,0,0.22); color: #fff; }
+.lc-btn--cta-on:hover .lc-btn-label,
+.lc-btn--cta-on:hover .lc-btn-price { color: #fff; }
 
 .img-nav-link {
   background: none; border: 0; padding: 0; cursor: pointer; font-family: inherit;
@@ -395,6 +419,6 @@ const CSS = `
 @media (max-width: 600px) {
   .img-stage { padding: 0 24px; }
   .img-el { max-height: calc(100vh - 100px); }
-  .lc-btn-row { grid-template-columns: repeat(2, 1fr); }
+  
 }
 `;
