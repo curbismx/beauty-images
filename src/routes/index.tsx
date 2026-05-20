@@ -1,10 +1,35 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Layers } from "lucide-react";
+import { Layers, LayoutGrid, Rows3 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { searchPublicImages, type PublicSearchResult } from "@/lib/search.functions";
 import { getLightbox, subscribeLightbox } from "@/lib/lightbox";
+import { useViewMode, useMasonryCols } from "@/lib/view-mode";
+
+function renderResultCard(r: PublicSearchResult, onClick: () => void) {
+  return (
+    <Link
+      key={r.id}
+      to="/image/$id"
+      params={{ id: r.id }}
+      className="search-result-card"
+      onMouseDown={(e) => e.preventDefault()}
+      onClick={onClick}
+    >
+      {r.signed_url ? (
+        <img src={r.signed_url} alt={r.title ?? r.caption ?? ""} loading="lazy" />
+      ) : (
+        <div className="search-result-fallback" />
+      )}
+      <figcaption>
+        <div className="src-num">#{String(r.image_number).padStart(5, "0")}</div>
+        {r.title && <div className="src-title">{r.title}</div>}
+      </figcaption>
+    </Link>
+  );
+}
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -72,6 +97,9 @@ function Index() {
   const [submittedQuery, setSubmittedQuery] = useState(restoreState?.q ?? "");
   const [results, setResults] = useState<PublicSearchResult[]>(restoreState?.results ?? []);
   const [searching, setSearching] = useState(false);
+  const [viewMode, setViewMode] = useViewMode();
+  const masonry = viewMode === "masonry";
+  const cols = useMasonryCols();
   const runSearch = useServerFn(searchPublicImages);
   const justClosedSearchRef = useRef(false);
   const restoreConsumedRef = useRef(false);
@@ -358,37 +386,38 @@ function Index() {
                     </>
                   )}
                 </div>
-                <Link to="/lightbox" className="srh-lightbox" aria-label="Open lightbox">
-                  <Layers size={16} />
-                  <span>LIGHTBOX</span>
-                  {lbCount > 0 && <span className="srh-lb-count">{lbCount}</span>}
-                </Link>
+                <div className="srh-actions">
+                  <button
+                    type="button"
+                    className="srh-iconbtn"
+                    aria-label={masonry ? "Show as square grid" : "Show full images (masonry)"}
+                    title={masonry ? "Square grid" : "Masonry"}
+                    onClick={() => setViewMode(masonry ? "square" : "masonry")}
+                  >
+                    {masonry ? <LayoutGrid size={16} /> : <Rows3 size={16} />}
+                  </button>
+                  <Link to="/lightbox" className="srh-lightbox" aria-label="Open lightbox">
+                    <Layers size={16} />
+                    <span>LIGHTBOX</span>
+                    {lbCount > 0 && <span className="srh-lb-count">{lbCount}</span>}
+                  </Link>
+                </div>
               </div>
               {searching && <div className="search-results-status">SEARCHING…</div>}
               {!searching && submittedQuery && results.length === 0 && (
                 <div className="search-results-status">NO MATCHES — TRY ANOTHER TERM</div>
               )}
-              {results.length > 0 && (
+              {results.length > 0 && !masonry && (
                 <div className="search-results-grid">
-                  {results.map((r) => (
-                    <Link
-                      key={r.id}
-                      to="/image/$id"
-                      params={{ id: r.id }}
-                      className="search-result-card"
-                      onMouseDown={(e) => e.preventDefault()}
-                      onClick={saveSearchState}
-                    >
-                      {r.signed_url ? (
-                        <img src={r.signed_url} alt={r.title ?? r.caption ?? ""} loading="lazy" />
-                      ) : (
-                        <div className="search-result-fallback" />
-                      )}
-                      <figcaption>
-                        <div className="src-num">#{String(r.image_number).padStart(5, "0")}</div>
-                        {r.title && <div className="src-title">{r.title}</div>}
-                      </figcaption>
-                    </Link>
+                  {results.map((r) => renderResultCard(r, saveSearchState))}
+                </div>
+              )}
+              {results.length > 0 && masonry && (
+                <div className="search-results-masonry">
+                  {Array.from({ length: cols }, (_, ci) => (
+                    <div className="masonry-col" key={ci}>
+                      {results.filter((_, i) => i % cols === ci).map((r) => renderResultCard(r, saveSearchState))}
+                    </div>
                   ))}
                 </div>
               )}
@@ -850,12 +879,21 @@ const PAGE_CSS = `
   line-height: 1.15;
   color: #000;
   margin-bottom: 28px;
-  display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap;
+  display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap;
 }
+.curbism-root .search-results-header .srh-actions { display: inline-flex; align-items: center; gap: 10px; }
+.curbism-root .search-results-header .srh-iconbtn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 38px; height: 38px;
+  background: #fff; color: #111; border: 1px solid #111;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.curbism-root .search-results-header .srh-iconbtn:hover { background: #111; color: #fff; }
 .curbism-root .search-results-header .srh-text { flex: 1; min-width: 0; }
 .curbism-root .search-results-header .srh-lightbox {
   display: inline-flex; align-items: center; gap: 8px;
-  padding: 10px 14px; background: #fff; color: #111; border: 1px solid #111;
+  height: 38px; padding: 0 14px; background: #fff; color: #111; border: 1px solid #111;
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 11px; font-weight: 700; letter-spacing: 0.2em;
   text-decoration: none; text-transform: uppercase;
@@ -878,6 +916,24 @@ const PAGE_CSS = `
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 24px;
+}
+.curbism-root .search-results-masonry {
+  display: flex; align-items: flex-start; gap: 24px;
+}
+.curbism-root .masonry-col {
+  flex: 1 1 0; min-width: 0;
+  display: flex; flex-direction: column; gap: 24px;
+}
+.curbism-root .search-results-masonry .search-result-card { display: block; margin: 0; }
+.curbism-root .search-results-masonry .search-result-card:hover { transform: none; }
+.curbism-root .search-results-masonry .search-result-card img,
+.curbism-root .search-results-masonry .search-result-fallback {
+  width: 100%; height: auto; aspect-ratio: auto; object-fit: initial;
+  display: block; background: #eee;
+}
+@media (max-width: 768px) {
+  .curbism-root .search-results-masonry { gap: 14px; }
+  .curbism-root .masonry-col { gap: 14px; }
 }
 .curbism-root .search-result-card {
   display: flex; flex-direction: column;
