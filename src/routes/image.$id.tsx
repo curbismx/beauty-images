@@ -398,8 +398,8 @@ const CSS = `
 
 .lc-tile {
   all: unset; cursor: pointer;
-  height: 46px; padding: 6px 10px;
-  display: flex; flex-direction: column; justify-content: space-between;
+  min-height: 64px; padding: 10px 12px;
+  display: grid; grid-template-columns: 1fr auto; align-items: center; row-gap: 2px; column-gap: 8px;
   background: rgba(255,255,255,0.08);
   outline: 1px solid rgba(255,255,255,0.18);
   transition: background 0.15s ease, outline-color 0.15s ease;
@@ -407,9 +407,9 @@ const CSS = `
 }
 .lc-tile:hover { background: rgba(255,255,255,0.15); }
 .lc-tile--active { background: rgba(255,255,255,0.22); outline: 1px solid #fff; }
-.lc-tile-label { font-size: 10px; font-weight: 600; color: #fff; letter-spacing: 0.08em; text-transform: uppercase; }
-.lc-tile-price { font-size: 14px; font-weight: 400; color: #fff; font-variant-numeric: tabular-nums; }
-.lc-tile-sub { font-size: 8px; color: #cfcfcf; line-height: 1.3; }
+.lc-tile-label { font-size: 11px; font-weight: 600; color: #fff; letter-spacing: 0.08em; text-transform: uppercase; }
+.lc-tile-price { font-size: 15px; font-weight: 400; color: #fff; font-variant-numeric: tabular-nums; text-align: right; }
+.lc-tile-sub { grid-column: 1 / -1; font-size: 9px; color: #cfcfcf; line-height: 1.3; }
 
 
 .lc-tile--lb {
