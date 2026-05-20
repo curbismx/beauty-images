@@ -155,7 +155,7 @@ const CSS = `
 .img-root * { box-sizing: border-box; }
 
 .img-header { position: fixed; top: 0; left: 0; right: 0; z-index: 10; padding: 22px 36px; display: flex; justify-content: space-between; align-items: center; pointer-events: none; }
-.img-back { pointer-events: auto; color: #fff; text-decoration: none; font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; font-weight: 700; opacity: 0.85; transition: opacity 0.2s ease; }
+.img-back { pointer-events: auto; background: none; border: 0; padding: 0; cursor: pointer; color: #fff; text-decoration: none; font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; font-weight: 700; opacity: 0.85; transition: opacity 0.2s ease; font-family: inherit; }
 .img-back:hover { opacity: 1; color: #D75F68; }
 
 /* Square stage — width == height == viewport width */
