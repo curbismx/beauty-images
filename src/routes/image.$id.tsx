@@ -69,6 +69,7 @@ function ImageDetail() {
   useEffect(() => {
     let alive = true;
     setLoading(true);
+    setImgReady(false);
     fetchImage({ data: { id } })
       .then((r) => {
         if (!alive) return;
