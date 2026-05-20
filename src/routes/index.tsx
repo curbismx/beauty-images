@@ -177,6 +177,16 @@ function Index() {
               <p>
                 PROVIDING IMAGES TO HIGH-END PUBLICATIONS AND ADVERTISING FOR OVER 20 YEARS. ALL OUR IMAGES ARE EXCLUSIVE TO BEAUTY IMAGES AND ARE SOLD ON A <span style={{ color: "#D75F68" }}>RIGHTS MANAGED</span> BASIS. ALL REAL PEOPLE. REAL PHOTOGRAPHY. WITH NO AI PRODUCTION AT ALL.
               </p>
+              <button
+                type="button"
+                className="intro-cta"
+                onClick={() => {
+                  searchInputRef.current?.focus();
+                  searchInputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+                }}
+              >
+                SEARCH NOW
+              </button>
             </div>
 
             <FeaturedMasonry />
