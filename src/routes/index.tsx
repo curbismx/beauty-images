@@ -193,14 +193,7 @@ function Index() {
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
               onFocus={() => setSearchFocused(true)}
-              onBlur={() => {
-                justClosedSearchRef.current = true;
-                setSearchFocused(false);
-                setSearchValue("");
-                setSubmittedQuery("");
-                setResults([]);
-                setCurrent(0);
-              }}
+              onBlur={() => setSearchFocused(false)}
               aria-label="Search images"
             />
             <button
