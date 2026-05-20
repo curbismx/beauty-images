@@ -13,37 +13,71 @@ function getSupabase(): SupabaseClient {
   return _supabase;
 }
 
+const TIER_FROM_CODE: Record<string, string> = { s: "small", m: "medium", l: "large" };
+
 async function handleCheckoutCompleted(session: any) {
   const userId = session.metadata?.userId || null;
   const imageIds: string[] = session.metadata?.imageIds
     ? String(session.metadata.imageIds).split(",").filter(Boolean)
     : [];
+
+  // Parse "id:s,id:m,id:l" into ordered (imageId, tier) pairs.
+  const tierPairs: Array<{ id: string; tier: string }> = [];
+  if (session.metadata?.imageTiers) {
+    for (const pair of String(session.metadata.imageTiers).split(",")) {
+      const [id, code] = pair.split(":");
+      const tier = TIER_FROM_CODE[(code || "").toLowerCase()];
+      if (id && tier) tierPairs.push({ id, tier });
+    }
+  }
+
   const amountTotal = (session.amount_total ?? 0) / 100;
   const currency = (session.currency || "gbp").toUpperCase();
   const paymentId = session.payment_intent || session.id;
+  const sessionId = session.id;
 
-  // Record one sales row per licensed image (best-effort).
-  if (imageIds.length > 0) {
-    const rows = imageIds.map((image_id) => ({
-      image_id,
-      user_id: userId,
-      amount: amountTotal / imageIds.length,
-      currency,
-      status: "completed" as const,
-      stripe_payment_id: paymentId,
-    }));
-    const { error } = await getSupabase().from("sales").insert(rows);
-    if (error) console.error("Failed to insert sales rows:", error);
-  } else {
+  const pricePerLine = tierPairs.length > 0
+    ? amountTotal / tierPairs.length
+    : (imageIds.length > 0 ? amountTotal / imageIds.length : amountTotal);
+
+  // Prefer one row per (image, tier) line so each licence is independent.
+  const rows = tierPairs.length > 0
+    ? tierPairs.map((p) => ({
+        image_id: p.id,
+        user_id: userId,
+        amount: pricePerLine,
+        currency,
+        status: "completed" as const,
+        stripe_payment_id: paymentId,
+        stripe_session_id: sessionId,
+        download_tier: p.tier,
+      }))
+    : imageIds.map((image_id) => ({
+        image_id,
+        user_id: userId,
+        amount: pricePerLine,
+        currency,
+        status: "completed" as const,
+        stripe_payment_id: paymentId,
+        stripe_session_id: sessionId,
+        download_tier: "medium",
+      }));
+
+  if (rows.length === 0) {
     const { error } = await getSupabase().from("sales").insert({
       user_id: userId,
       amount: amountTotal,
       currency,
       status: "completed",
       stripe_payment_id: paymentId,
+      stripe_session_id: sessionId,
     });
     if (error) console.error("Failed to insert sale row:", error);
+    return;
   }
+
+  const { error } = await getSupabase().from("sales").insert(rows);
+  if (error) console.error("Failed to insert sales rows:", error);
 }
 
 async function handleWebhook(req: Request, env: StripeEnv) {
