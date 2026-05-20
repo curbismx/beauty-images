@@ -43,7 +43,7 @@ const TIERS: Array<{
     price: "£150.00",
     sub: "800 px max width",
     description:
-      "Small licence — up to 800 px on the longest edge. Perfect for web banners, social media, blog headers and small editorial use. Includes worldwide rights for digital publication for 12 months.",
+      "A Small image delivers an image with maximum edge 800px as a JPG download. These images will be ideal for small usage on websites, social media, blog and small editorial usage. Digital rights will last for 12 months worldwide license.",
   },
   {
     id: "medium",
@@ -51,7 +51,7 @@ const TIERS: Array<{
     price: "£275.00",
     sub: "2000 px max width",
     description:
-      "Medium licence — up to 2000 px on the longest edge. Suited to magazine spreads, brochures, packaging mock-ups and quarter-page print. Worldwide print + digital rights for 12 months.",
+      "A Medium image delivers an image with maximum edge 2000px as a JPG download. These images will be suited to magazine spreads, brochures, packaging mock-ups and quarter-page print. Digital rights will last for 12 months worldwide license.",
   },
   {
     id: "large",
@@ -59,7 +59,7 @@ const TIERS: Array<{
     price: "£375.00",
     sub: "5400 px max width",
     description:
-      "Large licence — up to 5400 px on the longest edge. Designed for full-page print, posters, billboards and high-end advertising campaigns. Worldwide print + digital rights for 12 months.",
+      "A Large image delivers an image with maximum edge 5400px as a JPG download. These images will be suited to for full-page print, posters, billboards and high-end advertising campaigns. Digital rights will last for 12 months worldwide license.",
   },
 
 ];
