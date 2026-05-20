@@ -127,19 +127,31 @@ function ImageDetail() {
         {/* 2/3 image + 1/3 pricing layout */}
         <section className="img-split">
           <div className="img-stage">
-            <div className="img-frame">
-              {img?.signed_url ? (
-                <img
-                  className={`img-el${imgReady ? " img-el--ready" : ""}`}
-                  src={img.signed_url}
-                  alt={img.title ?? ""}
-                  onLoad={() => setImgReady(true)}
-                />
-              ) : (
-                <div className="img-empty">{loading ? "LOADING…" : "IMAGE UNAVAILABLE"}</div>
+            <div className="img-stage-inner">
+              <div className="img-frame">
+                {img?.signed_url ? (
+                  <img
+                    className={`img-el${imgReady ? " img-el--ready" : ""}`}
+                    src={img.signed_url}
+                    alt={img.title ?? ""}
+                    onLoad={() => setImgReady(true)}
+                  />
+                ) : (
+                  <div className="img-empty">{loading ? "LOADING…" : "IMAGE UNAVAILABLE"}</div>
+                )}
+              </div>
+              {imgReady && (
+                <div className="lc-detail lc-detail--under">
+                  <div className="lc-detail-head">
+                    <span className="lc-detail-tier">{activeTier.label.toUpperCase()}</span>
+                    <span className="lc-detail-price">{activeTier.price}</span>
+                  </div>
+                  <p className="lc-detail-text">{activeTier.description}</p>
+                </div>
               )}
             </div>
           </div>
+
 
           <div className={`licence-wrap${imgReady ? " licence-wrap--ready" : ""}`}>
             {showLicence ? (
