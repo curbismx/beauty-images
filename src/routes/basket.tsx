@@ -12,7 +12,7 @@ import {
   getPublicImagesByIds,
   type PublicSearchResult,
 } from "@/lib/search.functions";
-import { useViewMode, useMasonryCols } from "@/lib/view-mode";
+import { useMasonryCols } from "@/lib/view-mode";
 
 export const Route = createFileRoute("/basket")({
   head: () => ({
@@ -46,8 +46,7 @@ function BasketPage() {
   const fetchImages = useServerFn(getPublicImagesByIds);
   const [items, setItems] = useState<PublicSearchResult[]>([]);
   const [loading, setLoading] = useState(true);
-  const [viewMode, setViewMode] = useViewMode();
-  const masonry = viewMode === "masonry";
+  const [masonry, setMasonry] = useState(false);
   const cols = useMasonryCols();
   const [confirmCheckout, setConfirmCheckout] = useState(false);
 
@@ -126,7 +125,7 @@ function BasketPage() {
                   className="srh-iconbtn"
                   aria-label={masonry ? "Show as square grid" : "Show full images (masonry)"}
                   title={masonry ? "Square grid" : "Masonry"}
-                  onClick={() => setViewMode(masonry ? "square" : "masonry")}
+                  onClick={() => setMasonry((v) => !v)}
                 >
                   {masonry ? <LayoutGrid size={16} /> : <Rows3 size={16} />}
                 </button>
@@ -310,7 +309,7 @@ const CSS = `
   margin-top: 48px;
   border-top: 1px solid #eee;
   padding-top: 28px;
-  display: flex; flex-direction: column; align-items: stretch; gap: 18px;
+  display: flex; flex-direction: column; align-items: flex-start; gap: 18px;
 }
 .basket-total {
   display: flex; align-items: baseline; justify-content: space-between; gap: 16px;
@@ -324,13 +323,13 @@ const CSS = `
   font-variant-numeric: tabular-nums;
 }
 .basket-checkout-btn {
-  width: 100%;
-  height: 72px;
+  display: inline-flex; align-items: center; gap: 10px;
+  height: 38px; padding: 0 18px;
   border: 0;
   background: #D75F68;
   color: #fff;
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  font-size: 16px; font-weight: 700; letter-spacing: 0.3em; text-transform: uppercase;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.25em; text-transform: uppercase;
   cursor: pointer;
   transition: background 0.2s ease, transform 0.15s ease;
 }
@@ -375,6 +374,5 @@ const CSS = `
   .search-results-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
   .search-results-masonry { gap: 14px; }
   .masonry-col { gap: 14px; }
-  .basket-checkout-btn { height: 60px; font-size: 13px; letter-spacing: 0.2em; }
 }
 `;
