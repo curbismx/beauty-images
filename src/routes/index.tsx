@@ -167,8 +167,18 @@ function Index() {
       /* ignore */
     }
     const restoreScroll = () => {
-      if (typeof restoreState.y === "number") window.scrollTo(0, restoreState.y);
-      setRestoringSearch(false);
+      const targetY = typeof restoreState.y === "number" ? restoreState.y : 0;
+      const start = Date.now();
+      const tryScroll = () => {
+        window.scrollTo(0, targetY);
+        const reached = Math.abs(window.scrollY - targetY) < 2;
+        if (!reached && Date.now() - start < 2500) {
+          requestAnimationFrame(tryScroll);
+        } else {
+          setRestoringSearch(false);
+        }
+      };
+      requestAnimationFrame(tryScroll);
     };
     if (restoreState.results?.length) {
       requestAnimationFrame(() => requestAnimationFrame(restoreScroll));
