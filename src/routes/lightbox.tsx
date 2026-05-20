@@ -38,21 +38,10 @@ function LightboxPage() {
   const fetchImages = useServerFn(getPublicImagesByIds);
   const [items, setItems] = useState<PublicSearchResult[]>([]);
   const [loading, setLoading] = useState(true);
-  const [masonry, setMasonry] = useState(false);
+  const [viewMode, setViewMode] = useViewMode();
+  const masonry = viewMode === "masonry";
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [cols, setCols] = useState(4);
-
-  useEffect(() => {
-    const calc = () => {
-      const w = window.innerWidth;
-      if (w <= 768) setCols(2);
-      else if (w <= 900) setCols(3);
-      else setCols(4);
-    };
-    calc();
-    window.addEventListener("resize", calc);
-    return () => window.removeEventListener("resize", calc);
-  }, []);
+  const cols = useMasonryCols();
 
   useEffect(() => {
     let alive = true;
