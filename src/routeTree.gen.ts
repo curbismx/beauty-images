@@ -9,10 +9,13 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SignupRouteImport } from './routes/signup'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as LightboxRouteImport } from './routes/lightbox'
 import { Route as DesignRouteImport } from './routes/design'
 import { Route as BasketRouteImport } from './routes/basket'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AccountRouteImport } from './routes/account'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as ImageIdRouteImport } from './routes/image.$id'
@@ -26,6 +29,16 @@ import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
 import { Route as ApiPublicTrackRouteImport } from './routes/api/public/track'
 import { Route as AdminImageIdRouteImport } from './routes/admin.image.$id'
 
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LightboxRoute = LightboxRouteImport.update({
   id: '/lightbox',
   path: '/lightbox',
@@ -44,6 +57,11 @@ const BasketRoute = BasketRouteImport.update({
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AccountRoute = AccountRouteImport.update({
+  id: '/account',
+  path: '/account',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -109,10 +127,13 @@ const AdminImageIdRoute = AdminImageIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/account': typeof AccountRoute
   '/admin': typeof AdminRouteWithChildren
   '/basket': typeof BasketRoute
   '/design': typeof DesignRoute
   '/lightbox': typeof LightboxRoute
+  '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/featured': typeof AdminFeaturedRoute
   '/admin/library': typeof AdminLibraryRoute
@@ -127,9 +148,12 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/account': typeof AccountRoute
   '/basket': typeof BasketRoute
   '/design': typeof DesignRoute
   '/lightbox': typeof LightboxRoute
+  '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/featured': typeof AdminFeaturedRoute
   '/admin/library': typeof AdminLibraryRoute
@@ -145,10 +169,13 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/account': typeof AccountRoute
   '/admin': typeof AdminRouteWithChildren
   '/basket': typeof BasketRoute
   '/design': typeof DesignRoute
   '/lightbox': typeof LightboxRoute
+  '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/featured': typeof AdminFeaturedRoute
   '/admin/library': typeof AdminLibraryRoute
@@ -165,10 +192,13 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/account'
     | '/admin'
     | '/basket'
     | '/design'
     | '/lightbox'
+    | '/login'
+    | '/signup'
     | '/admin/customers'
     | '/admin/featured'
     | '/admin/library'
@@ -183,9 +213,12 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/account'
     | '/basket'
     | '/design'
     | '/lightbox'
+    | '/login'
+    | '/signup'
     | '/admin/customers'
     | '/admin/featured'
     | '/admin/library'
@@ -200,10 +233,13 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/account'
     | '/admin'
     | '/basket'
     | '/design'
     | '/lightbox'
+    | '/login'
+    | '/signup'
     | '/admin/customers'
     | '/admin/featured'
     | '/admin/library'
@@ -219,16 +255,33 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AccountRoute: typeof AccountRoute
   AdminRoute: typeof AdminRouteWithChildren
   BasketRoute: typeof BasketRoute
   DesignRoute: typeof DesignRoute
   LightboxRoute: typeof LightboxRoute
+  LoginRoute: typeof LoginRoute
+  SignupRoute: typeof SignupRoute
   ImageIdRoute: typeof ImageIdRoute
   ApiPublicTrackRoute: typeof ApiPublicTrackRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lightbox': {
       id: '/lightbox'
       path: '/lightbox'
@@ -255,6 +308,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/account': {
+      id: '/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof AccountRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -372,23 +432,16 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AccountRoute: AccountRoute,
   AdminRoute: AdminRouteWithChildren,
   BasketRoute: BasketRoute,
   DesignRoute: DesignRoute,
   LightboxRoute: LightboxRoute,
+  LoginRoute: LoginRoute,
+  SignupRoute: SignupRoute,
   ImageIdRoute: ImageIdRoute,
   ApiPublicTrackRoute: ApiPublicTrackRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

@@ -6,6 +6,22 @@ import { supabase } from "@/integrations/supabase/client";
 import { searchPublicImages, type PublicSearchResult } from "@/lib/search.functions";
 import { getLightbox, subscribeLightbox } from "@/lib/lightbox";
 import { useViewMode, useMasonryCols } from "@/lib/view-mode";
+import { useSession } from "@/lib/use-session";
+
+function AccountLink() {
+  const { session, loading } = useSession();
+  if (loading) return null;
+  if (session) {
+    return (
+      <Link to="/account" className="hero-account">
+        {(session.user.email ?? "Account").split("@")[0]}
+      </Link>
+    );
+  }
+  return (
+    <Link to="/login" className="hero-account">Log in</Link>
+  );
+}
 
 function renderResultCard(r: PublicSearchResult, onClick: () => void) {
   return (
@@ -277,6 +293,9 @@ function Index() {
 
           <div className="hero-zone hero-zone--left" aria-label="Previous image" onClick={goPrev} />
           <div className="hero-zone hero-zone--right" aria-label="Next image" onClick={goNext} />
+
+          <AccountLink />
+
 
           <button
             type="button"
@@ -653,6 +672,18 @@ const PAGE_CSS = `
   font-variant-numeric: tabular-nums;
   pointer-events: none;
 }
+
+.curbism-root .hero-account {
+  position: absolute; top: 36px; right: 36px; z-index: 5;
+  color: #fff; text-decoration: none;
+  font-size: 12px; font-weight: 800; letter-spacing: 0.2em; text-transform: uppercase;
+  padding: 8px 14px; border: 1px solid rgba(255,255,255,0.6); background: rgba(0,0,0,0.25);
+  backdrop-filter: blur(2px);
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.curbism-root .hero-account:hover { background: #D75F68; border-color: #D75F68; color: #fff; }
+
+
 
 .curbism-root .line-thick { width: 100%; height: 4px; background: black; }
 .curbism-root .line-thin  { width: 100%; height: 1px; background: black; }
