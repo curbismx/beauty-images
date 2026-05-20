@@ -89,18 +89,36 @@ function ImageDetail() {
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
       <div className="img-root">
         <header className="img-header">
-          <button
-            type="button"
-            className="img-back"
-            onClick={() => {
-              // Flag tells "/" to restore previous search + scroll. Full reload so the
-              // index mount effect runs and consumes the flag.
-              try { sessionStorage.setItem("bi_restore_search", "1"); } catch { /* ignore */ }
-              window.location.href = "/";
-            }}
-          >
-            ← BACK TO SEARCH RESULTS
-          </button>
+          <div className="img-header-left">
+            <button
+              type="button"
+              className="img-back"
+              onClick={() => {
+                try { sessionStorage.setItem("bi_restore_search", "1"); } catch { /* ignore */ }
+                window.location.href = "/";
+              }}
+            >
+              <svg className="img-back-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="square">
+                <path d="M19 12H5M11 5l-7 7 7 7" />
+              </svg>
+              <span>BACK TO SEARCH RESULTS</span>
+            </button>
+            <button
+              type="button"
+              className="img-back img-back--home"
+              onClick={() => {
+                try { sessionStorage.removeItem("bi_restore_search"); sessionStorage.removeItem("bi_search_state"); } catch { /* ignore */ }
+                window.location.href = "/";
+              }}
+            >
+              / BACK TO HOME
+            </button>
+          </div>
+          <nav className="img-header-right">
+            <a className="img-nav-link" href="/lightbox">LIGHTBOX</a>
+            <span className="img-nav-sep">/</span>
+            <a className="img-nav-link" href="/basket">BASKET</a>
+          </nav>
         </header>
 
         {/* BLACK STAGE — 150px black border on all four sides of the image */}
