@@ -57,7 +57,6 @@ function ImageDetail() {
   const [loading, setLoading] = useState(true);
   const [imgReady, setImgReady] = useState(false);
   const [tier, setTier] = useState<TierId>("medium");
-  const [showLicence, setShowLicence] = useState(true);
 
   const lbJson = useSyncExternalStore(
     subscribeLightbox,
