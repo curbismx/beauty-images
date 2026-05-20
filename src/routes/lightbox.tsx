@@ -39,6 +39,19 @@ function LightboxPage() {
   const [loading, setLoading] = useState(true);
   const [masonry, setMasonry] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [cols, setCols] = useState(4);
+
+  useEffect(() => {
+    const calc = () => {
+      const w = window.innerWidth;
+      if (w <= 768) setCols(2);
+      else if (w <= 900) setCols(3);
+      else setCols(4);
+    };
+    calc();
+    window.addEventListener("resize", calc);
+    return () => window.removeEventListener("resize", calc);
+  }, []);
 
   useEffect(() => {
     let alive = true;
