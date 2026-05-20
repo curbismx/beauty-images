@@ -116,7 +116,7 @@ function LightboxPage() {
                   className="srh-iconbtn"
                   aria-label={masonry ? "Show as square grid" : "Show full images (masonry)"}
                   title={masonry ? "Square grid" : "Masonry"}
-                  onClick={() => setMasonry((v) => !v)}
+                  onClick={() => setViewMode(masonry ? "square" : "masonry")}
                 >
                   {masonry ? <LayoutGrid size={16} /> : <Rows3 size={16} />}
                 </button>
