@@ -266,8 +266,69 @@ function ImageDetail() {
             </div>
           </section>
         )}
+
+        {img && imgReady && similar.length > 0 && (
+          <section className="img-similar">
+            <div className="search-results-header">
+              <div className="srh-text">
+                SIMILAR IMAGES
+                <span className="srp-meta">
+                  {" "}
+                  · {similar.length} {similar.length === 1 ? "IMAGE" : "IMAGES"}
+                </span>
+              </div>
+              <div className="srh-actions">
+                <button
+                  type="button"
+                  className="srh-iconbtn"
+                  aria-label={masonry ? "Show as square grid" : "Show full images (masonry)"}
+                  title={masonry ? "Square grid" : "Masonry"}
+                  onClick={() => setViewMode(masonry ? "square" : "masonry")}
+                >
+                  {masonry ? <LayoutGrid size={16} /> : <Rows3 size={16} />}
+                </button>
+              </div>
+            </div>
+
+            {!masonry && (
+              <div className="search-results-grid">
+                {similar.map((r) => renderSimCard(r))}
+              </div>
+            )}
+            {masonry && (
+              <div className="search-results-masonry">
+                {Array.from({ length: cols }, (_, ci) => (
+                  <div className="masonry-col" key={ci}>
+                    {similar.filter((_, i) => i % cols === ci).map((r) => renderSimCard(r))}
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+        )}
       </div>
     </>
+  );
+}
+
+function renderSimCard(r: PublicSearchResult) {
+  return (
+    <Link
+      key={r.id}
+      to="/image/$id"
+      params={{ id: r.id }}
+      className="search-result-card"
+    >
+      {r.signed_url ? (
+        <img src={r.signed_url} alt={r.title ?? r.caption ?? ""} loading="lazy" />
+      ) : (
+        <div className="search-result-fallback" />
+      )}
+      <figcaption>
+        <div className="src-num">#{String(r.image_number).padStart(5, "0")}</div>
+        {r.title && <div className="src-title">{r.title}</div>}
+      </figcaption>
+    </Link>
   );
 }
 
