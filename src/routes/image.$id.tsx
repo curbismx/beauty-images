@@ -166,13 +166,9 @@ function ImageDetail() {
                 </button>
 
                 <div className="lc-eyebrow">PURCHASE A LICENCE</div>
-                <div className="lc-detail">
-                  <div className="lc-detail-head">
-                    <span className="lc-detail-tier">{activeTier.label.toUpperCase()}</span>
-                    <span className="lc-detail-price">{activeTier.price}</span>
-                  </div>
-                  <p className="lc-detail-text">{activeTier.description}</p>
-                </div>
+
+                <div className="lc-tiles">
+
 
                 <div className="lc-tiles">
                   {TIERS.map((t) => {
