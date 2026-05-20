@@ -69,14 +69,33 @@ function Upload() {
         setQueue((q) => q.map((it) => (it.id === item.id ? { ...it, status: "uploading" } : it)));
         try {
           const ext = file.name.split(".").pop() ?? "jpg";
-          const storagePath = `${crypto.randomUUID()}.${ext}`;
+          const uid = crypto.randomUUID();
+          const storagePath = `${uid}.${ext}`;
+          const previewPath = `previews/${uid}.jpg`;
           const up = await supabase.storage
             .from("images-private")
             .upload(storagePath, file, { contentType: file.type, upsert: false });
           if (up.error) throw new Error(up.error.message);
+
+          // Build 800px preview (longest edge) and upload alongside the original
+          let savedPreviewPath: string | null = null;
+          try {
+            const previewBlob = await resizeImageToBlob(file, 800, 0.82);
+            const upPrev = await supabase.storage
+              .from("images-private")
+              .upload(previewPath, previewBlob, { contentType: "image/jpeg", upsert: false });
+            if (!upPrev.error) savedPreviewPath = previewPath;
+          } catch {
+            // preview generation is non-fatal; original still uploaded
+          }
+
           const ins = await supabase
             .from("images")
-            .insert({ filename: file.name, storage_path: storagePath })
+            .insert({
+              filename: file.name,
+              storage_path: storagePath,
+              preview_path: savedPreviewPath,
+            })
             .select("image_number")
             .single();
           if (ins.error) throw new Error(ins.error.message);
