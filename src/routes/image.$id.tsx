@@ -184,12 +184,11 @@ const CSS = `
 .img-back { pointer-events: auto; background: none; border: 0; padding: 0; cursor: pointer; color: #fff; font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; font-weight: 700; opacity: 0.85; transition: opacity 0.2s ease, color 0.2s ease; font-family: inherit; }
 .img-back:hover { opacity: 1; color: #D75F68; }
 
-/* BLACK STAGE — 150px black frame around the image on all sides */
+/* BLACK STAGE — 150px black frame around the image */
 .img-stage {
   background: #000;
-  padding: ${FRAME}px;
-  display: flex; align-items: center; justify-content: center;
-  min-height: 100vh;
+  padding: ${FRAME}px ${FRAME}px 40px;
+  display: flex; align-items: flex-start; justify-content: flex-start;
 }
 
 .img-frame {
@@ -213,46 +212,46 @@ const CSS = `
   background: #0a0a0a;
 }
 
-/* LICENCE CARD — overlays the image, top-right, translucent */
+/* LICENCE PANEL — sits flush-left under the image, on the black stage */
+.licence-wrap {
+  background: #000;
+  padding: 0 ${FRAME}px ${FRAME}px;
+}
+
 .licence-card {
-  position: absolute;
-  z-index: 5;
-  right: 0; top: 0;
-  width: 360px;
-  padding: 28px 26px 24px;
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+  padding: 28px 28px 24px;
   color: #f0f0f0;
   font-size: 13px;
   line-height: 1.5;
   background:
-    linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)) padding-box,
+    linear-gradient(rgba(255,255,255,0.06), rgba(255,255,255,0.06)) padding-box,
     repeating-linear-gradient(90deg, rgba(255,255,255,0.55) 0 2px, transparent 2px 6px) top/100% 1px no-repeat,
     repeating-linear-gradient(90deg, rgba(255,255,255,0.55) 0 2px, transparent 2px 6px) bottom/100% 1px no-repeat,
     repeating-linear-gradient(0deg, rgba(255,255,255,0.55) 0 2px, transparent 2px 6px) left/1px 100% no-repeat,
     repeating-linear-gradient(0deg, rgba(255,255,255,0.55) 0 2px, transparent 2px 6px) right/1px 100% no-repeat,
-    rgba(0,0,0,0.2);
-  text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+    rgba(255,255,255,0.06);
 }
 
 .lc-toggle {
   position: absolute; top: 10px; right: 10px;
-  background: rgba(0,0,0,0.4); color: #fff;
+  background: rgba(255,255,255,0.1); color: #fff;
   border: 0; width: 30px; height: 30px;
   display: flex; align-items: center; justify-content: center;
   cursor: pointer; transition: background 0.2s ease, color 0.2s ease;
-  z-index: 6;
 }
 .lc-toggle:hover { background: #D75F68; color: #fff; }
 
 .lc-mini-cta {
-  position: absolute; right: 0; top: 0;
-  display: flex; align-items: center; gap: 14px;
+  display: inline-flex; align-items: center; gap: 14px;
   padding: 12px 18px 12px 14px;
   background: #D75F68; color: #fff; border: 0; cursor: pointer;
   font-family: inherit; font-size: 12px; font-weight: 600;
   letter-spacing: 0.2em; text-transform: uppercase;
   box-shadow: 0 4px 18px rgba(0,0,0,0.35);
   transition: background 0.2s ease;
-  z-index: 6;
 }
 .lc-mini-cta:hover { background: #000; box-shadow: inset 0 0 0 1px #D75F68, 0 4px 18px rgba(0,0,0,0.35); }
 .lc-mini-eye { display: flex; align-items: center; justify-content: center; opacity: 0.9; }
@@ -260,43 +259,38 @@ const CSS = `
 .lc-mini-price { font-weight: 700; letter-spacing: 0.05em; font-variant-numeric: tabular-nums; padding-left: 12px; border-left: 1px solid rgba(255,255,255,0.4); }
 
 .lc-eyebrow { font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; color: #fff; margin-bottom: 14px; font-weight: 700; }
-.lc-intro { font-size: 11px; line-height: 1.55; color: #c2c2c2; margin-bottom: 20px; padding-right: 28px; }
+.lc-intro { font-size: 11px; line-height: 1.55; color: #c2c2c2; margin: 0 0 22px; max-width: 560px; }
 
-.lc-tiers { display: flex; flex-direction: column; gap: 1px; background: rgba(255,255,255,0.08); margin-bottom: 18px; }
-.lc-tier {
+/* SQUARE TILES for each size */
+.lc-tiles { display: grid; grid-template-columns: repeat(4, 160px); gap: 12px; margin-bottom: 22px; }
+.lc-tile {
   all: unset; cursor: pointer;
-  display: flex; gap: 12px; align-items: flex-start;
-  padding: 12px 12px; background: rgba(255,255,255,0.08);
-  transition: background 0.15s ease;
+  width: 160px; height: 160px; padding: 14px;
+  display: flex; flex-direction: column; justify-content: space-between;
+  background: rgba(255,255,255,0.08);
+  outline: 1px solid rgba(255,255,255,0.18);
+  transition: background 0.15s ease, outline-color 0.15s ease;
+  box-sizing: border-box;
 }
-.lc-tier:hover { background: rgba(255,255,255,0.15); }
-.lc-tier--active { background: rgba(255,255,255,0.22); }
+.lc-tile:hover { background: rgba(255,255,255,0.15); }
+.lc-tile--active { background: rgba(255,255,255,0.22); outline: 1px solid #fff; }
+.lc-tile-label { font-size: 12px; font-weight: 600; color: #fff; letter-spacing: 0.08em; text-transform: uppercase; }
+.lc-tile-price { font-size: 22px; font-weight: 400; color: #fff; font-variant-numeric: tabular-nums; }
+.lc-tile-sub { font-size: 10px; color: #cfcfcf; line-height: 1.4; }
 
-.lc-radio { flex: 0 0 14px; width: 14px; height: 14px; border: 1px solid #ccc; border-radius: 50%; margin-top: 3px; position: relative; }
-.lc-radio--on { border-color: #fff; }
-.lc-radio--on::after { content: ""; position: absolute; inset: 2px; background: #fff; border-radius: 50%; }
-
-.lc-tier-body { flex: 1; display: flex; flex-direction: column; gap: 3px; }
-.lc-tier-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
-.lc-tier-label { font-size: 12px; font-weight: 500; color: #fff; }
-.lc-tier-price { font-size: 13px; font-weight: 600; color: #fff; font-variant-numeric: tabular-nums; }
-.lc-tier-sub { font-size: 10px; color: #ddd; letter-spacing: 0.02em; }
-
-.lc-freeze { padding: 10px 12px; background: rgba(20,20,20,0.5); margin-bottom: 16px; border-left: 2px solid #D75F68; }
-.lc-freeze-title { font-size: 11px; color: #D75F68; font-weight: 600; margin-bottom: 4px; }
-.lc-freeze-sub { font-size: 10px; color: #aaa; line-height: 1.5; }
-
-.lc-total { display: flex; align-items: baseline; gap: 8px; justify-content: center; padding: 8px 0 14px; }
+.lc-footer { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
+.lc-total { display: flex; align-items: baseline; gap: 8px; }
 .lc-total-amount { font-size: 26px; font-weight: 300; color: #fff; font-variant-numeric: tabular-nums; }
 .lc-total-currency { font-size: 11px; color: #aaa; letter-spacing: 0.2em; }
 
 .lc-cta {
-  all: unset; cursor: pointer; display: block; width: 100%;
-  text-align: center; padding: 14px; background: #D75F68; color: #fff;
+  all: unset; cursor: pointer; display: inline-block;
+  text-align: center; padding: 14px 36px; background: #D75F68; color: #fff;
   font-size: 12px; font-weight: 600; letter-spacing: 0.2em;
   transition: background 0.2s ease;
 }
 .lc-cta:hover { background: #000; box-shadow: inset 0 0 0 1px #D75F68; }
+
 
 /* WHITE DETAILS SECTION below the black stage */
 .img-details {
