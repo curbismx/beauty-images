@@ -157,13 +157,30 @@ function Index() {
     window.scrollTo(0, 0);
   };
 
+  // Click outside the search box (and outside search results) returns home.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const onDown = (e: MouseEvent) => {
+      if (!searchActive) return;
+      const target = e.target as Node | null;
+      if (!target) return;
+      const inSearch = heroRef.current?.querySelector(".hero-search")?.contains(target);
+      const inResults = resultsRef.current?.contains(target);
+      const onSubmit = (target as Element).closest?.(".hero-search-submit");
+      if (inSearch || inResults || onSubmit) return;
+      goHome();
+    };
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
+  }, [searchActive]);
+
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: PAGE_CSS }} />
       <div className="curbism-root">
 
         {/* HERO */}
-        <section className={`hero${searchActive ? " hero--search" : ""}${submittedQuery && searchValue.length > 0 ? " hero--results" : ""}`}>
+        <section ref={heroRef} className={`hero${searchActive ? " hero--search" : ""}${submittedQuery && searchValue.length > 0 ? " hero--results" : ""}`}>
           {HERO_IMAGES.map((src, i) => (
             <img
               key={src}
