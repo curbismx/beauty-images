@@ -72,6 +72,15 @@ function ImageDetail() {
   );
   const inLightbox = (JSON.parse(lbJson) as string[]).includes(id);
 
+  const basketJson = useSyncExternalStore(
+    subscribeBasket,
+    () => JSON.stringify(getBasket()),
+    () => "[]",
+  );
+  const inBasket = (JSON.parse(basketJson) as BasketItem[]).some(
+    (x) => x.id === id && x.tier === tier,
+  );
+
   useEffect(() => {
     let alive = true;
     setLoading(true);
