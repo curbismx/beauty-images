@@ -893,7 +893,7 @@ const PAGE_CSS = `
 .curbism-root .search-results-header .srh-text { flex: 1; min-width: 0; }
 .curbism-root .search-results-header .srh-lightbox {
   display: inline-flex; align-items: center; gap: 8px;
-  padding: 10px 14px; background: #fff; color: #111; border: 1px solid #111;
+  height: 38px; padding: 0 14px; background: #fff; color: #111; border: 1px solid #111;
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 11px; font-weight: 700; letter-spacing: 0.2em;
   text-decoration: none; text-transform: uppercase;
