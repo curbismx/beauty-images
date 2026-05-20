@@ -258,7 +258,7 @@ function ImageDetail() {
 }
 
 const FRAME = 75;
-const IMG_MAX = 600;
+const IMG_MAX = 700;
 
 const CSS = `
 .img-root { background: #000; color: #e8e8e8; min-height: 100vh; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
