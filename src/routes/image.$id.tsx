@@ -312,7 +312,7 @@ const CSS = `
 
 /* Detail under image (left-aligned with image) */
 .lc-detail { margin-bottom: 0; }
-.lc-detail--under { margin: 28px 0 0; max-width: 100%; }
+.lc-detail--under { margin: 0; max-width: 100%; }
 .lc-detail-eyebrow { font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; color: #888; font-weight: 700; margin: 28px 0 12px; }
 .lc-detail-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 8px; }
 .lc-detail-tier { font-size: 14px; font-weight: 700; color: #fff; letter-spacing: 0.2em; }
