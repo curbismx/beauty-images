@@ -359,15 +359,14 @@ const CSS = `
 .img-meta-cell-value { font-size: 14px; color: #111; }
 
 @media (max-width: 900px) {
-  .img-stage { padding: 60px 60px 75px; }
+  .img-stage { padding: 0 60px; }
   .img-el { max-height: calc(100vh - 120px); }
-  .licence-wrap { padding: 0 60px 75px; }
   .img-details { padding: 48px 32px 80px; }
   .img-meta-title { font-size: 24px; }
 }
 @media (max-width: 600px) {
-  .img-stage { padding: 70px 24px 75px; }
+  .img-stage { padding: 0 24px; }
   .img-el { max-height: calc(100vh - 100px); }
-  .licence-wrap { padding: 0 24px 75px; }
+  .lc-btn-row { grid-template-columns: repeat(2, 1fr); }
 }
 `;
