@@ -415,6 +415,7 @@ const CSS = `
 .lc-tile--lb {
   background: rgba(255,255,255,0.06);
   outline: 1px dashed rgba(255,255,255,0.35);
+  aspect-ratio: auto;
   display: flex; flex-direction: row; align-items: center; justify-content: center; text-align: center; gap: 8px;
   min-height: 52px;
 }
