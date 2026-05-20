@@ -348,7 +348,7 @@ const PAGE_CSS = `
   position: absolute; inset: 0;
   width: 100%; height: 100%;
   object-fit: cover; opacity: 0;
-  transition: opacity 0.5s ease; will-change: opacity;
+  transition: opacity 2.5s ease; will-change: opacity;
 }
 .curbism-root .hero .bg-img.active { opacity: 1; }
 .curbism-root .hero .bg-img--search { z-index: 1; }
