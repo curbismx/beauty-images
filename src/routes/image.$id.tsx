@@ -47,11 +47,8 @@ function ImageDetail() {
             type="button"
             className="img-back"
             onClick={() => {
-              if (typeof window !== "undefined" && window.history.length > 1) {
-                window.history.back();
-              } else {
-                window.location.href = "/";
-              }
+              // Always go to "/" — index restores the previous search/scroll from sessionStorage.
+              window.location.href = "/";
             }}
           >
             ← BACK TO SEARCH RESULTS
@@ -66,82 +63,73 @@ function ImageDetail() {
             ) : (
               <div className="img-empty">{loading ? "LOADING…" : "IMAGE UNAVAILABLE"}</div>
             )}
+          </div>
+        </section>
 
-            {/* LICENCE CARD — overlays the image, translucent */}
-            {showLicence && (
-              <aside className="licence-card">
-                <button
-                  type="button"
-                  className="lc-toggle"
-                  aria-label="Hide pricing"
-                  onClick={() => setShowLicence(false)}
-                >
-                  <Eye size={16} />
-                </button>
+        {/* LICENCE PANEL — directly under the image, flush-left */}
+        <section className="licence-wrap">
+          {showLicence ? (
+            <aside className="licence-card">
+              <button
+                type="button"
+                className="lc-toggle"
+                aria-label="Hide pricing"
+                onClick={() => setShowLicence(false)}
+              >
+                <Eye size={16} />
+              </button>
 
-                <div className="lc-eyebrow">PURCHASE A LICENCE</div>
-                <p className="lc-intro">
-                  All Royalty-Free licences include global use rights, comprehensive protection, and simple pricing with volume discounts available.
-                </p>
+              <div className="lc-eyebrow">PURCHASE A LICENCE</div>
+              <p className="lc-intro">
+                All Royalty-Free licences include global use rights, comprehensive protection,
+                and simple pricing with volume discounts available.
+              </p>
 
-                <div className="lc-tiers">
-                  {TIERS.map((t) => {
-                    const active = tier === t.id;
-                    return (
-                      <button
-                        key={t.id}
-                        type="button"
-                        className={`lc-tier${active ? " lc-tier--active" : ""}`}
-                        onClick={() => setTier(t.id)}
-                      >
-                        <span className={`lc-radio${active ? " lc-radio--on" : ""}`} aria-hidden="true" />
-                        <span className="lc-tier-body">
-                          <span className="lc-tier-row">
-                            <span className="lc-tier-label">{t.label}</span>
-                            <span className="lc-tier-price">{t.price}</span>
-                          </span>
-                          <span className="lc-tier-sub">{t.sub}</span>
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
+              <div className="lc-tiles">
+                {TIERS.map((t) => {
+                  const active = tier === t.id;
+                  return (
+                    <button
+                      key={t.id}
+                      type="button"
+                      className={`lc-tile${active ? " lc-tile--active" : ""}`}
+                      onClick={() => setTier(t.id)}
+                    >
+                      <span className="lc-tile-label">{t.label}</span>
+                      <span className="lc-tile-price">{t.price}</span>
+                      <span className="lc-tile-sub">{t.sub}</span>
+                    </button>
+                  );
+                })}
+              </div>
 
-                <div className="lc-freeze">
-                  <div className="lc-freeze-title">Market-freeze ↗</div>
-                  <div className="lc-freeze-sub">
-                    We'll remove this image from our site for as long as you need it.
-                  </div>
-                </div>
-
+              <div className="lc-footer">
                 <div className="lc-total">
                   <span className="lc-total-amount">
                     {TIERS.find((t) => t.id === tier)?.price}
                   </span>
                   <span className="lc-total-currency">GBP</span>
                 </div>
-
                 <button type="button" className="lc-cta">ADD TO BASKET</button>
-              </aside>
-            )}
-
-            {!showLicence && (
-              <button
-                type="button"
-                className="lc-mini-cta"
-                onClick={() => setShowLicence(true)}
-              >
-                <span className="lc-mini-eye" aria-hidden="true">
-                  <EyeOff size={14} />
-                </span>
-                <span className="lc-mini-label">ADD TO BASKET</span>
-                <span className="lc-mini-price">
-                  {TIERS.find((t) => t.id === tier)?.price}
-                </span>
-              </button>
-            )}
-          </div>
+              </div>
+            </aside>
+          ) : (
+            <button
+              type="button"
+              className="lc-mini-cta"
+              onClick={() => setShowLicence(true)}
+            >
+              <span className="lc-mini-eye" aria-hidden="true">
+                <EyeOff size={14} />
+              </span>
+              <span className="lc-mini-label">ADD TO BASKET</span>
+              <span className="lc-mini-price">
+                {TIERS.find((t) => t.id === tier)?.price}
+              </span>
+            </button>
+          )}
         </section>
+
 
         {/* WHITE DETAILS SECTION below the black stage */}
         {img && (
