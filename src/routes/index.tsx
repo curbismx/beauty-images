@@ -50,10 +50,16 @@ function Index() {
   const [results, setResults] = useState<PublicSearchResult[]>([]);
   const [searching, setSearching] = useState(false);
   const runSearch = useServerFn(searchPublicImages);
+  const justClosedSearchRef = useRef(false);
 
-  const goPrev = () =>
+  const goPrev = () => {
+    if (justClosedSearchRef.current) { justClosedSearchRef.current = false; return; }
     setCurrent((c) => (c - 1 + HERO_IMAGES.length) % HERO_IMAGES.length);
-  const goNext = () => setCurrent((c) => (c + 1) % HERO_IMAGES.length);
+  };
+  const goNext = () => {
+    if (justClosedSearchRef.current) { justClosedSearchRef.current = false; return; }
+    setCurrent((c) => (c + 1) % HERO_IMAGES.length);
+  };
 
   const searchActive = searchFocused || searchValue.length > 0 || submittedQuery.length > 0;
 
@@ -125,6 +131,7 @@ function Index() {
               onChange={(e) => setSearchValue(e.target.value)}
               onFocus={() => setSearchFocused(true)}
               onBlur={() => {
+                justClosedSearchRef.current = true;
                 setSearchFocused(false);
                 setSearchValue("");
                 setSubmittedQuery("");
