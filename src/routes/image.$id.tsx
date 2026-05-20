@@ -281,7 +281,7 @@ const CSS = `
 /* 2/3 image + 1/3 pricing split */
 .img-split {
   display: grid;
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: 4fr 1fr;
   align-items: start;
   background: #000;
   padding: ${FRAME}px ${FRAME}px ${FRAME}px 0;
@@ -384,7 +384,7 @@ const CSS = `
 .lc-detail-text { font-size: 13px; line-height: 1.6; color: #e6e6e6; margin: 0; }
 
 /* TILES for each size + ADD TO LIGHTBOX + ADD TO BASKET */
-.lc-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.lc-tiles { display: grid; grid-template-columns: 1fr; gap: 10px; }
 .lc-tile {
   all: unset; cursor: pointer;
   height: 88px; padding: 10px 12px;
