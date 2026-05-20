@@ -67,11 +67,20 @@ function Index() {
   const runSearch = useServerFn(searchPublicImages);
   const justClosedSearchRef = useRef(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const heroRef = useRef<HTMLElement>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
   const lbCount = useSyncExternalStore(
     subscribeLightbox,
     () => getLightbox().length,
     () => 0,
   );
+
+  // Preload the search hero image so it can fade in smoothly on first focus.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const img = new Image();
+    img.src = "/hero-search.jpg";
+  }, []);
 
 
   const goPrev = () => {
