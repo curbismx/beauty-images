@@ -94,9 +94,10 @@ function ImageDetail() {
             type="button"
             className="img-back"
             onClick={() => {
-              // Flag tells "/" to restore the previous search + scroll position.
+              // Flag tells "/" to restore previous search + scroll. Full reload so the
+              // index mount effect runs and consumes the flag.
               try { sessionStorage.setItem("bi_restore_search", "1"); } catch { /* ignore */ }
-              navigate({ to: "/" });
+              window.location.href = "/";
             }}
           >
             ← BACK TO SEARCH RESULTS
