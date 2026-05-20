@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState, useSyncExternalStore, useCallback } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { X, Trash2 } from "lucide-react";
+import { Trash2, X } from "lucide-react";
 import {
   getLightbox,
   removeFromLightbox,
@@ -30,8 +30,6 @@ function useLightboxIdsJson(): string {
     () => "[]",
   );
 }
-
-
 
 function LightboxPage() {
   const idsJson = useLightboxIdsJson();
@@ -68,114 +66,160 @@ function LightboxPage() {
     <>
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
       <div className="lb-root">
-        <header className="lb-header">
-          <Link to="/" className="lb-back">← BACK TO SEARCH</Link>
-          <div className="lb-title-block">
-            <div className="lb-eyebrow">YOUR LIGHTBOX</div>
-            <h1 className="lb-title">
-              {ids.length} {ids.length === 1 ? "IMAGE" : "IMAGES"} SAVED
-            </h1>
-            <p className="lb-sub">
-              Sift through your selection. Remove anything you don't need, then
-              click an image to review or purchase a licence.
-            </p>
+        <Link to="/" className="lb-back">← BACK TO SEARCH</Link>
+
+        <div className="search-results">
+          <div className="search-results-header">
+            <div className="srh-text">
+              LIGHTBOX
+              <span className="srp-meta">
+                {" "}
+                · {ids.length} {ids.length === 1 ? "IMAGE" : "IMAGES"}
+              </span>
+            </div>
+            {ids.length > 0 && (
+              <button type="button" className="srh-lightbox" onClick={handleClear}>
+                <Trash2 size={16} />
+                <span>CLEAR</span>
+              </button>
+            )}
           </div>
-          {ids.length > 0 && (
-            <button type="button" className="lb-clear" onClick={handleClear}>
-              <Trash2 size={14} />
-              <span>CLEAR LIGHTBOX</span>
-            </button>
+
+          {loading && <div className="search-results-status">LOADING…</div>}
+
+          {!loading && ids.length === 0 && (
+            <div className="search-results-status">
+              YOUR LIGHTBOX IS EMPTY — ADD IMAGES FROM THE LIBRARY
+            </div>
           )}
-        </header>
 
-        {loading && <div className="lb-status">LOADING…</div>}
-
-        {!loading && ids.length === 0 && (
-          <div className="lb-empty">
-            <div className="lb-empty-title">YOUR LIGHTBOX IS EMPTY</div>
-            <p className="lb-empty-sub">
-              Browse the library and click <strong>ADD TO LIGHTBOX</strong> on
-              any image to save it here for review.
-            </p>
-            <Link to="/" className="lb-empty-cta">START BROWSING →</Link>
-          </div>
-        )}
-
-        {!loading && items.length > 0 && (
-          <div className="lb-grid">
-            {items.map((r) => (
-              <div className="lb-card" key={r.id}>
-                <Link
-                  to="/image/$id"
-                  params={{ id: r.id }}
-                  className="lb-card-link"
-                >
-                  {r.signed_url ? (
-                    <img src={r.signed_url} alt={r.title ?? r.caption ?? ""} loading="lazy" />
-                  ) : (
-                    <div className="lb-card-fallback" />
-                  )}
-                </Link>
-                <button
-                  type="button"
-                  className="lb-card-remove"
-                  aria-label="Remove from lightbox"
-                  onClick={() => removeFromLightbox(r.id)}
-                >
-                  <X size={14} />
-                </button>
-                <figcaption>
-                  <div className="lb-num">#{String(r.image_number).padStart(5, "0")}</div>
-                  {r.title && <div className="lb-cap-title">{r.title}</div>}
-                </figcaption>
-              </div>
-            ))}
-          </div>
-        )}
+          {!loading && items.length > 0 && (
+            <div className="search-results-grid">
+              {items.map((r) => (
+                <div key={r.id} className="search-result-card">
+                  <Link
+                    to="/image/$id"
+                    params={{ id: r.id }}
+                    className="src-link"
+                  >
+                    {r.signed_url ? (
+                      <img src={r.signed_url} alt={r.title ?? r.caption ?? ""} loading="lazy" />
+                    ) : (
+                      <div className="search-result-fallback" />
+                    )}
+                  </Link>
+                  <button
+                    type="button"
+                    className="src-remove"
+                    aria-label="Remove from lightbox"
+                    onClick={() => removeFromLightbox(r.id)}
+                  >
+                    <X size={14} />
+                  </button>
+                  <figcaption>
+                    <div className="src-num">#{String(r.image_number).padStart(5, "0")}</div>
+                    {r.title && <div className="src-title">{r.title}</div>}
+                  </figcaption>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </>
   );
 }
 
 const CSS = `
-.lb-root { min-height: 100vh; background: #fff; color: #111; padding: 48px 36px 96px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+.lb-root { min-height: 100vh; background: #fff; color: #111; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
 .lb-root * { box-sizing: border-box; }
 
-.lb-header { display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 24px; margin-bottom: 48px; border-bottom: 1px solid #eee; padding-bottom: 24px; }
-.lb-back { grid-column: 1 / -1; justify-self: start; background: none; border: 0; padding: 0; font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; font-weight: 700; color: #111; text-decoration: none; margin-bottom: 24px; cursor: pointer; transition: color 0.2s ease; }
+.lb-back {
+  display: inline-block;
+  padding: 24px 40px 0;
+  font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; font-weight: 700;
+  color: #111; text-decoration: none;
+  transition: color 0.2s ease;
+}
 .lb-back:hover { color: #D75F68; }
-.lb-title-block { min-width: 0; }
-.lb-eyebrow { font-size: 11px; letter-spacing: 0.3em; color: #888; font-weight: 600; margin-bottom: 8px; }
-.lb-title { font-size: 28px; font-weight: 500; letter-spacing: -0.01em; margin: 0 0 12px; }
-.lb-sub { font-size: 13px; color: #555; max-width: 560px; line-height: 1.55; margin: 0; }
 
-.lb-clear { display: inline-flex; align-items: center; gap: 8px; padding: 10px 14px; background: #fff; color: #111; border: 1px solid #e0e0e0; font-size: 11px; letter-spacing: 0.2em; font-weight: 600; cursor: pointer; transition: all 0.2s ease; }
-.lb-clear:hover { background: #111; color: #fff; border-color: #111; }
+/* Match search-results styles from index.tsx */
+.search-results { padding: 32px 40px 120px; }
 
-.lb-status { padding: 80px 0; text-align: center; font-size: 11px; letter-spacing: 0.3em; color: #999; }
+.search-results-header {
+  font-family: 'DIN Condensed', 'DIN Alternate', 'Barlow Condensed', 'Oswald', sans-serif;
+  font-size: clamp(28px, 4.2vw, 56px);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.035em;
+  line-height: 1.15;
+  color: #000;
+  margin-bottom: 28px;
+  display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap;
+}
+.search-results-header .srh-text { flex: 1; min-width: 0; }
+.search-results-header .srh-lightbox {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 14px; background: #fff; color: #111; border: 1px solid #111;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.2em;
+  text-decoration: none; text-transform: uppercase; cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.search-results-header .srh-lightbox:hover { background: #D75F68; color: #fff; border-color: #D75F68; }
+.search-results-header .srp-meta { color: #999; font-weight: 900; }
 
-.lb-empty { padding: 80px 0; text-align: center; }
-.lb-empty-title { font-size: 13px; letter-spacing: 0.3em; color: #111; font-weight: 700; margin-bottom: 16px; }
-.lb-empty-sub { font-size: 14px; color: #666; max-width: 460px; margin: 0 auto 32px; line-height: 1.6; }
-.lb-empty-cta { display: inline-block; padding: 14px 32px; background: #D75F68; color: #fff; text-decoration: none; font-size: 12px; letter-spacing: 0.2em; font-weight: 600; transition: background 0.2s ease; }
-.lb-empty-cta:hover { background: #111; }
+.search-results-status {
+  font-size: 11px; letter-spacing: 0.3em; color: #777; text-transform: uppercase;
+  padding: 40px 0 200px;
+}
 
-.lb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
-.lb-card { position: relative; background: #f7f7f7; border: 1px solid #eee; }
-.lb-card-link { display: block; }
-.lb-card-link img { display: block; width: 100%; height: 240px; object-fit: cover; transition: opacity 0.2s ease; }
-.lb-card-link:hover img { opacity: 0.92; }
-.lb-card-fallback { width: 100%; height: 240px; background: #eee; }
-.lb-card-remove { position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; border: 0; background: rgba(0,0,0,0.6); color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s ease; }
-.lb-card-remove:hover { background: #D75F68; }
-.lb-card figcaption { padding: 10px 12px; }
-.lb-num { font-size: 10px; letter-spacing: 0.25em; color: #888; font-weight: 600; margin-bottom: 4px; }
-.lb-cap-title { font-size: 12px; color: #222; line-height: 1.4; }
+.search-results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 24px;
+}
+.search-result-card {
+  position: relative;
+  display: flex; flex-direction: column;
+  background: #fafafa;
+  transition: transform 0.25s ease;
+}
+.search-result-card:hover { transform: translateY(-2px); }
+.src-link { display: block; }
+.search-result-card img,
+.search-result-fallback {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  display: block;
+  background: #eee;
+}
+.search-result-card figcaption {
+  padding: 10px 2px 0;
+  display: flex; flex-direction: column; gap: 2px;
+}
+.search-result-card .src-num {
+  font-size: 10px; letter-spacing: 0.25em; color: #999; text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+}
+.search-result-card .src-title {
+  font-size: 12px; color: #111; letter-spacing: 0.04em;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.src-remove {
+  position: absolute; top: 8px; right: 8px;
+  width: 28px; height: 28px; border: 0;
+  background: rgba(0,0,0,0.6); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: background 0.2s ease;
+  z-index: 2;
+}
+.src-remove:hover { background: #D75F68; }
 
-@media (max-width: 600px) {
-  .lb-root { padding: 24px 16px 64px; }
-  .lb-header { grid-template-columns: 1fr; }
-  .lb-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
-  .lb-card-link img, .lb-card-fallback { height: 180px; }
+@media (max-width: 768px) {
+  .lb-back { padding: 18px 22px 0; }
+  .search-results { padding: 24px 22px 80px; }
+  .search-results-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
 }
 `;
