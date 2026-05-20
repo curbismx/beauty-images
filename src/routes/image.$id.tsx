@@ -51,7 +51,6 @@ const TIERS: Array<{
 
 function ImageDetail() {
   const { id } = Route.useParams();
-  const navigate = useNavigate();
   const fetchImage = useServerFn(getPublicImage);
   const [img, setImg] = useState<PublicImageDetail | null>(null);
   const [loading, setLoading] = useState(true);
