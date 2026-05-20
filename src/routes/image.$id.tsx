@@ -272,7 +272,7 @@ const CSS = `
 /* Image stage (single column) */
 .img-split {
   background: #000;
-  padding: ${FRAME}px 0;
+  padding: ${FRAME}px 0 15px;
 }
 
 .img-stage {
@@ -317,13 +317,13 @@ const CSS = `
 .lc-detail-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 8px; }
 .lc-detail-tier { font-size: 14px; font-weight: 700; color: #fff; letter-spacing: 0.2em; }
 .lc-detail-price { font-size: 14px; font-weight: 600; color: #D75F68; font-variant-numeric: tabular-nums; letter-spacing: 0.05em; }
-.lc-detail-text { font-size: 13px; line-height: 1.6; color: #e6e6e6; margin: 0 0 22px; max-width: 66%; }
+.lc-detail-text { font-size: 13px; line-height: 1.6; color: #e6e6e6; margin: 0; max-width: 66%; min-height: calc(1.6em * 5); }
 
 .lc-btn-row {
   display: inline-flex;
   flex-wrap: wrap;
   gap: 10px;
-  margin-top: 4px;
+  margin-top: 75px;
 }
 .lc-btn {
   all: unset; cursor: pointer;
