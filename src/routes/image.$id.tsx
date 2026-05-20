@@ -194,8 +194,16 @@ function ImageDetail() {
                         </button>
                       );
                     })}
-                    <button type="button" className="lc-btn lc-btn--cta">
-                      <span className="lc-btn-label">ADD TO BASKET</span>
+                    <button
+                      type="button"
+                      className={`lc-btn lc-btn--cta${inBasket ? " lc-btn--cta-on" : ""}`}
+                      onClick={() =>
+                        inBasket ? removeFromBasket(id, tier) : addToBasket(id, tier)
+                      }
+                    >
+                      <span className="lc-btn-label">
+                        {inBasket ? "REMOVE FROM BASKET" : "ADD TO BASKET"}
+                      </span>
                       <span className="lc-btn-price">{activeTier.price}</span>
                     </button>
                   </div>
