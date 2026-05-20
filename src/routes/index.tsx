@@ -144,7 +144,10 @@ function Index() {
     } catch { /* ignore */ }
   };
 
-  const goHome = () => {
+  const goHome = (suppressNextHeroClick = false) => {
+    if (suppressNextHeroClick) {
+      justClosedSearchRef.current = true;
+    }
     try {
       sessionStorage.removeItem("bi_search_state");
       sessionStorage.removeItem("bi_restore_search");
@@ -168,7 +171,8 @@ function Index() {
       const inResults = resultsRef.current?.contains(target);
       const onSubmit = (target as Element).closest?.(".hero-search-submit");
       if (inSearch || inResults || onSubmit) return;
-      goHome();
+      const onHeroZone = Boolean((target as Element).closest?.(".hero-zone"));
+      goHome(onHeroZone);
     };
     document.addEventListener("mousedown", onDown);
     return () => document.removeEventListener("mousedown", onDown);
