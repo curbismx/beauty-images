@@ -225,11 +225,11 @@ const CSS = `
   background: #0a0a0a;
 }
 
-/* LICENCE CARD — overlays the image, bottom-right, translucent */
+/* LICENCE CARD — overlays the image, top-right, translucent */
 .licence-card {
   position: absolute;
   z-index: 5;
-  right: 24px; bottom: 24px;
+  right: 0; top: 0;
   width: 360px;
   padding: 28px 26px 24px;
   color: #f0f0f0;
@@ -256,7 +256,7 @@ const CSS = `
 .lc-toggle:hover { background: #D75F68; color: #fff; }
 
 .lc-mini-cta {
-  position: absolute; right: 24px; bottom: 24px;
+  position: absolute; right: 0; top: 0;
   display: flex; align-items: center; gap: 14px;
   padding: 12px 18px 12px 14px;
   background: #D75F68; color: #fff; border: 0; cursor: pointer;
@@ -278,21 +278,21 @@ const CSS = `
 .lc-tier {
   all: unset; cursor: pointer;
   display: flex; gap: 12px; align-items: flex-start;
-  padding: 12px 12px; background: rgba(20,20,20,0.7);
+  padding: 12px 12px; background: rgba(255,255,255,0.08);
   transition: background 0.15s ease;
 }
-.lc-tier:hover { background: rgba(40,40,40,0.85); }
-.lc-tier--active { background: rgba(55,55,55,0.9); }
+.lc-tier:hover { background: rgba(255,255,255,0.15); }
+.lc-tier--active { background: rgba(255,255,255,0.22); }
 
-.lc-radio { flex: 0 0 14px; width: 14px; height: 14px; border: 1px solid #888; border-radius: 50%; margin-top: 3px; position: relative; }
+.lc-radio { flex: 0 0 14px; width: 14px; height: 14px; border: 1px solid #ccc; border-radius: 50%; margin-top: 3px; position: relative; }
 .lc-radio--on { border-color: #fff; }
 .lc-radio--on::after { content: ""; position: absolute; inset: 2px; background: #fff; border-radius: 50%; }
 
 .lc-tier-body { flex: 1; display: flex; flex-direction: column; gap: 3px; }
 .lc-tier-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
-.lc-tier-label { font-size: 12px; font-weight: 500; color: #f5f5f5; }
+.lc-tier-label { font-size: 12px; font-weight: 500; color: #fff; }
 .lc-tier-price { font-size: 13px; font-weight: 600; color: #fff; font-variant-numeric: tabular-nums; }
-.lc-tier-sub { font-size: 10px; color: #999; letter-spacing: 0.02em; }
+.lc-tier-sub { font-size: 10px; color: #ddd; letter-spacing: 0.02em; }
 
 .lc-freeze { padding: 10px 12px; background: rgba(20,20,20,0.5); margin-bottom: 16px; border-left: 2px solid #D75F68; }
 .lc-freeze-title { font-size: 11px; color: #D75F68; font-weight: 600; margin-bottom: 4px; }
