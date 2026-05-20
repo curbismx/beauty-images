@@ -183,7 +183,7 @@ const CSS = `
 /* BLACK STAGE — 150px black frame around the image */
 .img-stage {
   background: #000;
-  padding: ${FRAME}px ${FRAME}px 40px;
+  padding: ${FRAME}px ${FRAME}px 75px;
   display: flex; align-items: flex-start; justify-content: flex-start;
 }
 
