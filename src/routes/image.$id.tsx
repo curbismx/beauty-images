@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, useSyncExternalStore } from "react";
-import { Check } from "lucide-react";
+
 import { useServerFn } from "@tanstack/react-start";
 import { getPublicImage, type PublicImageDetail } from "@/lib/search.functions";
 import {
