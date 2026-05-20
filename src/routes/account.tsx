@@ -147,4 +147,5 @@ const accountCss = `
 .acct-status { color: #D75F68; text-transform: uppercase; font-weight: 800; letter-spacing: 0.1em; font-size: 10px; align-self: center; }
 .acct-logout { margin-top: 12px; background: transparent; color: #fff; border-color: #fff; }
 .acct-logout:hover { background: #D75F68; border-color: #D75F68; color: #fff; }
+.acct-ok { color: #6ec77a; font-size: 12px; font-weight: 700; letter-spacing: 0.05em; }
 `;
