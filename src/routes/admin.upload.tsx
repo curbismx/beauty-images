@@ -4,7 +4,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "./admin";
-import { getRecentImages, getImageStats, keywordPendingBatch } from "@/lib/images.functions";
+import { getRecentImages, getImageStats, keywordPendingBatch, listImagesMissingPreview, setImagePreviewPath } from "@/lib/images.functions";
+import { resizeImageToBlob } from "@/lib/resize-image";
 
 export const Route = createFileRoute("/admin/upload")({
   component: Upload,
