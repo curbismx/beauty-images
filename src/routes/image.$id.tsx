@@ -138,7 +138,7 @@ function ImageDetail() {
           </nav>
         </header>
 
-        {/* 2/3 image + 1/3 pricing layout */}
+        {/* Single column image + licence */}
         <section className="img-split">
           <div className="img-stage">
             <div className="img-stage-inner">
@@ -156,40 +156,37 @@ function ImageDetail() {
               </div>
               {imgReady && (
                 <div className="lc-detail lc-detail--under">
+                  <div className="lc-detail-eyebrow">LICENCE DETAILS</div>
                   <div className="lc-detail-head">
                     <span className="lc-detail-tier">{activeTier.label.toUpperCase()}</span>
                     <span className="lc-detail-price">{activeTier.price}</span>
                   </div>
                   <p className="lc-detail-text">{activeTier.description}</p>
+
+                  <div className="lc-btn-row">
+                    {TIERS.map((t) => {
+                      const active = tier === t.id;
+                      return (
+                        <button
+                          key={t.id}
+                          type="button"
+                          className={`lc-btn${active ? " lc-btn--active" : ""}`}
+                          onClick={() => setTier(t.id)}
+                        >
+                          <span className="lc-btn-label">{t.label.toUpperCase()}</span>
+                          <span className="lc-btn-price">{t.price}</span>
+                        </button>
+                      );
+                    })}
+                    <button type="button" className="lc-btn lc-btn--cta">
+                      <span className="lc-btn-label">ADD TO BASKET</span>
+                      <span className="lc-btn-price">{activeTier.price}</span>
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
           </div>
-
-
-          <aside className={`licence-wrap${imgReady ? " licence-wrap--ready" : ""}`}>
-            <div className="lc-eyebrow">LICENCE</div>
-            <div className="lc-tiles">
-              {TIERS.map((t) => {
-                const active = tier === t.id;
-                return (
-                  <button
-                    key={t.id}
-                    type="button"
-                    className={`lc-tile${active ? " lc-tile--active" : ""}`}
-                    onClick={() => setTier(t.id)}
-                  >
-                    <span className="lc-tile-label">{t.label}</span>
-                    <span className="lc-tile-price">{t.price}</span>
-                    <span className="lc-tile-sub">{t.sub}</span>
-                  </button>
-                );
-              })}
-            </div>
-            <button type="button" className="lc-basket">
-              ADD TO BASKET <span className="lc-basket-price">{activeTier.price}</span>
-            </button>
-          </aside>
         </section>
 
 
