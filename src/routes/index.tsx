@@ -64,19 +64,48 @@ function Index() {
 
   const searchActive = searchFocused || searchValue.length > 0 || submittedQuery.length > 0;
 
-  const submitSearch = async () => {
-    const q = searchValue.trim();
+  const submitSearch = async (qOverride?: string, restoreY?: number) => {
+    const q = (qOverride ?? searchValue).trim();
     if (!q) return;
     setSubmittedQuery(q);
     setSearching(true);
     try {
       const r = await runSearch({ data: { q, limit: 60 } });
       setResults(r);
+      if (typeof restoreY === "number") {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => window.scrollTo(0, restoreY));
+        });
+      }
     } catch {
       setResults([]);
     } finally {
       setSearching(false);
     }
+  };
+
+  // Restore previous search + scroll position on mount (e.g. after coming back from /image/:id)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const raw = sessionStorage.getItem("bi_search_state");
+      if (!raw) return;
+      const saved = JSON.parse(raw) as { q?: string; y?: number };
+      if (saved.q) {
+        setSearchValue(saved.q);
+        submitSearch(saved.q, saved.y);
+      }
+    } catch { /* ignore */ }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const saveSearchState = () => {
+    try {
+      sessionStorage.setItem(
+        "bi_search_state",
+        JSON.stringify({ q: submittedQuery, y: window.scrollY }),
+      );
+    } catch { /* ignore */ }
   };
 
   return (
