@@ -126,10 +126,13 @@ function ImageDetail() {
               </button>
 
               <div className="lc-eyebrow">PURCHASE A LICENCE</div>
-              <p className="lc-intro">
-                All Royalty-Free licences include global use rights, comprehensive protection,
-                and simple pricing with volume discounts available.
-              </p>
+              <div className="lc-detail">
+                <div className="lc-detail-head">
+                  <span className="lc-detail-tier">{activeTier.label.toUpperCase()}</span>
+                  <span className="lc-detail-price">{activeTier.price}</span>
+                </div>
+                <p className="lc-detail-text">{activeTier.description}</p>
+              </div>
 
               <div className="lc-tiles">
                 {TIERS.map((t) => {
@@ -147,10 +150,22 @@ function ImageDetail() {
                     </button>
                   );
                 })}
+                <button
+                  type="button"
+                  className={`lc-tile lc-tile--lb${inLightbox ? " lc-tile--lb-on" : ""}`}
+                  onClick={() => (inLightbox ? removeFromLightbox(id) : addToLightbox(id))}
+                >
+                  <span className="lc-tile-lb-icon" aria-hidden="true">
+                    {inLightbox ? <Check size={18} /> : <Plus size={18} />}
+                  </span>
+                  <span className="lc-tile-lb-label">
+                    {inLightbox ? "IN LIGHTBOX" : "ADD TO LIGHTBOX"}
+                  </span>
+                </button>
                 <button type="button" className="lc-tile lc-tile--cta">
                   <span className="lc-tile-cta-label">ADD TO BASKET</span>
                   <span className="lc-tile-cta-price">
-                    {TIERS.find((t) => t.id === tier)?.price}
+                    {activeTier.price}
                   </span>
                 </button>
               </div>
