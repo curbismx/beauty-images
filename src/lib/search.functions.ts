@@ -140,18 +140,19 @@ export const getSimilarShootImages = createServerFn({ method: "POST" })
 
     const { data: rows, error } = await supabaseAdmin
       .from("images")
-      .select("id, image_number, title, caption, keywords, storage_path, preview_path")
+      .select("id, image_number, title, caption, keywords, preview_path")
       .gte("image_number", min)
       .lte("image_number", max)
       .neq("id", data.excludeId)
       .not("keyworded_at", "is", null)
+      .not("preview_path", "is", null)
       .order("image_number", { ascending: true })
       .limit(60);
     if (error) throw new Error(error.message);
-    const merged = rows ?? [];
+    const merged = (rows ?? []).filter((r) => !!r.preview_path);
     if (merged.length === 0) return [];
 
-    const paths = merged.map((r) => r.preview_path ?? r.storage_path);
+    const paths = merged.map((r) => r.preview_path as string);
     const signed = await supabaseAdmin.storage
       .from("images-private")
       .createSignedUrls(paths, 3600);
