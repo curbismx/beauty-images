@@ -9,6 +9,13 @@ import {
   getLightbox,
   subscribeLightbox,
 } from "@/lib/lightbox";
+import {
+  addToBasket,
+  removeFromBasket,
+  getBasket,
+  subscribeBasket,
+  type BasketItem,
+} from "@/lib/basket";
 
 export const Route = createFileRoute("/image/$id")({
   component: ImageDetail,
