@@ -837,6 +837,7 @@ const PAGE_CSS = `
   .curbism-root .hero-search { left: 22px; width: calc(80% - 22px); padding-left: 0; top: calc(100px + clamp(20px, 5.5vw, 36px) * 3 + 18px); }
   .curbism-root .hero-search input { padding: 12px 14px; font-size: 14px; }
   .curbism-root .hero-counter { bottom: 22px; right: 22px; font-size: 10px; }
+  .curbism-root .hero-account { top: 22px; right: 22px; }
   .curbism-root .section { min-height: 380px; }
   .curbism-root .section--apps { min-height: 460px; }
   .curbism-root .section-label { bottom: 16px; left: 24px; font-size: 10px; }
