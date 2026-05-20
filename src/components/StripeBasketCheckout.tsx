@@ -7,6 +7,7 @@ interface BasketCheckoutProps {
   customerEmail?: string;
   userId?: string;
   imageIds?: string[];
+  imageTiers?: string;
   returnUrl?: string;
 }
 
@@ -15,6 +16,7 @@ export function StripeBasketCheckout({
   customerEmail,
   userId,
   imageIds,
+  imageTiers,
   returnUrl,
 }: BasketCheckoutProps) {
   const fetchClientSecret = async (): Promise<string> => {
@@ -24,6 +26,7 @@ export function StripeBasketCheckout({
         customerEmail,
         userId,
         imageIds,
+        imageTiers,
         returnUrl: returnUrl || `${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}`,
         environment: getStripeEnvironment(),
       },
