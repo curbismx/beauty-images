@@ -73,6 +73,9 @@ function Index() {
   const [submittedQuery, setSubmittedQuery] = useState(restoreState?.q ?? "");
   const [results, setResults] = useState<PublicSearchResult[]>(restoreState?.results ?? []);
   const [searching, setSearching] = useState(false);
+  const [viewMode, setViewMode] = useViewMode();
+  const masonry = viewMode === "masonry";
+  const cols = useMasonryCols();
   const runSearch = useServerFn(searchPublicImages);
   const justClosedSearchRef = useRef(false);
   const restoreConsumedRef = useRef(false);
