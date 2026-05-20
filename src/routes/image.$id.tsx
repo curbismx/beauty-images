@@ -253,25 +253,21 @@ const CSS = `
 .img-nav-link:hover { opacity: 1; color: #D75F68; }
 .img-nav-sep { color: #fff; opacity: 0.45; font-size: 11px; }
 
-/* 2/3 image + 1/3 pricing split */
+/* Image stage (single column) */
 .img-split {
-  display: grid;
-  grid-template-columns: 17fr 3fr;
-  align-items: start;
   background: #000;
-  padding: ${FRAME}px ${FRAME}px ${FRAME}px 0;
+  padding: ${FRAME}px 0;
 }
 
 .img-stage {
   background: #000;
-  padding: 0 ${FRAME}px 0 ${FRAME}px;
+  padding: 0 ${FRAME}px;
   min-width: 0;
 }
 .img-stage-inner {
   display: inline-block;
   max-width: 100%;
 }
-
 
 .img-frame {
   position: relative;
@@ -298,71 +294,13 @@ const CSS = `
   background: #0a0a0a;
 }
 
-/* LICENCE PANEL — right column: 3 small price tiles + basket button */
-.licence-wrap {
-  display: flex; flex-direction: column; gap: 10px;
-  padding: 0 12px 0 0;
-  opacity: 0;
-  transition: opacity 0.45s ease 0.15s;
-  min-width: 0;
-}
-.licence-wrap--ready { opacity: 1; }
-
-.lc-eyebrow {
-  font-size: 9px; letter-spacing: 0.28em; text-transform: uppercase;
-  color: #888; font-weight: 700; margin: 0 0 2px;
-}
-
-.lc-tiles { display: flex; flex-direction: column; gap: 8px; }
-
-.lc-tile {
-  all: unset; cursor: pointer;
-  display: grid;
-  grid-template-columns: 1fr auto;
-  grid-template-rows: auto auto;
-  column-gap: 10px; row-gap: 2px;
-  padding: 10px 12px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.15);
-  transition: background 0.15s ease, border-color 0.15s ease;
-}
-.lc-tile:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.35); }
-.lc-tile--active { background: rgba(255,255,255,0.14); border-color: #fff; }
-
-.lc-tile-label {
-  grid-column: 1; grid-row: 1;
-  font-size: 11px; font-weight: 700; color: #fff;
-  letter-spacing: 0.18em; text-transform: uppercase;
-}
-.lc-tile-price {
-  grid-column: 2; grid-row: 1 / span 2;
-  align-self: center;
-  font-size: 16px; font-weight: 500; color: #fff;
-  font-variant-numeric: tabular-nums; white-space: nowrap;
-}
-.lc-tile-sub {
-  grid-column: 1; grid-row: 2;
-  font-size: 10px; color: #999; line-height: 1.3;
-}
-
-.lc-basket {
-  all: unset; cursor: pointer; text-align: center;
-  margin-top: 4px;
-  padding: 12px 10px;
-  background: #D75F68; color: #fff;
-  font-size: 11px; font-weight: 700; letter-spacing: 0.22em;
-  text-transform: uppercase;
-  transition: background 0.2s ease;
-}
-.lc-basket:hover { background: #b94e56; }
-.lc-basket-price { font-weight: 600; letter-spacing: 0.05em; margin-left: 8px; font-variant-numeric: tabular-nums; }
-
 /* Detail under image (left-aligned with image) */
-.lc-detail { margin-bottom: 20px; }
-.lc-detail--under { margin: 24px 0 0; max-width: 100%; }
+.lc-detail { margin-bottom: 0; }
+.lc-detail--under { margin: 28px 0 0; max-width: 100%; }
+.lc-detail-eyebrow { font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; color: #888; font-weight: 700; margin-bottom: 12px; }
 .lc-detail-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 8px; }
-.lc-detail-tier { font-size: 13px; font-weight: 700; color: #fff; letter-spacing: 0.18em; }
-.lc-detail-price { font-size: 13px; font-weight: 600; color: #D75F68; font-variant-numeric: tabular-nums; letter-spacing: 0.05em; }
+.lc-detail-tier { font-size: 14px; font-weight: 700; color: #fff; letter-spacing: 0.2em; }
+.lc-detail-price { font-size: 14px; font-weight: 600; color: #D75F68; font-variant-numeric: tabular-nums; letter-spacing: 0.05em; }
 .lc-detail-text { font-size: 13px; line-height: 1.6; color: #e6e6e6; margin: 0; }
 
 .img-nav-link {
