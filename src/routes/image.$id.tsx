@@ -1,20 +1,68 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { useEffect, useState, useSyncExternalStore } from "react";
+import { Eye, EyeOff, Check, Plus } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { getPublicImage, type PublicImageDetail } from "@/lib/search.functions";
+import {
+  addToLightbox,
+  removeFromLightbox,
+  getLightbox,
+  subscribeLightbox,
+} from "@/lib/lightbox";
 
 export const Route = createFileRoute("/image/$id")({
   component: ImageDetail,
 });
+
+type TierId = "small" | "medium" | "large";
+
+const TIERS: Array<{
+  id: TierId;
+  label: string;
+  price: string;
+  sub: string;
+  description: string;
+}> = [
+  {
+    id: "small",
+    label: "Small",
+    price: "£150.00",
+    sub: "1280 px · 300 dpi",
+    description:
+      "Small licence — 1280 px on the long edge at 300 dpi. Perfect for web banners, social media, blog headers and small editorial use. Includes worldwide rights for digital publication for 12 months.",
+  },
+  {
+    id: "medium",
+    label: "Medium",
+    price: "£275.00",
+    sub: "1957 × 1538 px · 3 MP",
+    description:
+      "Medium licence — 1957 × 1538 px (16.6 × 13.0 cm) at 300 dpi, around 3 MP. Suited to magazine spreads, brochures, packaging mock-ups and quarter-page print. Worldwide print + digital rights for 12 months.",
+  },
+  {
+    id: "large",
+    label: "Large",
+    price: "£375.00",
+    sub: "4000 px · 12 MP",
+    description:
+      "Large licence — 4000 px on the long edge (33.9 × 22.6 cm) at 300 dpi, around 12 MP. Designed for full-page print, posters, billboards and high-end advertising campaigns. Worldwide print + digital rights for 12 months.",
+  },
+];
 
 function ImageDetail() {
   const { id } = Route.useParams();
   const fetchImage = useServerFn(getPublicImage);
   const [img, setImg] = useState<PublicImageDetail | null>(null);
   const [loading, setLoading] = useState(true);
-  const [tier, setTier] = useState<"small" | "medium" | "large">("medium");
+  const [tier, setTier] = useState<TierId>("medium");
   const [showLicence, setShowLicence] = useState(true);
+
+  const lbJson = useSyncExternalStore(
+    subscribeLightbox,
+    () => JSON.stringify(getLightbox()),
+    () => "[]",
+  );
+  const inLightbox = (JSON.parse(lbJson) as string[]).includes(id);
 
   useEffect(() => {
     let alive = true;
@@ -31,11 +79,9 @@ function ImageDetail() {
     };
   }, [id, fetchImage]);
 
-  const TIERS = [
-    { id: "small" as const, label: "Small", price: "£150.00", sub: "1280 px · 300 dpi" },
-    { id: "medium" as const, label: "Medium", price: "£275.00", sub: "1957 x 1538 px · 3 MP" },
-    { id: "large" as const, label: "Large", price: "£375.00", sub: "4000 px · 12 MP" },
-  ];
+  const activeTier = TIERS.find((t) => t.id === tier)!;
+
+
 
 
   return (
