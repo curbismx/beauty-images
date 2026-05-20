@@ -51,6 +51,7 @@ function Index() {
   const [searching, setSearching] = useState(false);
   const runSearch = useServerFn(searchPublicImages);
   const justClosedSearchRef = useRef(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const goPrev = () => {
     if (justClosedSearchRef.current) { justClosedSearchRef.current = false; return; }
