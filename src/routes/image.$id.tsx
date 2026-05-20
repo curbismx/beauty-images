@@ -432,6 +432,4 @@ const CSS = `
   .licence-wrap { padding: 0 24px 75px; }
   .licence-card { padding: 20px 18px 18px; }
 }
-  .licence-card { padding: 20px 18px 18px; }
-}
 `;
