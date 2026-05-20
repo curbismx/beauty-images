@@ -45,10 +45,23 @@ function pad(n: number) {
 }
 
 function Index() {
+  const initialQuery = (() => {
+    if (typeof window === "undefined") return "";
+    try {
+      if (sessionStorage.getItem("bi_restore_search")) {
+        const raw = sessionStorage.getItem("bi_search_state");
+        if (raw) {
+          const saved = JSON.parse(raw) as { q?: string };
+          return saved.q ?? "";
+        }
+      }
+    } catch { /* ignore */ }
+    return "";
+  })();
   const [current, setCurrent] = useState(0);
   const [searchFocused, setSearchFocused] = useState(false);
-  const [searchValue, setSearchValue] = useState("");
-  const [submittedQuery, setSubmittedQuery] = useState("");
+  const [searchValue, setSearchValue] = useState(initialQuery);
+  const [submittedQuery, setSubmittedQuery] = useState(initialQuery);
   const [results, setResults] = useState<PublicSearchResult[]>([]);
   const [searching, setSearching] = useState(false);
   const runSearch = useServerFn(searchPublicImages);
