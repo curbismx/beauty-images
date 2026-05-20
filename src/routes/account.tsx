@@ -53,10 +53,6 @@ function AccountPage() {
     await supabase.from("profiles").update({ full_name: name }).eq("id", session.user.id);
   };
 
-  const saveName = async () => {
-    if (!session) return;
-    await supabase.from("profiles").update({ full_name: name }).eq("id", session.user.id);
-  };
 
   const changePassword = async () => {
     setPwMsg(null);
