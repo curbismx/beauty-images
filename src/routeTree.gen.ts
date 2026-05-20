@@ -13,6 +13,7 @@ import { Route as DesignRouteImport } from './routes/design'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as ImageIdRouteImport } from './routes/image.$id'
 import { Route as AdminUploadRouteImport } from './routes/admin.upload'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminSalesRouteImport } from './routes/admin.sales'
@@ -42,6 +43,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminRoute,
+} as any)
+const ImageIdRoute = ImageIdRouteImport.update({
+  id: '/image/$id',
+  path: '/image/$id',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AdminUploadRoute = AdminUploadRouteImport.update({
   id: '/upload',
@@ -100,6 +106,7 @@ export interface FileRoutesByFullPath {
   '/admin/sales': typeof AdminSalesRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/upload': typeof AdminUploadRoute
+  '/image/$id': typeof ImageIdRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/image/$id': typeof AdminImageIdRoute
   '/api/public/track': typeof ApiPublicTrackRoute
@@ -114,6 +121,7 @@ export interface FileRoutesByTo {
   '/admin/sales': typeof AdminSalesRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/upload': typeof AdminUploadRoute
+  '/image/$id': typeof ImageIdRoute
   '/admin': typeof AdminIndexRoute
   '/admin/image/$id': typeof AdminImageIdRoute
   '/api/public/track': typeof ApiPublicTrackRoute
@@ -130,6 +138,7 @@ export interface FileRoutesById {
   '/admin/sales': typeof AdminSalesRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/upload': typeof AdminUploadRoute
+  '/image/$id': typeof ImageIdRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/image/$id': typeof AdminImageIdRoute
   '/api/public/track': typeof ApiPublicTrackRoute
@@ -147,6 +156,7 @@ export interface FileRouteTypes {
     | '/admin/sales'
     | '/admin/settings'
     | '/admin/upload'
+    | '/image/$id'
     | '/admin/'
     | '/admin/image/$id'
     | '/api/public/track'
@@ -161,6 +171,7 @@ export interface FileRouteTypes {
     | '/admin/sales'
     | '/admin/settings'
     | '/admin/upload'
+    | '/image/$id'
     | '/admin'
     | '/admin/image/$id'
     | '/api/public/track'
@@ -176,6 +187,7 @@ export interface FileRouteTypes {
     | '/admin/sales'
     | '/admin/settings'
     | '/admin/upload'
+    | '/image/$id'
     | '/admin/'
     | '/admin/image/$id'
     | '/api/public/track'
@@ -185,6 +197,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
   DesignRoute: typeof DesignRoute
+  ImageIdRoute: typeof ImageIdRoute
   ApiPublicTrackRoute: typeof ApiPublicTrackRoute
 }
 
@@ -217,6 +230,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
+    }
+    '/image/$id': {
+      id: '/image/$id'
+      path: '/image/$id'
+      fullPath: '/image/$id'
+      preLoaderRoute: typeof ImageIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/admin/upload': {
       id: '/admin/upload'
@@ -314,8 +334,19 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
   DesignRoute: DesignRoute,
+  ImageIdRoute: ImageIdRoute,
   ApiPublicTrackRoute: ApiPublicTrackRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
