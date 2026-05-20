@@ -879,8 +879,17 @@ const PAGE_CSS = `
   line-height: 1.15;
   color: #000;
   margin-bottom: 28px;
-  display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap;
+  display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap;
 }
+.curbism-root .search-results-header .srh-actions { display: inline-flex; align-items: center; gap: 10px; }
+.curbism-root .search-results-header .srh-iconbtn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 38px; height: 38px;
+  background: #fff; color: #111; border: 1px solid #111;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.curbism-root .search-results-header .srh-iconbtn:hover { background: #111; color: #fff; }
 .curbism-root .search-results-header .srh-text { flex: 1; min-width: 0; }
 .curbism-root .search-results-header .srh-lightbox {
   display: inline-flex; align-items: center; gap: 8px;
