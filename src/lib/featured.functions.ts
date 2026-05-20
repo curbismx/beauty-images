@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requireAdmin } from "@/integrations/supabase/admin-middleware";
 import { z } from "zod";
 
 export type FeaturedImage = {
@@ -11,7 +11,7 @@ export type FeaturedImage = {
 };
 
 export const listFeatured = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireAdmin])
   .handler(async ({ context }) => {
     const { data, error } = await context.supabase
       .from("featured_images")
@@ -26,7 +26,7 @@ export const listFeatured = createServerFn({ method: "GET" })
   });
 
 export const reorderFeatured = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireAdmin])
   .inputValidator(z.object({ ids: z.array(z.string().uuid()).min(1).max(2000) }).parse)
   .handler(async ({ data, context }) => {
     // Assign sort_order so that index 0 (top of list) gets the highest value.
@@ -42,7 +42,7 @@ export const reorderFeatured = createServerFn({ method: "POST" })
   });
 
 export const deleteFeatured = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireAdmin])
   .inputValidator(z.object({ id: z.string().uuid() }).parse)
   .handler(async ({ data, context }) => {
     const { data: row, error } = await context.supabase

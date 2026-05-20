@@ -1,6 +1,7 @@
 import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { AuthProvider, useAuth } from "@/lib/use-auth";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/admin")({
   component: AdminLayoutRoot,
@@ -29,6 +30,7 @@ function AdminLayout() {
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isLogin = pathname === "/admin/login";
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
 
   useEffect(() => {
     if (!loading && !session && !isLogin) {
@@ -39,13 +41,36 @@ function AdminLayout() {
     }
   }, [loading, session, isLogin, navigate]);
 
+  useEffect(() => {
+    let cancelled = false;
+    if (!session) {
+      setIsAdmin(null);
+      return;
+    }
+    (async () => {
+      const { data } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", session.user.id)
+        .eq("role", "admin")
+        .maybeSingle();
+      if (cancelled) return;
+      const ok = !!data;
+      setIsAdmin(ok);
+      if (!ok && !isLogin) navigate({ to: "/" });
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [session, isLogin, navigate]);
+
   return (
     <>
       <style>{adminCss}</style>
       <div className="bi-admin">
         {isLogin ? (
           <Outlet />
-        ) : !session ? (
+        ) : !session || isAdmin !== true ? (
           <div className="bi-loading">…</div>
         ) : (
           <div className="bi-shell">

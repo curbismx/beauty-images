@@ -71,7 +71,7 @@ function Upload() {
           const resp = await fetch(r.signed_url);
           if (!resp.ok) throw new Error(`download ${resp.status}`);
           const orig = await resp.blob();
-          const previewBlob = await resizeImageToBlob(orig, 800, 0.82);
+          const previewBlob = await resizeImageToBlob(orig, 600, 0.82);
           const previewPath = `previews/${r.id}.jpg`;
           const up = await supabase.storage
             .from("images-private")
@@ -124,10 +124,10 @@ function Upload() {
             .upload(storagePath, file, { contentType: file.type, upsert: false });
           if (up.error) throw new Error(up.error.message);
 
-          // Build 800px preview (longest edge) and upload alongside the original
+          // Build 600px preview (longest edge) and upload alongside the original
           let savedPreviewPath: string | null = null;
           try {
-            const previewBlob = await resizeImageToBlob(file, 800, 0.82);
+            const previewBlob = await resizeImageToBlob(file, 600, 0.82);
             const upPrev = await supabase.storage
               .from("images-private")
               .upload(previewPath, previewBlob, { contentType: "image/jpeg", upsert: false });
@@ -220,7 +220,7 @@ function Upload() {
             type="button"
             onClick={runBackfill}
             disabled={backfill.running}
-            title="Generate 800px previews for any images that don't have one"
+            title="Generate 600px previews for any images that don't have one"
             style={{
               background: "#fff",
               color: "#000",
@@ -238,7 +238,7 @@ function Upload() {
               ? `Previews: ${backfill.done}✓ ${backfill.failed ? backfill.failed + "✗ " : ""}…`
               : backfill.message === "Done"
                 ? `Previews done: ${backfill.done}✓ ${backfill.failed}✗`
-                : "Generate 800px previews"}
+                : "Generate 600px previews"}
           </button>
         </div>
       </div>

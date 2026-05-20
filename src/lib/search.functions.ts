@@ -41,15 +41,15 @@ export const searchPublicImages = createServerFn({ method: "POST" })
 
     const { data: rows, error } = await supabaseAdmin
       .from("images")
-      .select("id, image_number, title, caption, keywords, storage_path, preview_path")
+      .select("id, image_number, title, caption, keywords, preview_path")
       .not("keyworded_at", "is", null)
+      .not("preview_path", "is", null)
       .order("image_number", { ascending: false })
       .limit(200);
     if (error) throw new Error(error.message);
 
-    const merged = rows ?? [];
-
-    const paths = merged.map((r) => r.preview_path ?? r.storage_path);
+    const merged = (rows ?? []).filter((r) => !!r.preview_path);
+    const paths = merged.map((r) => r.preview_path as string);
     const signed = paths.length
       ? await supabaseAdmin.storage
           .from("images-private")
@@ -71,15 +71,14 @@ export const getPublicImage = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<PublicImageDetail | null> => {
     const { data: row, error } = await supabaseAdmin
       .from("images")
-      .select("id, image_number, title, caption, keywords, category, pricing_tier, storage_path, preview_path")
+      .select("id, image_number, title, caption, keywords, category, pricing_tier, preview_path")
       .eq("id", data.id)
       .maybeSingle();
     if (error) throw new Error(error.message);
-    if (!row) return null;
-    const path = row.preview_path ?? row.storage_path;
+    if (!row || !row.preview_path) return null;
     const signed = await supabaseAdmin.storage
       .from("images-private")
-      .createSignedUrl(path, 3600);
+      .createSignedUrl(row.preview_path, 3600);
     return {
       id: row.id,
       image_number: row.image_number as number,
@@ -100,16 +99,16 @@ export const getPublicImagesByIds = createServerFn({ method: "POST" })
     if (data.ids.length === 0) return [];
     const { data: rows, error } = await supabaseAdmin
       .from("images")
-      .select("id, image_number, title, caption, keywords, storage_path, preview_path")
+      .select("id, image_number, title, caption, keywords, preview_path")
       .in("id", data.ids);
     if (error) throw new Error(error.message);
 
-    const byId = new Map((rows ?? []).map((r) => [r.id, r]));
+    const byId = new Map((rows ?? []).filter((r) => !!r.preview_path).map((r) => [r.id, r]));
     const ordered = data.ids.map((id) => byId.get(id)).filter(Boolean) as Array<
       NonNullable<ReturnType<typeof byId.get>>
     >;
 
-    const paths = ordered.map((r) => r.preview_path ?? r.storage_path);
+    const paths = ordered.map((r) => r.preview_path as string);
     const signed = paths.length
       ? await supabaseAdmin.storage
           .from("images-private")
@@ -141,18 +140,19 @@ export const getSimilarShootImages = createServerFn({ method: "POST" })
 
     const { data: rows, error } = await supabaseAdmin
       .from("images")
-      .select("id, image_number, title, caption, keywords, storage_path, preview_path")
+      .select("id, image_number, title, caption, keywords, preview_path")
       .gte("image_number", min)
       .lte("image_number", max)
       .neq("id", data.excludeId)
       .not("keyworded_at", "is", null)
+      .not("preview_path", "is", null)
       .order("image_number", { ascending: true })
       .limit(60);
     if (error) throw new Error(error.message);
-    const merged = rows ?? [];
+    const merged = (rows ?? []).filter((r) => !!r.preview_path);
     if (merged.length === 0) return [];
 
-    const paths = merged.map((r) => r.preview_path ?? r.storage_path);
+    const paths = merged.map((r) => r.preview_path as string);
     const signed = await supabaseAdmin.storage
       .from("images-private")
       .createSignedUrls(paths, 3600);
