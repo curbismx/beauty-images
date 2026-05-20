@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requireAdmin } from "@/integrations/supabase/admin-middleware";
 import { z } from "zod";
 
 export type PendingImage = {
@@ -10,7 +10,7 @@ export type PendingImage = {
 };
 
 export const getImageStats = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireAdmin])
   .handler(async ({ context }) => {
     const { supabase } = context;
     const [{ count: total }, { count: pending }] = await Promise.all([
@@ -34,7 +34,7 @@ export type RecentImage = {
 };
 
 export const getRecentImages = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireAdmin])
   .inputValidator(z.object({ limit: z.number().int().min(1).max(200).default(50) }).parse)
   .handler(async ({ data, context }) => {
     const { supabase } = context;
@@ -68,7 +68,7 @@ export type LibraryImage = RecentImage & {
 };
 
 export const listImages = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireAdmin])
   .inputValidator(
     z
       .object({
@@ -139,7 +139,7 @@ export type ImageDetail = {
 };
 
 export const getImage = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireAdmin])
   .inputValidator(z.object({ id: z.string().uuid() }).parse)
   .handler(async ({ data, context }) => {
     const { supabase } = context;
@@ -173,7 +173,7 @@ export const getImage = createServerFn({ method: "GET" })
   });
 
 export const updateImage = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireAdmin])
   .inputValidator(
     z.object({
       id: z.string().uuid(),
@@ -262,7 +262,7 @@ function guessMime(filename: string): string {
 }
 
 export const keywordPendingBatch = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireAdmin])
   .inputValidator(z.object({ limit: z.number().int().min(1).max(50) }).parse)
   .handler(async ({ data, context }) => {
     const { supabase } = context;
@@ -309,7 +309,7 @@ export const keywordPendingBatch = createServerFn({ method: "POST" })
   });
 
 export const publishAllReady = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireAdmin])
   .handler(async ({ context }) => {
     const { data, error } = await context.supabase
       .from("images")
@@ -322,7 +322,7 @@ export const publishAllReady = createServerFn({ method: "POST" })
   });
 
 export const unpublishAll = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireAdmin])
   .handler(async ({ context }) => {
     const { data, error } = await context.supabase
       .from("images")
@@ -334,7 +334,7 @@ export const unpublishAll = createServerFn({ method: "POST" })
   });
 
 export const deleteImages = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireAdmin])
   .inputValidator(z.object({ ids: z.array(z.string().uuid()).min(1).max(1000) }).parse)
   .handler(async ({ data, context }) => {
     const { supabase } = context;
@@ -357,7 +357,7 @@ export const deleteImages = createServerFn({ method: "POST" })
   });
 
 export const listImagesMissingPreview = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireAdmin])
   .inputValidator(z.object({ limit: z.number().int().min(1).max(50).default(10) }).parse)
   .handler(async ({ data, context }) => {
     const { supabase } = context;
@@ -382,7 +382,7 @@ export const listImagesMissingPreview = createServerFn({ method: "GET" })
   });
 
 export const countImagesMissingPreview = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireAdmin])
   .handler(async ({ context }) => {
     const { count, error } = await context.supabase
       .from("images")
@@ -393,7 +393,7 @@ export const countImagesMissingPreview = createServerFn({ method: "GET" })
   });
 
 export const setImagePreviewPath = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireAdmin])
   .inputValidator(
     z.object({ id: z.string().uuid(), preview_path: z.string().min(1).max(500) }).parse,
   )

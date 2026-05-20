@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requireAdmin } from "@/integrations/supabase/admin-middleware";
 
 export type VisitorRow = {
   id: string;
@@ -16,7 +16,7 @@ export type VisitorRow = {
 };
 
 export const getVisitors = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireAdmin])
   .handler(async ({ context }) => {
     const { supabase } = context;
     const today = new Date().toISOString().slice(0, 10);
