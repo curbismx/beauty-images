@@ -252,6 +252,7 @@ function Index() {
                       params={{ id: r.id }}
                       className="search-result-card"
                       onMouseDown={(e) => e.preventDefault()}
+                      onClick={saveSearchState}
                     >
                       {r.signed_url ? (
                         <img src={r.signed_url} alt={r.title ?? r.caption ?? ""} loading="lazy" />
