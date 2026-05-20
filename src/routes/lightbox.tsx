@@ -39,6 +39,19 @@ function LightboxPage() {
   const [loading, setLoading] = useState(true);
   const [masonry, setMasonry] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [cols, setCols] = useState(4);
+
+  useEffect(() => {
+    const calc = () => {
+      const w = window.innerWidth;
+      if (w <= 768) setCols(2);
+      else if (w <= 900) setCols(3);
+      else setCols(4);
+    };
+    calc();
+    window.addEventListener("resize", calc);
+    return () => window.removeEventListener("resize", calc);
+  }, []);
 
   useEffect(() => {
     let alive = true;
@@ -66,11 +79,36 @@ function LightboxPage() {
     setConfirmOpen(false);
   }, []);
 
+  const renderCard = (r: PublicSearchResult) => (
+    <div key={r.id} className="search-result-card">
+      <Link to="/image/$id" params={{ id: r.id }} className="src-link">
+        {r.signed_url ? (
+          <img src={r.signed_url} alt={r.title ?? r.caption ?? ""} loading="lazy" />
+        ) : (
+          <div className="search-result-fallback" />
+        )}
+      </Link>
+      <button
+        type="button"
+        className="src-remove"
+        aria-label="Remove from lightbox"
+        onClick={() => removeFromLightbox(r.id)}
+      >
+        <X size={14} />
+      </button>
+      <figcaption>
+        <div className="src-num">#{String(r.image_number).padStart(5, "0")}</div>
+        {r.title && <div className="src-title">{r.title}</div>}
+      </figcaption>
+    </div>
+  );
+
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
       <div className="lb-root">
         <Link to="/" className="lb-back">← BACK TO SEARCH</Link>
+
 
         <div className="search-results">
           <div className="search-results-header">
@@ -108,33 +146,17 @@ function LightboxPage() {
             </div>
           )}
 
-          {!loading && items.length > 0 && (
-            <div className={masonry ? "search-results-masonry" : "search-results-grid"}>
-              {items.map((r) => (
-                <div key={r.id} className="search-result-card">
-                  <Link
-                    to="/image/$id"
-                    params={{ id: r.id }}
-                    className="src-link"
-                  >
-                    {r.signed_url ? (
-                      <img src={r.signed_url} alt={r.title ?? r.caption ?? ""} loading="lazy" />
-                    ) : (
-                      <div className="search-result-fallback" />
-                    )}
-                  </Link>
-                  <button
-                    type="button"
-                    className="src-remove"
-                    aria-label="Remove from lightbox"
-                    onClick={() => removeFromLightbox(r.id)}
-                  >
-                    <X size={14} />
-                  </button>
-                  <figcaption>
-                    <div className="src-num">#{String(r.image_number).padStart(5, "0")}</div>
-                    {r.title && <div className="src-title">{r.title}</div>}
-                  </figcaption>
+          {!loading && items.length > 0 && !masonry && (
+            <div className="search-results-grid">
+              {items.map((r) => renderCard(r))}
+            </div>
+          )}
+
+          {!loading && items.length > 0 && masonry && (
+            <div className="search-results-masonry">
+              {Array.from({ length: cols }, (_, ci) => (
+                <div className="masonry-col" key={ci}>
+                  {items.filter((_, i) => i % cols === ci).map((r) => renderCard(r))}
                 </div>
               ))}
             </div>
@@ -229,19 +251,22 @@ const CSS = `
   gap: 24px;
 }
 
-/* Masonry: full images, not square-cropped */
+/* Masonry: flex-based columns guarantee top-row alignment */
 .search-results-masonry {
-  column-count: 4;
-  column-gap: 24px;
-  column-fill: balance;
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
 }
-@media (max-width: 1200px) { .search-results-masonry { column-count: 3; } }
-@media (max-width: 768px)  { .search-results-masonry { column-count: 2; column-gap: 14px; } }
+.masonry-col {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
 .search-results-masonry .search-result-card {
-  break-inside: avoid;
-  margin: 0 0 24px;
   display: block;
-  vertical-align: top;
+  margin: 0;
 }
 .search-results-masonry .search-result-card:hover { transform: none; }
 .search-results-masonry .search-result-card img,
@@ -252,6 +277,10 @@ const CSS = `
   object-fit: initial;
   display: block;
   background: #eee;
+}
+@media (max-width: 768px) {
+  .search-results-masonry { gap: 14px; }
+  .masonry-col { gap: 14px; }
 }
 
 .search-result-card {
