@@ -24,6 +24,9 @@ function AccountPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [sales, setSales] = useState<Sale[]>([]);
+  const [newPassword, setNewPassword] = useState("");
+  const [pwMsg, setPwMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
+  const [pwBusy, setPwBusy] = useState(false);
 
   useEffect(() => {
     if (loading) return;
