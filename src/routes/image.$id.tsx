@@ -117,6 +117,21 @@ function ImageDetail() {
             </button>
           </div>
           <nav className="img-header-right">
+            <button
+              type="button"
+              className={`img-nav-link${inLightbox ? " img-nav-link--on" : ""}`}
+              onClick={() => (inLightbox ? removeFromLightbox(id) : addToLightbox(id))}
+            >
+              {inLightbox ? (
+                <>
+                  <Check size={12} style={{ marginRight: 6, verticalAlign: "-2px" }} />
+                  IN LIGHTBOX
+                </>
+              ) : (
+                "ADD TO LIGHTBOX"
+              )}
+            </button>
+            <span className="img-nav-sep">/</span>
             <a className="img-nav-link" href="/lightbox">LIGHTBOX</a>
             <span className="img-nav-sep">/</span>
             <a className="img-nav-link" href="/basket">BASKET</a>
