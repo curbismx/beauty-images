@@ -40,32 +40,41 @@ const HERO_IMAGES = [
   "/hero-10.jpg",
 ];
 
+type SavedSearchState = {
+  q?: string;
+  y?: number;
+  results?: PublicSearchResult[];
+};
+
+function readRestoreSearchState(): SavedSearchState | null {
+  if (typeof window === "undefined") return null;
+  try {
+    if (!sessionStorage.getItem("bi_restore_search")) return null;
+    const raw = sessionStorage.getItem("bi_search_state");
+    if (!raw) return null;
+    const saved = JSON.parse(raw) as SavedSearchState;
+    return saved.q ? saved : null;
+  } catch {
+    return null;
+  }
+}
+
 function pad(n: number) {
   return String(n).padStart(2, "0");
 }
 
 function Index() {
-  const initialQuery = (() => {
-    if (typeof window === "undefined") return "";
-    try {
-      if (sessionStorage.getItem("bi_restore_search")) {
-        const raw = sessionStorage.getItem("bi_search_state");
-        if (raw) {
-          const saved = JSON.parse(raw) as { q?: string };
-          return saved.q ?? "";
-        }
-      }
-    } catch { /* ignore */ }
-    return "";
-  })();
+  const [restoreState] = useState<SavedSearchState | null>(() => readRestoreSearchState());
+  const [restoringSearch, setRestoringSearch] = useState(() => Boolean(restoreState?.q));
   const [current, setCurrent] = useState(0);
   const [searchFocused, setSearchFocused] = useState(false);
-  const [searchValue, setSearchValue] = useState(initialQuery);
-  const [submittedQuery, setSubmittedQuery] = useState(initialQuery);
-  const [results, setResults] = useState<PublicSearchResult[]>([]);
+  const [searchValue, setSearchValue] = useState(restoreState?.q ?? "");
+  const [submittedQuery, setSubmittedQuery] = useState(restoreState?.q ?? "");
+  const [results, setResults] = useState<PublicSearchResult[]>(restoreState?.results ?? []);
   const [searching, setSearching] = useState(false);
   const runSearch = useServerFn(searchPublicImages);
   const justClosedSearchRef = useRef(false);
+  const restoreConsumedRef = useRef(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const heroRef = useRef<HTMLElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
@@ -82,13 +91,18 @@ function Index() {
     img.src = "/hero-search.jpg";
   }, []);
 
-
   const goPrev = () => {
-    if (justClosedSearchRef.current) { justClosedSearchRef.current = false; return; }
+    if (justClosedSearchRef.current) {
+      justClosedSearchRef.current = false;
+      return;
+    }
     setCurrent((c) => (c - 1 + HERO_IMAGES.length) % HERO_IMAGES.length);
   };
   const goNext = () => {
-    if (justClosedSearchRef.current) { justClosedSearchRef.current = false; return; }
+    if (justClosedSearchRef.current) {
+      justClosedSearchRef.current = false;
+      return;
+    }
     setCurrent((c) => (c + 1) % HERO_IMAGES.length);
   };
 
@@ -114,34 +128,54 @@ function Index() {
     }
   };
 
-  // Restore previous search + scroll position ONLY when arriving back from /image/:id.
-  // saveSearchState() sets a one-shot flag we consume + clear here, so a fresh
-  // navigation to "/" (e.g. clicking the logo) shows the home page, not stale results.
+  // Restore previous search immediately when arriving back from /image/:id.
+  // The saved result rows avoid replaying the home -> search transition and network search.
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined" || !restoreState?.q || restoreConsumedRef.current) return;
+    restoreConsumedRef.current = true;
     try {
-      const flag = sessionStorage.getItem("bi_restore_search");
-      if (!flag) return;
       sessionStorage.removeItem("bi_restore_search");
-      const raw = sessionStorage.getItem("bi_search_state");
-      if (!raw) return;
-      const saved = JSON.parse(raw) as { q?: string; y?: number };
-      if (saved.q) {
-        setSearchValue(saved.q);
-        submitSearch(saved.q, saved.y);
-      }
-    } catch { /* ignore */ }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    } catch {
+      /* ignore */
+    }
+    const restoreScroll = () => {
+      if (typeof restoreState.y === "number") window.scrollTo(0, restoreState.y);
+      setRestoringSearch(false);
+    };
+    if (restoreState.results?.length) {
+      requestAnimationFrame(() => requestAnimationFrame(restoreScroll));
+      return;
+    }
+    let alive = true;
+    const q = restoreState.q.trim();
+    setSearching(true);
+    runSearch({ data: { q, limit: 60 } })
+      .then((r) => {
+        if (!alive) return;
+        setResults(r);
+        restoreScroll();
+      })
+      .catch(() => {
+        if (!alive) return;
+        setResults([]);
+        setRestoringSearch(false);
+      })
+      .finally(() => alive && setSearching(false));
+    return () => {
+      alive = false;
+    };
+  }, [restoreState, runSearch]);
 
   const saveSearchState = () => {
     try {
       sessionStorage.setItem(
         "bi_search_state",
-        JSON.stringify({ q: submittedQuery, y: window.scrollY }),
+        JSON.stringify({ q: submittedQuery || searchValue.trim(), y: window.scrollY, results }),
       );
       sessionStorage.setItem("bi_restore_search", "1");
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
   };
 
   const goHome = (suppressNextHeroClick = false) => {
@@ -151,7 +185,9 @@ function Index() {
     try {
       sessionStorage.removeItem("bi_search_state");
       sessionStorage.removeItem("bi_restore_search");
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
     setSearchValue("");
     setSubmittedQuery("");
     setResults([]);
@@ -182,9 +218,11 @@ function Index() {
     <>
       <style dangerouslySetInnerHTML={{ __html: PAGE_CSS }} />
       <div className="curbism-root">
-
         {/* HERO */}
-        <section ref={heroRef} className={`hero${searchActive ? " hero--search" : ""}${submittedQuery && searchValue.length > 0 ? " hero--results" : ""}`}>
+        <section
+          ref={heroRef}
+          className={`hero${searchActive ? " hero--search" : ""}${submittedQuery && searchValue.length > 0 ? " hero--results" : ""}${restoringSearch ? " hero--instant" : ""}`}
+        >
           {HERO_IMAGES.map((src, i) => (
             <img
               key={src}
@@ -199,16 +237,8 @@ function Index() {
             alt=""
           />
 
-          <div
-            className="hero-zone hero-zone--left"
-            aria-label="Previous image"
-            onClick={goPrev}
-          />
-          <div
-            className="hero-zone hero-zone--right"
-            aria-label="Next image"
-            onClick={goNext}
-          />
+          <div className="hero-zone hero-zone--left" aria-label="Previous image" onClick={goPrev} />
+          <div className="hero-zone hero-zone--right" aria-label="Next image" onClick={goNext} />
 
           <button
             type="button"
@@ -246,7 +276,15 @@ function Index() {
               disabled={!searchValue.trim() || searching}
               onMouseDown={(e) => e.preventDefault()}
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="square">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="square"
+              >
                 <path d="M5 12h14M13 5l7 7-7 7" />
               </svg>
             </button>
@@ -263,7 +301,10 @@ function Index() {
               <div className="appeared-in-label">PUBLISHED IN</div>
               <div className="appeared-in-marquee">
                 <div className="appeared-in-track">
-                  <img src="/appeared-in.png" alt="Published in Vogue, Thalgo, El País, Lexus, Apple" />
+                  <img
+                    src="/appeared-in.png"
+                    alt="Published in Vogue, Thalgo, El País, Lexus, Apple"
+                  />
                   <img src="/appeared-in.png" alt="" aria-hidden="true" />
                 </div>
               </div>
@@ -272,7 +313,10 @@ function Index() {
             <div className="intro-text">
               <h2>ADVERTISING DESIGN &amp; EDITORIAL IMAGES</h2>
               <p>
-                PROVIDING IMAGES TO HIGH-END PUBLICATIONS AND ADVERTISING FOR OVER 20 YEARS. ALL OUR IMAGES ARE EXCLUSIVE TO BEAUTY IMAGES AND ARE SOLD ON A <span style={{ color: "#D75F68" }}>RIGHTS MANAGED</span> BASIS. ALL REAL PEOPLE. REAL PHOTOGRAPHY. WITH NO AI PRODUCTION AT ALL.
+                PROVIDING IMAGES TO HIGH-END PUBLICATIONS AND ADVERTISING FOR OVER 20 YEARS. ALL OUR
+                IMAGES ARE EXCLUSIVE TO BEAUTY IMAGES AND ARE SOLD ON A{" "}
+                <span style={{ color: "#D75F68" }}>RIGHTS MANAGED</span> BASIS. ALL REAL PEOPLE.
+                REAL PHOTOGRAPHY. WITH NO AI PRODUCTION AT ALL.
               </p>
               <button
                 type="button"
@@ -293,20 +337,26 @@ function Index() {
             <div className="search-results" ref={resultsRef}>
               <div className="search-results-header">
                 <div className="srh-text">
-                {submittedQuery ? (
-                  <>
-                    SEARCH RESULTS
-                    <span className="srp-meta">
-                      {" "}/ "{submittedQuery}"
-                      {!searching && <> · {results.length} {results.length === 1 ? "IMAGE" : "IMAGES"}</>}
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    SEARCH RESULTS
-                    <span className="srp-hint"> WILL APPEAR HERE</span>
-                  </>
-                )}
+                  {submittedQuery ? (
+                    <>
+                      SEARCH RESULTS
+                      <span className="srp-meta">
+                        {" "}
+                        / "{submittedQuery}"
+                        {!searching && (
+                          <>
+                            {" "}
+                            · {results.length} {results.length === 1 ? "IMAGE" : "IMAGES"}
+                          </>
+                        )}
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      SEARCH RESULTS
+                      <span className="srp-hint"> WILL APPEAR HERE</span>
+                    </>
+                  )}
                 </div>
                 <Link to="/lightbox" className="srh-lightbox" aria-label="Open lightbox">
                   <Layers size={16} />
@@ -386,11 +436,9 @@ function FeaturedMasonry() {
       const rows = data as FeaturedRow[];
       const next = rows.map((r) => ({
         id: r.id,
-        url: supabase.storage
-          .from("featured-images")
-          .getPublicUrl(r.storage_path, {
-            transform: { height: 800, resize: "contain", quality: 75 },
-          }).data.publicUrl,
+        url: supabase.storage.from("featured-images").getPublicUrl(r.storage_path, {
+          transform: { height: 800, resize: "contain", quality: 75 },
+        }).data.publicUrl,
         alt: r.filename,
       }));
       setItems((prev) => [...prev, ...next]);
@@ -407,7 +455,6 @@ function FeaturedMasonry() {
 
   useEffect(() => {
     loadMore();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -442,7 +489,7 @@ function MasonryColumns({ items }: { items: Array<{ id: string; url: string; alt
     window.addEventListener("resize", update);
     return () => window.removeEventListener("resize", update);
   }, []);
-  const buckets: typeof items[] = Array.from({ length: cols }, () => []);
+  const buckets: (typeof items)[] = Array.from({ length: cols }, () => []);
   items.forEach((it, i) => buckets[i % cols].push(it));
   return (
     <div className="featured-masonry-grid">
@@ -473,6 +520,13 @@ const PAGE_CSS = `
 }
 .curbism-root .hero--results {
   background: white;
+}
+.curbism-root .hero--instant,
+.curbism-root .hero--instant .bg-img,
+.curbism-root .hero--instant + .home-stack .home-fade,
+.curbism-root .hero--instant + .home-stack .search-results {
+  transition: none !important;
+  animation: none !important;
 }
 .curbism-root .hero .bg-img {
   position: absolute; inset: 0;
