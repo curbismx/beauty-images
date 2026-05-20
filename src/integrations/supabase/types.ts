@@ -128,6 +128,30 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       sales: {
         Row: {
           amount: number | null
@@ -144,6 +168,7 @@ export type Database = {
           stripe_payment_id: string | null
           territory: string | null
           usage_type: string | null
+          user_id: string | null
         }
         Insert: {
           amount?: number | null
@@ -160,6 +185,7 @@ export type Database = {
           stripe_payment_id?: string | null
           territory?: string | null
           usage_type?: string | null
+          user_id?: string | null
         }
         Update: {
           amount?: number | null
@@ -176,6 +202,7 @@ export type Database = {
           stripe_payment_id?: string | null
           territory?: string | null
           usage_type?: string | null
+          user_id?: string | null
         }
         Relationships: [
           {
