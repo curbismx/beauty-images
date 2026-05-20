@@ -263,7 +263,8 @@ const CSS = `
 .img-root { background: #000; color: #e8e8e8; min-height: 100vh; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
 .img-root * { box-sizing: border-box; }
 
-.img-header { position: fixed; top: 0; left: 0; right: 0; z-index: 20; padding: 22px 36px; display: flex; justify-content: space-between; align-items: center; pointer-events: none; gap: 24px; }
+.img-header { position: fixed; top: 0; left: 0; right: 0; z-index: 20; padding: 22px 36px; display: flex; justify-content: space-between; align-items: center; pointer-events: none; gap: 24px; opacity: 0; transition: opacity 0.4s ease 0.05s; }
+.img-header--ready { opacity: 1; }
 .img-header-left { display: flex; align-items: center; gap: 14px; pointer-events: auto; }
 .img-header-right { display: flex; align-items: center; gap: 10px; pointer-events: auto; }
 .img-back { display: inline-flex; align-items: center; gap: 8px; background: none; border: 0; padding: 0; cursor: pointer; color: #fff; font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; font-weight: 700; opacity: 0.85; transition: opacity 0.2s ease, color 0.2s ease; font-family: inherit; }
