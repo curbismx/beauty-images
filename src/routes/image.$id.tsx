@@ -32,11 +32,11 @@ function ImageDetail() {
   }, [id, fetchImage]);
 
   const TIERS = [
-    { id: "small" as const, label: "Small", price: "£150.00", sub: "1280 px (4.27 x 2.85 cm) · 300 dpi" },
-    { id: "medium" as const, label: "Medium", price: "£275.00", sub: "1957 x 1538 px (16.57 x 13.02 cm) · 300 dpi | 3 MP" },
-    { id: "large" as const, label: "Large", price: "£375.00", sub: "4000 px (33.87 x 22.58 cm) · 300 dpi | 12 MP" },
-    { id: "pack" as const, label: "5 Large images or 4K and HD videos", price: "£265.00", sub: "per download" },
+    { id: "small" as const, label: "Small", price: "£150.00", sub: "1280 px · 300 dpi" },
+    { id: "medium" as const, label: "Medium", price: "£275.00", sub: "1957 x 1538 px · 3 MP" },
+    { id: "large" as const, label: "Large", price: "£375.00", sub: "4000 px · 12 MP" },
   ];
+
 
   return (
     <>
