@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState, useSyncExternalStore, useCallback } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Trash2, X, LayoutGrid, Rows3 } from "lucide-react";
+import { X, LayoutGrid, Rows3 } from "lucide-react";
 import {
   getBasket,
   removeFromBasket,
