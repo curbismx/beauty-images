@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, useSyncExternalStore } from "react";
-import { Eye, EyeOff, Check, Plus } from "lucide-react";
+import { Check } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { getPublicImage, type PublicImageDetail } from "@/lib/search.functions";
 import {
@@ -57,7 +57,6 @@ function ImageDetail() {
   const [loading, setLoading] = useState(true);
   const [imgReady, setImgReady] = useState(false);
   const [tier, setTier] = useState<TierId>("medium");
-  const [showLicence, setShowLicence] = useState(true);
 
   const lbJson = useSyncExternalStore(
     subscribeLightbox,
@@ -118,6 +117,21 @@ function ImageDetail() {
             </button>
           </div>
           <nav className="img-header-right">
+            <button
+              type="button"
+              className={`img-nav-link${inLightbox ? " img-nav-link--on" : ""}`}
+              onClick={() => (inLightbox ? removeFromLightbox(id) : addToLightbox(id))}
+            >
+              {inLightbox ? (
+                <>
+                  <Check size={12} style={{ marginRight: 6, verticalAlign: "-2px" }} />
+                  IN LIGHTBOX
+                </>
+              ) : (
+                "ADD TO LIGHTBOX"
+              )}
+            </button>
+            <span className="img-nav-sep">/</span>
             <a className="img-nav-link" href="/lightbox">LIGHTBOX</a>
             <span className="img-nav-sep">/</span>
             <a className="img-nav-link" href="/basket">BASKET</a>
@@ -153,70 +167,29 @@ function ImageDetail() {
           </div>
 
 
-          <div className={`licence-wrap${imgReady ? " licence-wrap--ready" : ""}`}>
-            {showLicence ? (
-              <aside className="licence-card">
-                <button
-                  type="button"
-                  className="lc-toggle"
-                  aria-label="Hide pricing"
-                  onClick={() => setShowLicence(false)}
-                >
-                  <Eye size={16} />
-                </button>
-
-                <div className="lc-eyebrow">PURCHASE A LICENCE</div>
-
-                <div className="lc-tiles">
-
-                  {TIERS.map((t) => {
-                    const active = tier === t.id;
-                    return (
-                      <button
-                        key={t.id}
-                        type="button"
-                        className={`lc-tile${active ? " lc-tile--active" : ""}`}
-                        onClick={() => setTier(t.id)}
-                      >
-                        <span className="lc-tile-label">{t.label}</span>
-                        <span className="lc-tile-price">{t.price}</span>
-                        <span className="lc-tile-sub">{t.sub}</span>
-                      </button>
-                    );
-                  })}
+          <aside className={`licence-wrap${imgReady ? " licence-wrap--ready" : ""}`}>
+            <div className="lc-eyebrow">LICENCE</div>
+            <div className="lc-tiles">
+              {TIERS.map((t) => {
+                const active = tier === t.id;
+                return (
                   <button
+                    key={t.id}
                     type="button"
-                    className={`lc-tile lc-tile--lb${inLightbox ? " lc-tile--lb-on" : ""}`}
-                    onClick={() => (inLightbox ? removeFromLightbox(id) : addToLightbox(id))}
+                    className={`lc-tile${active ? " lc-tile--active" : ""}`}
+                    onClick={() => setTier(t.id)}
                   >
-                    <span className="lc-tile-lb-icon" aria-hidden="true">
-                      {inLightbox ? <Check size={18} /> : <Plus size={18} />}
-                    </span>
-                    <span className="lc-tile-lb-label">LIGHTBOX</span>
-
+                    <span className="lc-tile-label">{t.label}</span>
+                    <span className="lc-tile-price">{t.price}</span>
+                    <span className="lc-tile-sub">{t.sub}</span>
                   </button>
-                  <button type="button" className="lc-tile lc-tile--cta">
-                    <span className="lc-tile-cta-label">ADD TO BASKET</span>
-                    <span className="lc-tile-cta-price">
-                      {activeTier.price}
-                    </span>
-                  </button>
-                </div>
-              </aside>
-            ) : (
-              <button
-                type="button"
-                className="lc-mini-cta"
-                onClick={() => setShowLicence(true)}
-              >
-                <span className="lc-mini-eye" aria-hidden="true">
-                  <EyeOff size={14} />
-                </span>
-                <span className="lc-mini-label">ADD TO BASKET</span>
-                <span className="lc-mini-price">{activeTier.price}</span>
-              </button>
-            )}
-          </div>
+                );
+              })}
+            </div>
+            <button type="button" className="lc-basket">
+              ADD TO BASKET <span className="lc-basket-price">{activeTier.price}</span>
+            </button>
+          </aside>
         </section>
 
 
@@ -328,63 +301,64 @@ const CSS = `
   background: #0a0a0a;
 }
 
-/* LICENCE PANEL — right column */
+/* LICENCE PANEL — right column: 3 small price tiles + basket button */
 .licence-wrap {
-  background: #000;
-  padding: 0;
+  display: flex; flex-direction: column; gap: 10px;
+  padding: 0 12px 0 0;
   opacity: 0;
   transition: opacity 0.45s ease 0.15s;
   min-width: 0;
 }
 .licence-wrap--ready { opacity: 1; }
 
-
-.licence-card {
-  position: relative;
-  display: block;
-  width: 100%;
-  overflow: hidden;
-  padding: 16px 12px 14px;
-  color: #f0f0f0;
-  font-size: 13px;
-  line-height: 1.5;
-  background:
-    linear-gradient(rgba(255,255,255,0.06), rgba(255,255,255,0.06)) padding-box,
-    repeating-linear-gradient(90deg, rgba(255,255,255,0.55) 0 2px, transparent 2px 6px) top/100% 1px no-repeat,
-    repeating-linear-gradient(90deg, rgba(255,255,255,0.55) 0 2px, transparent 2px 6px) bottom/100% 1px no-repeat,
-    repeating-linear-gradient(0deg, rgba(255,255,255,0.55) 0 2px, transparent 2px 6px) left/1px 100% no-repeat,
-    repeating-linear-gradient(0deg, rgba(255,255,255,0.55) 0 2px, transparent 2px 6px) right/1px 100% no-repeat,
-    rgba(255,255,255,0.06);
+.lc-eyebrow {
+  font-size: 9px; letter-spacing: 0.28em; text-transform: uppercase;
+  color: #888; font-weight: 700; margin: 0 0 2px;
 }
 
-.lc-toggle {
-  position: absolute; top: 10px; right: 10px;
-  background: rgba(255,255,255,0.1); color: #fff;
-  border: 0; width: 30px; height: 30px;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; transition: background 0.2s ease, color 0.2s ease;
-}
-.lc-toggle:hover { background: #D75F68; color: #fff; }
+.lc-tiles { display: flex; flex-direction: column; gap: 8px; }
 
-.lc-mini-cta {
-  display: inline-flex; align-items: stretch; gap: 0;
-  background: #D75F68; color: #fff; border: 0; cursor: pointer; padding: 0;
-  font-family: inherit; font-size: 12px; font-weight: 600;
-  letter-spacing: 0.2em; text-transform: uppercase;
-  box-shadow: 0 4px 18px rgba(0,0,0,0.35);
+.lc-tile {
+  all: unset; cursor: pointer;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto;
+  column-gap: 10px; row-gap: 2px;
+  padding: 10px 12px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.15);
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.lc-tile:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.35); }
+.lc-tile--active { background: rgba(255,255,255,0.14); border-color: #fff; }
+
+.lc-tile-label {
+  grid-column: 1; grid-row: 1;
+  font-size: 11px; font-weight: 700; color: #fff;
+  letter-spacing: 0.18em; text-transform: uppercase;
+}
+.lc-tile-price {
+  grid-column: 2; grid-row: 1 / span 2;
+  align-self: center;
+  font-size: 16px; font-weight: 500; color: #fff;
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.lc-tile-sub {
+  grid-column: 1; grid-row: 2;
+  font-size: 10px; color: #999; line-height: 1.3;
+}
+
+.lc-basket {
+  all: unset; cursor: pointer; text-align: center;
+  margin-top: 4px;
+  padding: 12px 10px;
+  background: #D75F68; color: #fff;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.22em;
+  text-transform: uppercase;
   transition: background 0.2s ease;
 }
-.lc-mini-cta:hover { background: #b94e56; }
-.lc-mini-eye {
-  display: flex; align-items: center; justify-content: center;
-  padding: 12px 14px;
-  border-right: 2px solid #000;
-}
-.lc-mini-label { display: flex; align-items: center; padding: 12px 0 12px 16px; font-weight: 600; }
-.lc-mini-price { display: flex; align-items: center; font-weight: 700; letter-spacing: 0.05em; font-variant-numeric: tabular-nums; padding: 12px 18px 12px 12px; margin-left: 12px; border-left: 1px solid rgba(255,255,255,0.4); }
-
-.lc-eyebrow { font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; color: #fff; margin: 0 32px 12px 0; font-weight: 700; line-height: 1.25; }
-.lc-intro { font-size: 11px; line-height: 1.55; color: #c2c2c2; margin: 0 0 22px; max-width: 560px; }
+.lc-basket:hover { background: #b94e56; }
+.lc-basket-price { font-weight: 600; letter-spacing: 0.05em; margin-left: 8px; font-variant-numeric: tabular-nums; }
 
 /* Detail under image (left-aligned with image) */
 .lc-detail { margin-bottom: 20px; }
@@ -394,48 +368,11 @@ const CSS = `
 .lc-detail-price { font-size: 13px; font-weight: 600; color: #D75F68; font-variant-numeric: tabular-nums; letter-spacing: 0.05em; }
 .lc-detail-text { font-size: 13px; line-height: 1.6; color: #e6e6e6; margin: 0; }
 
-/* TILES for each size + LIGHTBOX + ADD TO BASKET — square */
-.lc-tiles { display: grid; grid-template-columns: minmax(0, 1fr); gap: 9px; width: 100%; min-width: 0; }
-
-.lc-tile {
-  all: unset; cursor: pointer;
-  width: 100%; max-width: 100%; min-width: 0;
-  aspect-ratio: 1 / 1; padding: 10px;
-  display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between;
-  background: rgba(255,255,255,0.08);
-  outline: 1px solid rgba(255,255,255,0.18);
-  transition: background 0.15s ease, outline-color 0.15s ease;
-  box-sizing: border-box; overflow: hidden;
+.img-nav-link {
+  background: none; border: 0; padding: 0; cursor: pointer; font-family: inherit;
 }
-.lc-tile:hover { background: rgba(255,255,255,0.15); }
-.lc-tile--active { background: rgba(255,255,255,0.22); outline: 1px solid #fff; }
-.lc-tile-label { max-width: 100%; font-size: 10px; font-weight: 600; color: #fff; letter-spacing: 0.07em; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.lc-tile-price { max-width: 100%; font-size: clamp(13px, 1.35vw, 16px); font-weight: 400; color: #fff; font-variant-numeric: tabular-nums; align-self: flex-end; white-space: nowrap; }
-.lc-tile-sub { max-width: 100%; font-size: 9px; color: #cfcfcf; line-height: 1.25; overflow-wrap: anywhere; }
+.img-nav-link--on { color: #D75F68; }
 
-
-.lc-tile--lb {
-  background: rgba(255,255,255,0.06);
-  outline: 1px dashed rgba(255,255,255,0.35);
-  aspect-ratio: auto;
-  display: flex; flex-direction: row; align-items: center; justify-content: center; text-align: center; gap: 8px;
-  min-height: 52px;
-}
-.lc-tile--lb:hover { background: rgba(255,255,255,0.14); outline-color: #fff; }
-.lc-tile--lb-on { background: rgba(215,95,104,0.18); outline: 1px solid #D75F68; }
-.lc-tile-lb-icon { display: flex; align-items: center; justify-content: center; color: #fff; }
-.lc-tile-lb-label { font-size: 11px; font-weight: 700; letter-spacing: 0.15em; color: #fff; text-transform: uppercase; line-height: 1.2; }
-
-.lc-tile--cta {
-  background: #D75F68;
-  outline: 1px solid #D75F68;
-  aspect-ratio: auto;
-  display: flex; flex-direction: column; align-items: flex-start; justify-content: center; text-align: left; gap: 4px;
-  min-height: 54px; padding: 9px 10px;
-}
-.lc-tile--cta:hover { background: #b94e56; outline-color: #b94e56; }
-.lc-tile-cta-label { max-width: 100%; font-size: 10px; font-weight: 700; letter-spacing: 0.11em; color: #fff; text-transform: uppercase; line-height: 1.15; }
-.lc-tile-cta-price { max-width: 100%; font-size: 14px; font-weight: 600; color: #fff; font-variant-numeric: tabular-nums; white-space: nowrap; }
 
 
 
@@ -467,8 +404,6 @@ const CSS = `
   .img-stage { padding: 60px 60px 75px; }
   .img-el { max-height: calc(100vh - 120px); }
   .licence-wrap { padding: 0 60px 75px; }
-  .lc-tiles { grid-template-columns: repeat(2, 1fr); max-width: none; }
-  .lc-tile { width: 100%; height: 88px; }
   .img-details { padding: 48px 32px 80px; }
   .img-meta-title { font-size: 24px; }
 }
@@ -476,6 +411,5 @@ const CSS = `
   .img-stage { padding: 70px 24px 75px; }
   .img-el { max-height: calc(100vh - 100px); }
   .licence-wrap { padding: 0 24px 75px; }
-  .licence-card { padding: 20px 18px 18px; }
 }
 `;
