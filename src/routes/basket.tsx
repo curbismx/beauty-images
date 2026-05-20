@@ -374,6 +374,5 @@ const CSS = `
   .search-results-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
   .search-results-masonry { gap: 14px; }
   .masonry-col { gap: 14px; }
-  .basket-checkout-btn { height: 60px; font-size: 13px; letter-spacing: 0.2em; }
 }
 `;
