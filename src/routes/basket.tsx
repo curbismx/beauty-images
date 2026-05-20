@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState, useSyncExternalStore, useCallback } from "react";
+import { useEffect, useState, useSyncExternalStore, useCallback, useMemo } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { X, LayoutGrid, Rows3 } from "lucide-react";
 import {
@@ -13,6 +13,9 @@ import {
   type PublicSearchResult,
 } from "@/lib/search.functions";
 import { useMasonryCols } from "@/lib/view-mode";
+import { useSession } from "@/lib/use-session";
+import { StripeBasketCheckout } from "@/components/StripeBasketCheckout";
+import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 
 export const Route = createFileRoute("/basket")({
   head: () => ({
