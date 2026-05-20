@@ -34,44 +34,20 @@ export const searchPublicImages = createServerFn({ method: "POST" })
       .parse,
   )
   .handler(async ({ data }): Promise<PublicSearchResult[]> => {
-    const raw = data.q.replace(/[%,]/g, " ").trim();
-    const tokens = raw.split(/\s+/).filter(Boolean).slice(0, 6);
+    // TEST MODE: ignore the query and return every keyworded image so we
+    // can iterate on the detail page across all image types. Restore the
+    // proper title/caption/keywords filter + public=true before launch.
+    void data;
 
-    // NOTE: test mode — public filter intentionally removed so unpublished
-    // images appear in results. Restore .eq("public", true) before launch.
-    let q = supabaseAdmin
+    const { data: rows, error } = await supabaseAdmin
       .from("images")
       .select("id, image_number, title, caption, keywords, storage_path")
-      .eq("availability", "available")
+      .not("keyworded_at", "is", null)
       .order("image_number", { ascending: false })
-      .limit(data.limit);
-
-    if (tokens.length) {
-      const orClauses: string[] = [];
-      for (const t of tokens) {
-        const esc = t.replace(/[%,()]/g, " ");
-        orClauses.push(`title.ilike.%${esc}%`);
-        orClauses.push(`caption.ilike.%${esc}%`);
-        orClauses.push(`keywords.cs.{${esc}}`);
-      }
-      q = q.or(orClauses.join(","));
-    }
-
-    const { data: rows, error } = await q;
+      .limit(200);
     if (error) throw new Error(error.message);
 
-    // Test mode: always append the latest N images to every search so we
-    // have something to click into while building the detail page.
-    const haveIds = new Set((rows ?? []).map((r) => r.id));
-    const { data: extras } = await supabaseAdmin
-      .from("images")
-      .select("id, image_number, title, caption, keywords, storage_path")
-      .order("image_number", { ascending: false })
-      .limit(TEST_APPEND_LIMIT);
-    const merged = [
-      ...(rows ?? []),
-      ...((extras ?? []).filter((r) => !haveIds.has(r.id))),
-    ];
+    const merged = rows ?? [];
 
     const paths = merged.map((r) => r.storage_path);
     const signed = paths.length
