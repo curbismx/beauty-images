@@ -13,7 +13,7 @@ function ImageDetail() {
   const fetchImage = useServerFn(getPublicImage);
   const [img, setImg] = useState<PublicImageDetail | null>(null);
   const [loading, setLoading] = useState(true);
-  const [tier, setTier] = useState<"small" | "medium" | "large" | "pack">("medium");
+  const [tier, setTier] = useState<"small" | "medium" | "large">("medium");
   const [showLicence, setShowLicence] = useState(true);
 
   useEffect(() => {
@@ -32,11 +32,11 @@ function ImageDetail() {
   }, [id, fetchImage]);
 
   const TIERS = [
-    { id: "small" as const, label: "Small", price: "£150.00", sub: "1280 px (4.27 x 2.85 cm) · 300 dpi" },
-    { id: "medium" as const, label: "Medium", price: "£275.00", sub: "1957 x 1538 px (16.57 x 13.02 cm) · 300 dpi | 3 MP" },
-    { id: "large" as const, label: "Large", price: "£375.00", sub: "4000 px (33.87 x 22.58 cm) · 300 dpi | 12 MP" },
-    { id: "pack" as const, label: "5 Large images or 4K and HD videos", price: "£265.00", sub: "per download" },
+    { id: "small" as const, label: "Small", price: "£150.00", sub: "1280 px · 300 dpi" },
+    { id: "medium" as const, label: "Medium", price: "£275.00", sub: "1957 x 1538 px · 3 MP" },
+    { id: "large" as const, label: "Large", price: "£375.00", sub: "4000 px · 12 MP" },
   ];
+
 
   return (
     <>
@@ -101,16 +101,12 @@ function ImageDetail() {
                     </button>
                   );
                 })}
-              </div>
-
-              <div className="lc-footer">
-                <div className="lc-total">
-                  <span className="lc-total-amount">
+                <button type="button" className="lc-tile lc-tile--cta">
+                  <span className="lc-tile-cta-label">ADD TO BASKET</span>
+                  <span className="lc-tile-cta-price">
                     {TIERS.find((t) => t.id === tier)?.price}
                   </span>
-                  <span className="lc-total-currency">GBP</span>
-                </div>
-                <button type="button" className="lc-cta">ADD TO BASKET</button>
+                </button>
               </div>
             </aside>
           ) : (
@@ -187,7 +183,7 @@ const CSS = `
 /* BLACK STAGE — 150px black frame around the image */
 .img-stage {
   background: #000;
-  padding: ${FRAME}px ${FRAME}px 40px;
+  padding: ${FRAME}px ${FRAME}px 75px;
   display: flex; align-items: flex-start; justify-content: flex-start;
 }
 
@@ -215,7 +211,7 @@ const CSS = `
 /* LICENCE PANEL — sits flush-left under the image, on the black stage */
 .licence-wrap {
   background: #000;
-  padding: 0 ${FRAME}px ${FRAME}px;
+  padding: 0 ${FRAME}px 75px;
 }
 
 .licence-card {
@@ -245,27 +241,30 @@ const CSS = `
 .lc-toggle:hover { background: #D75F68; color: #fff; }
 
 .lc-mini-cta {
-  display: inline-flex; align-items: center; gap: 14px;
-  padding: 12px 18px 12px 14px;
-  background: #D75F68; color: #fff; border: 0; cursor: pointer;
+  display: inline-flex; align-items: stretch; gap: 0;
+  background: #D75F68; color: #fff; border: 0; cursor: pointer; padding: 0;
   font-family: inherit; font-size: 12px; font-weight: 600;
   letter-spacing: 0.2em; text-transform: uppercase;
   box-shadow: 0 4px 18px rgba(0,0,0,0.35);
   transition: background 0.2s ease;
 }
-.lc-mini-cta:hover { background: #000; box-shadow: inset 0 0 0 1px #D75F68, 0 4px 18px rgba(0,0,0,0.35); }
-.lc-mini-eye { display: flex; align-items: center; justify-content: center; opacity: 0.9; }
-.lc-mini-label { font-weight: 600; }
-.lc-mini-price { font-weight: 700; letter-spacing: 0.05em; font-variant-numeric: tabular-nums; padding-left: 12px; border-left: 1px solid rgba(255,255,255,0.4); }
+.lc-mini-cta:hover { background: #b94e56; }
+.lc-mini-eye {
+  display: flex; align-items: center; justify-content: center;
+  padding: 12px 14px;
+  border-right: 2px solid #000;
+}
+.lc-mini-label { display: flex; align-items: center; padding: 12px 0 12px 16px; font-weight: 600; }
+.lc-mini-price { display: flex; align-items: center; font-weight: 700; letter-spacing: 0.05em; font-variant-numeric: tabular-nums; padding: 12px 18px 12px 12px; margin-left: 12px; border-left: 1px solid rgba(255,255,255,0.4); }
 
 .lc-eyebrow { font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; color: #fff; margin-bottom: 14px; font-weight: 700; }
 .lc-intro { font-size: 11px; line-height: 1.55; color: #c2c2c2; margin: 0 0 22px; max-width: 560px; }
 
-/* SQUARE TILES for each size */
-.lc-tiles { display: grid; grid-template-columns: repeat(4, 160px); gap: 12px; margin-bottom: 22px; }
+/* TILES for each size + the ADD TO BASKET tile */
+.lc-tiles { display: grid; grid-template-columns: repeat(4, 130px); gap: 10px; }
 .lc-tile {
   all: unset; cursor: pointer;
-  width: 160px; height: 160px; padding: 14px;
+  width: 130px; height: 110px; padding: 12px;
   display: flex; flex-direction: column; justify-content: space-between;
   background: rgba(255,255,255,0.08);
   outline: 1px solid rgba(255,255,255,0.18);
@@ -274,22 +273,20 @@ const CSS = `
 }
 .lc-tile:hover { background: rgba(255,255,255,0.15); }
 .lc-tile--active { background: rgba(255,255,255,0.22); outline: 1px solid #fff; }
-.lc-tile-label { font-size: 12px; font-weight: 600; color: #fff; letter-spacing: 0.08em; text-transform: uppercase; }
-.lc-tile-price { font-size: 22px; font-weight: 400; color: #fff; font-variant-numeric: tabular-nums; }
-.lc-tile-sub { font-size: 10px; color: #cfcfcf; line-height: 1.4; }
+.lc-tile-label { font-size: 11px; font-weight: 600; color: #fff; letter-spacing: 0.08em; text-transform: uppercase; }
+.lc-tile-price { font-size: 18px; font-weight: 400; color: #fff; font-variant-numeric: tabular-nums; }
+.lc-tile-sub { font-size: 9px; color: #cfcfcf; line-height: 1.4; }
 
-.lc-footer { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
-.lc-total { display: flex; align-items: baseline; gap: 8px; }
-.lc-total-amount { font-size: 26px; font-weight: 300; color: #fff; font-variant-numeric: tabular-nums; }
-.lc-total-currency { font-size: 11px; color: #aaa; letter-spacing: 0.2em; }
-
-.lc-cta {
-  all: unset; cursor: pointer; display: inline-block;
-  text-align: center; padding: 14px 36px; background: #D75F68; color: #fff;
-  font-size: 12px; font-weight: 600; letter-spacing: 0.2em;
-  transition: background 0.2s ease;
+.lc-tile--cta {
+  background: #D75F68;
+  outline: 1px solid #D75F68;
+  align-items: center; justify-content: center;
+  text-align: center; gap: 8px;
 }
-.lc-cta:hover { background: #000; box-shadow: inset 0 0 0 1px #D75F68; }
+.lc-tile--cta:hover { background: #b94e56; outline-color: #b94e56; }
+.lc-tile-cta-label { font-size: 11px; font-weight: 700; letter-spacing: 0.2em; color: #fff; text-transform: uppercase; }
+.lc-tile-cta-price { font-size: 18px; font-weight: 600; color: #fff; font-variant-numeric: tabular-nums; }
+
 
 
 /* WHITE DETAILS SECTION below the black stage */
@@ -316,18 +313,20 @@ const CSS = `
 .img-meta-cell-value { font-size: 14px; color: #111; }
 
 @media (max-width: 900px) {
-  .img-stage { padding: 60px 60px 30px; }
+  .img-stage { padding: 60px 60px 75px; }
   .img-el { max-height: calc(100vh - 120px); }
-  .licence-wrap { padding: 0 60px 60px; }
+  .licence-wrap { padding: 0 60px 75px; }
   .lc-tiles { grid-template-columns: repeat(2, 1fr); }
-  .lc-tile { width: 100%; height: auto; aspect-ratio: 1 / 1; }
+  .lc-tile { width: 100%; height: 110px; }
   .img-details { padding: 48px 32px 80px; }
   .img-meta-title { font-size: 24px; }
 }
 @media (max-width: 600px) {
-  .img-stage { padding: 70px 24px 24px; }
+  .img-stage { padding: 70px 24px 75px; }
   .img-el { max-height: calc(100vh - 100px); }
-  .licence-wrap { padding: 0 24px 32px; }
+  .licence-wrap { padding: 0 24px 75px; }
+  .licence-card { padding: 20px 18px 18px; }
+}
   .licence-card { padding: 20px 18px 18px; }
 }
 `;
