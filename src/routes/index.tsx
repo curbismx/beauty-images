@@ -697,7 +697,8 @@ const PAGE_CSS = `
   transition: background 0.25s ease, color 0.25s ease, opacity 0.2s ease;
 }
 .curbism-root .hero-search-submit:hover:not(:disabled) { background: #000; color: #fff; }
-.curbism-root .hero-search-submit:disabled { opacity: 0.35; cursor: not-allowed; }
+.curbism-root .hero-search-submit:disabled { cursor: not-allowed; }
+.curbism-root .hero-search-submit svg { opacity: 1; }
 .curbism-root .hero-search:focus-within .hero-search-submit { background: rgba(255,255,255,0.8); }
 .curbism-root .hero-search:focus-within .hero-search-submit:hover:not(:disabled) { background: #000; color: #fff; }
 
