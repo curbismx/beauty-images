@@ -313,18 +313,20 @@ const CSS = `
 .img-meta-cell-value { font-size: 14px; color: #111; }
 
 @media (max-width: 900px) {
-  .img-stage { padding: 60px 60px 30px; }
+  .img-stage { padding: 60px 60px 75px; }
   .img-el { max-height: calc(100vh - 120px); }
-  .licence-wrap { padding: 0 60px 60px; }
+  .licence-wrap { padding: 0 60px 75px; }
   .lc-tiles { grid-template-columns: repeat(2, 1fr); }
-  .lc-tile { width: 100%; height: auto; aspect-ratio: 1 / 1; }
+  .lc-tile { width: 100%; height: 110px; }
   .img-details { padding: 48px 32px 80px; }
   .img-meta-title { font-size: 24px; }
 }
 @media (max-width: 600px) {
-  .img-stage { padding: 70px 24px 24px; }
+  .img-stage { padding: 70px 24px 75px; }
   .img-el { max-height: calc(100vh - 100px); }
-  .licence-wrap { padding: 0 24px 32px; }
+  .licence-wrap { padding: 0 24px 75px; }
+  .licence-card { padding: 20px 18px 18px; }
+}
   .licence-card { padding: 20px 18px 18px; }
 }
 `;
