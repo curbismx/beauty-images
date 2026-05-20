@@ -129,6 +129,7 @@ function Index() {
                 setSearchValue("");
                 setSubmittedQuery("");
                 setResults([]);
+                setCurrent(0);
               }}
               aria-label="Search images"
             />
