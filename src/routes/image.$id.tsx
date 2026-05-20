@@ -427,6 +427,7 @@ const CSS = `
 .lc-tile--cta {
   background: #D75F68;
   outline: 1px solid #D75F68;
+  aspect-ratio: auto;
   display: flex; flex-direction: row; align-items: center; justify-content: space-between; text-align: left; gap: 8px;
   min-height: 56px; padding: 10px 12px;
 }
