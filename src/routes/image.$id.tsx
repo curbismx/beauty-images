@@ -398,7 +398,7 @@ const CSS = `
 
 .lc-tile {
   all: unset; cursor: pointer;
-  aspect-ratio: 1 / 1; padding: 10px 12px;
+  height: 46px; padding: 6px 10px;
   display: flex; flex-direction: column; justify-content: space-between;
   background: rgba(255,255,255,0.08);
   outline: 1px solid rgba(255,255,255,0.18);
