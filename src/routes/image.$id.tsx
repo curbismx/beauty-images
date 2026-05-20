@@ -236,14 +236,13 @@ const CSS = `
   font-size: 13px;
   line-height: 1.5;
   background:
-    linear-gradient(rgba(10,10,10,0.72), rgba(10,10,10,0.72)) padding-box,
-    repeating-linear-gradient(90deg, rgba(255,255,255,0.35) 0 2px, transparent 2px 6px) top/100% 1px no-repeat,
-    repeating-linear-gradient(90deg, rgba(255,255,255,0.35) 0 2px, transparent 2px 6px) bottom/100% 1px no-repeat,
-    repeating-linear-gradient(0deg, rgba(255,255,255,0.35) 0 2px, transparent 2px 6px) left/1px 100% no-repeat,
-    repeating-linear-gradient(0deg, rgba(255,255,255,0.35) 0 2px, transparent 2px 6px) right/1px 100% no-repeat,
-    rgba(8,8,8,0.55);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+    linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)) padding-box,
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.55) 0 2px, transparent 2px 6px) top/100% 1px no-repeat,
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.55) 0 2px, transparent 2px 6px) bottom/100% 1px no-repeat,
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.55) 0 2px, transparent 2px 6px) left/1px 100% no-repeat,
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.55) 0 2px, transparent 2px 6px) right/1px 100% no-repeat,
+    rgba(0,0,0,0.2);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.6);
 }
 
 .lc-toggle {
