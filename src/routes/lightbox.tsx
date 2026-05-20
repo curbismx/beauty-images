@@ -233,14 +233,17 @@ const CSS = `
 .search-results-masonry {
   column-count: 4;
   column-gap: 24px;
+  column-fill: balance;
 }
 @media (max-width: 1200px) { .search-results-masonry { column-count: 3; } }
 @media (max-width: 768px)  { .search-results-masonry { column-count: 2; column-gap: 14px; } }
 .search-results-masonry .search-result-card {
   break-inside: avoid;
-  margin-bottom: 24px;
+  margin: 0 0 24px;
   display: block;
+  vertical-align: top;
 }
+.search-results-masonry .search-result-card:hover { transform: none; }
 .search-results-masonry .search-result-card img,
 .search-results-masonry .search-result-fallback {
   width: 100%;
