@@ -387,10 +387,31 @@ const CSS = `
   padding: 28px 28px 22px;
   box-shadow: 0 30px 80px rgba(0,0,0,0.35);
 }
+.lb-modal--checkout {
+  width: min(720px, calc(100vw - 32px));
+  max-height: calc(100vh - 40px);
+  padding: 0;
+  overflow: hidden;
+  display: flex; flex-direction: column;
+}
+.lb-checkout-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 22px 24px 14px;
+  border-bottom: 1px solid #eee;
+}
+.lb-checkout-close {
+  width: 32px; height: 32px; border: 0; background: transparent; color: #111;
+  display: inline-flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: color 0.15s ease;
+}
+.lb-checkout-close:hover { color: #D75F68; }
+.lb-checkout-body {
+  flex: 1; overflow-y: auto; padding: 16px 24px 24px;
+}
 .lb-modal-title {
   font-family: 'DIN Condensed', 'DIN Alternate', 'Barlow Condensed', 'Oswald', sans-serif;
   font-size: 32px; font-weight: 900; letter-spacing: -0.02em; text-transform: uppercase;
-  line-height: 1; margin-bottom: 14px;
+  line-height: 1; margin: 0;
 }
 .lb-modal-body { font-size: 13px; line-height: 1.5; color: #444; margin-bottom: 22px; }
 .lb-modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
