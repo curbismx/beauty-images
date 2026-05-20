@@ -557,7 +557,7 @@ const PAGE_CSS = `
 .curbism-root .intro-text p { font-size: clamp(28px, 4.2vw, 56px); font-weight: 900; text-transform: uppercase; letter-spacing: -0.035em; line-height: 1.15; color: #111; }
 @media (max-width: 768px) {
   .curbism-root .appeared-in { padding: 24px 24px 12px; }
-  .curbism-root .appeared-in img { width: 90%; max-width: 90%; }
+  .curbism-root .appeared-in-track img { height: 28px; width: auto; max-width: none; padding-right: 48px; }
   .curbism-root .intro-text { padding: 12px 24px 40px; max-width: 100%; }
   .curbism-root .intro-text h2 { font-size: 16px; }
   .curbism-root .intro-text p { font-size: 14px; }
