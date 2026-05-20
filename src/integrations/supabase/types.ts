@@ -80,6 +80,7 @@ export type Database = {
           keywords: string[]
           model_release: boolean
           model_release_pdf_path: string | null
+          preview_path: string | null
           pricing_tier: string | null
           public: boolean
           storage_path: string
@@ -99,6 +100,7 @@ export type Database = {
           keywords?: string[]
           model_release?: boolean
           model_release_pdf_path?: string | null
+          preview_path?: string | null
           pricing_tier?: string | null
           public?: boolean
           storage_path: string
@@ -118,6 +120,7 @@ export type Database = {
           keywords?: string[]
           model_release?: boolean
           model_release_pdf_path?: string | null
+          preview_path?: string | null
           pricing_tier?: string | null
           public?: boolean
           storage_path?: string
