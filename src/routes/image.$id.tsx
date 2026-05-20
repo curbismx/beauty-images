@@ -127,19 +127,31 @@ function ImageDetail() {
         {/* 2/3 image + 1/3 pricing layout */}
         <section className="img-split">
           <div className="img-stage">
-            <div className="img-frame">
-              {img?.signed_url ? (
-                <img
-                  className={`img-el${imgReady ? " img-el--ready" : ""}`}
-                  src={img.signed_url}
-                  alt={img.title ?? ""}
-                  onLoad={() => setImgReady(true)}
-                />
-              ) : (
-                <div className="img-empty">{loading ? "LOADING…" : "IMAGE UNAVAILABLE"}</div>
+            <div className="img-stage-inner">
+              <div className="img-frame">
+                {img?.signed_url ? (
+                  <img
+                    className={`img-el${imgReady ? " img-el--ready" : ""}`}
+                    src={img.signed_url}
+                    alt={img.title ?? ""}
+                    onLoad={() => setImgReady(true)}
+                  />
+                ) : (
+                  <div className="img-empty">{loading ? "LOADING…" : "IMAGE UNAVAILABLE"}</div>
+                )}
+              </div>
+              {imgReady && (
+                <div className="lc-detail lc-detail--under">
+                  <div className="lc-detail-head">
+                    <span className="lc-detail-tier">{activeTier.label.toUpperCase()}</span>
+                    <span className="lc-detail-price">{activeTier.price}</span>
+                  </div>
+                  <p className="lc-detail-text">{activeTier.description}</p>
+                </div>
               )}
             </div>
           </div>
+
 
           <div className={`licence-wrap${imgReady ? " licence-wrap--ready" : ""}`}>
             {showLicence ? (
@@ -154,15 +166,9 @@ function ImageDetail() {
                 </button>
 
                 <div className="lc-eyebrow">PURCHASE A LICENCE</div>
-                <div className="lc-detail">
-                  <div className="lc-detail-head">
-                    <span className="lc-detail-tier">{activeTier.label.toUpperCase()}</span>
-                    <span className="lc-detail-price">{activeTier.price}</span>
-                  </div>
-                  <p className="lc-detail-text">{activeTier.description}</p>
-                </div>
 
                 <div className="lc-tiles">
+
                   {TIERS.map((t) => {
                     const active = tier === t.id;
                     return (
@@ -186,9 +192,8 @@ function ImageDetail() {
                     <span className="lc-tile-lb-icon" aria-hidden="true">
                       {inLightbox ? <Check size={18} /> : <Plus size={18} />}
                     </span>
-                    <span className="lc-tile-lb-label">
-                      {inLightbox ? "IN LIGHTBOX" : "ADD TO LIGHTBOX"}
-                    </span>
+                    <span className="lc-tile-lb-label">LIGHTBOX</span>
+
                   </button>
                   <button type="button" className="lc-tile lc-tile--cta">
                     <span className="lc-tile-cta-label">ADD TO BASKET</span>
@@ -290,9 +295,13 @@ const CSS = `
 .img-stage {
   background: #000;
   padding: 0 ${FRAME}px 0 ${FRAME}px;
-  display: flex; align-items: flex-start; justify-content: flex-start;
   min-width: 0;
 }
+.img-stage-inner {
+  display: inline-block;
+  max-width: 100%;
+}
+
 
 .img-frame {
   position: relative;
@@ -376,18 +385,20 @@ const CSS = `
 .lc-eyebrow { font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; color: #fff; margin-bottom: 14px; font-weight: 700; }
 .lc-intro { font-size: 11px; line-height: 1.55; color: #c2c2c2; margin: 0 0 22px; max-width: 560px; }
 
-/* Expanded detail panel above the tiles — updates with the active tier */
+/* Detail under image (left-aligned with image) */
 .lc-detail { margin-bottom: 20px; }
+.lc-detail--under { margin: 24px 0 0; max-width: 100%; }
 .lc-detail-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 8px; }
 .lc-detail-tier { font-size: 13px; font-weight: 700; color: #fff; letter-spacing: 0.18em; }
 .lc-detail-price { font-size: 13px; font-weight: 600; color: #D75F68; font-variant-numeric: tabular-nums; letter-spacing: 0.05em; }
 .lc-detail-text { font-size: 13px; line-height: 1.6; color: #e6e6e6; margin: 0; }
 
-/* TILES for each size + ADD TO LIGHTBOX + ADD TO BASKET */
+/* TILES for each size + LIGHTBOX + ADD TO BASKET — square */
 .lc-tiles { display: grid; grid-template-columns: 1fr; gap: 10px; }
+
 .lc-tile {
   all: unset; cursor: pointer;
-  height: 88px; padding: 10px 12px;
+  aspect-ratio: 1 / 1; padding: 10px 12px;
   display: flex; flex-direction: column; justify-content: space-between;
   background: rgba(255,255,255,0.08);
   outline: 1px solid rgba(255,255,255,0.18);
