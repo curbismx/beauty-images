@@ -1,8 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useServerFn } from "@tanstack/react-start";
+import { Layers } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { searchPublicImages, type PublicSearchResult } from "@/lib/search.functions";
+import { getLightbox, subscribeLightbox } from "@/lib/lightbox";
 
 export const Route = createFileRoute("/")({
   head: () => ({
