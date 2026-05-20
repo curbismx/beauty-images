@@ -67,11 +67,20 @@ function Index() {
   const runSearch = useServerFn(searchPublicImages);
   const justClosedSearchRef = useRef(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const heroRef = useRef<HTMLElement>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
   const lbCount = useSyncExternalStore(
     subscribeLightbox,
     () => getLightbox().length,
     () => 0,
   );
+
+  // Preload the search hero image so it can fade in smoothly on first focus.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const img = new Image();
+    img.src = "/hero-search.jpg";
+  }, []);
 
 
   const goPrev = () => {
@@ -148,13 +157,30 @@ function Index() {
     window.scrollTo(0, 0);
   };
 
+  // Click outside the search box (and outside search results) returns home.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const onDown = (e: MouseEvent) => {
+      if (!searchActive) return;
+      const target = e.target as Node | null;
+      if (!target) return;
+      const inSearch = heroRef.current?.querySelector(".hero-search")?.contains(target);
+      const inResults = resultsRef.current?.contains(target);
+      const onSubmit = (target as Element).closest?.(".hero-search-submit");
+      if (inSearch || inResults || onSubmit) return;
+      goHome();
+    };
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
+  }, [searchActive]);
+
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: PAGE_CSS }} />
       <div className="curbism-root">
 
         {/* HERO */}
-        <section className={`hero${searchActive ? " hero--search" : ""}${submittedQuery && searchValue.length > 0 ? " hero--results" : ""}`}>
+        <section ref={heroRef} className={`hero${searchActive ? " hero--search" : ""}${submittedQuery && searchValue.length > 0 ? " hero--results" : ""}`}>
           {HERO_IMAGES.map((src, i) => (
             <img
               key={src}
@@ -260,7 +286,7 @@ function Index() {
           </div>
 
           {searchActive && (
-            <div className="search-results">
+            <div className="search-results" ref={resultsRef}>
               <div className="search-results-header">
                 <div className="srh-text">
                 {submittedQuery ? (
