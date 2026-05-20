@@ -241,27 +241,30 @@ const CSS = `
 .lc-toggle:hover { background: #D75F68; color: #fff; }
 
 .lc-mini-cta {
-  display: inline-flex; align-items: center; gap: 14px;
-  padding: 12px 18px 12px 14px;
-  background: #D75F68; color: #fff; border: 0; cursor: pointer;
+  display: inline-flex; align-items: stretch; gap: 0;
+  background: #D75F68; color: #fff; border: 0; cursor: pointer; padding: 0;
   font-family: inherit; font-size: 12px; font-weight: 600;
   letter-spacing: 0.2em; text-transform: uppercase;
   box-shadow: 0 4px 18px rgba(0,0,0,0.35);
   transition: background 0.2s ease;
 }
-.lc-mini-cta:hover { background: #000; box-shadow: inset 0 0 0 1px #D75F68, 0 4px 18px rgba(0,0,0,0.35); }
-.lc-mini-eye { display: flex; align-items: center; justify-content: center; opacity: 0.9; }
-.lc-mini-label { font-weight: 600; }
-.lc-mini-price { font-weight: 700; letter-spacing: 0.05em; font-variant-numeric: tabular-nums; padding-left: 12px; border-left: 1px solid rgba(255,255,255,0.4); }
+.lc-mini-cta:hover { background: #b94e56; }
+.lc-mini-eye {
+  display: flex; align-items: center; justify-content: center;
+  padding: 12px 14px;
+  border-right: 2px solid #000;
+}
+.lc-mini-label { display: flex; align-items: center; padding: 12px 0 12px 16px; font-weight: 600; }
+.lc-mini-price { display: flex; align-items: center; font-weight: 700; letter-spacing: 0.05em; font-variant-numeric: tabular-nums; padding: 12px 18px 12px 12px; margin-left: 12px; border-left: 1px solid rgba(255,255,255,0.4); }
 
 .lc-eyebrow { font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; color: #fff; margin-bottom: 14px; font-weight: 700; }
 .lc-intro { font-size: 11px; line-height: 1.55; color: #c2c2c2; margin: 0 0 22px; max-width: 560px; }
 
-/* SQUARE TILES for each size */
-.lc-tiles { display: grid; grid-template-columns: repeat(4, 160px); gap: 12px; margin-bottom: 22px; }
+/* TILES for each size + the ADD TO BASKET tile */
+.lc-tiles { display: grid; grid-template-columns: repeat(4, 130px); gap: 10px; }
 .lc-tile {
   all: unset; cursor: pointer;
-  width: 160px; height: 160px; padding: 14px;
+  width: 130px; height: 110px; padding: 12px;
   display: flex; flex-direction: column; justify-content: space-between;
   background: rgba(255,255,255,0.08);
   outline: 1px solid rgba(255,255,255,0.18);
@@ -270,22 +273,20 @@ const CSS = `
 }
 .lc-tile:hover { background: rgba(255,255,255,0.15); }
 .lc-tile--active { background: rgba(255,255,255,0.22); outline: 1px solid #fff; }
-.lc-tile-label { font-size: 12px; font-weight: 600; color: #fff; letter-spacing: 0.08em; text-transform: uppercase; }
-.lc-tile-price { font-size: 22px; font-weight: 400; color: #fff; font-variant-numeric: tabular-nums; }
-.lc-tile-sub { font-size: 10px; color: #cfcfcf; line-height: 1.4; }
+.lc-tile-label { font-size: 11px; font-weight: 600; color: #fff; letter-spacing: 0.08em; text-transform: uppercase; }
+.lc-tile-price { font-size: 18px; font-weight: 400; color: #fff; font-variant-numeric: tabular-nums; }
+.lc-tile-sub { font-size: 9px; color: #cfcfcf; line-height: 1.4; }
 
-.lc-footer { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
-.lc-total { display: flex; align-items: baseline; gap: 8px; }
-.lc-total-amount { font-size: 26px; font-weight: 300; color: #fff; font-variant-numeric: tabular-nums; }
-.lc-total-currency { font-size: 11px; color: #aaa; letter-spacing: 0.2em; }
-
-.lc-cta {
-  all: unset; cursor: pointer; display: inline-block;
-  text-align: center; padding: 14px 36px; background: #D75F68; color: #fff;
-  font-size: 12px; font-weight: 600; letter-spacing: 0.2em;
-  transition: background 0.2s ease;
+.lc-tile--cta {
+  background: #D75F68;
+  outline: 1px solid #D75F68;
+  align-items: center; justify-content: center;
+  text-align: center; gap: 8px;
 }
-.lc-cta:hover { background: #000; box-shadow: inset 0 0 0 1px #D75F68; }
+.lc-tile--cta:hover { background: #b94e56; outline-color: #b94e56; }
+.lc-tile-cta-label { font-size: 11px; font-weight: 700; letter-spacing: 0.2em; color: #fff; text-transform: uppercase; }
+.lc-tile-cta-price { font-size: 18px; font-weight: 600; color: #fff; font-variant-numeric: tabular-nums; }
+
 
 
 /* WHITE DETAILS SECTION below the black stage */
