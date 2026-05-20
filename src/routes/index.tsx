@@ -126,6 +126,7 @@ function Index() {
             }}
           >
             <input
+              ref={searchInputRef}
               type="search"
               placeholder="SEARCH"
               value={searchValue}
