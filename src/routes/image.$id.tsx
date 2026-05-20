@@ -343,7 +343,8 @@ const CSS = `
   position: relative;
   display: block;
   width: 100%;
-  padding: 18px 18px 16px;
+  overflow: hidden;
+  padding: 16px 12px 14px;
   color: #f0f0f0;
   font-size: 13px;
   line-height: 1.5;
@@ -382,7 +383,7 @@ const CSS = `
 .lc-mini-label { display: flex; align-items: center; padding: 12px 0 12px 16px; font-weight: 600; }
 .lc-mini-price { display: flex; align-items: center; font-weight: 700; letter-spacing: 0.05em; font-variant-numeric: tabular-nums; padding: 12px 18px 12px 12px; margin-left: 12px; border-left: 1px solid rgba(255,255,255,0.4); }
 
-.lc-eyebrow { font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; color: #fff; margin-bottom: 14px; font-weight: 700; }
+.lc-eyebrow { font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; color: #fff; margin: 0 32px 12px 0; font-weight: 700; line-height: 1.25; }
 .lc-intro { font-size: 11px; line-height: 1.55; color: #c2c2c2; margin: 0 0 22px; max-width: 560px; }
 
 /* Detail under image (left-aligned with image) */
@@ -394,22 +395,23 @@ const CSS = `
 .lc-detail-text { font-size: 13px; line-height: 1.6; color: #e6e6e6; margin: 0; }
 
 /* TILES for each size + LIGHTBOX + ADD TO BASKET — square */
-.lc-tiles { display: grid; grid-template-columns: 1fr; gap: 10px; }
+.lc-tiles { display: grid; grid-template-columns: minmax(0, 1fr); gap: 9px; width: 100%; min-width: 0; }
 
 .lc-tile {
   all: unset; cursor: pointer;
-  aspect-ratio: 1 / 1; padding: 12px;
+  width: 100%; max-width: 100%; min-width: 0;
+  aspect-ratio: 1 / 1; padding: 10px;
   display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between;
   background: rgba(255,255,255,0.08);
   outline: 1px solid rgba(255,255,255,0.18);
   transition: background 0.15s ease, outline-color 0.15s ease;
-  box-sizing: border-box;
+  box-sizing: border-box; overflow: hidden;
 }
 .lc-tile:hover { background: rgba(255,255,255,0.15); }
 .lc-tile--active { background: rgba(255,255,255,0.22); outline: 1px solid #fff; }
-.lc-tile-label { font-size: 11px; font-weight: 600; color: #fff; letter-spacing: 0.08em; text-transform: uppercase; }
-.lc-tile-price { font-size: 18px; font-weight: 400; color: #fff; font-variant-numeric: tabular-nums; align-self: flex-end; }
-.lc-tile-sub { font-size: 10px; color: #cfcfcf; line-height: 1.3; }
+.lc-tile-label { max-width: 100%; font-size: 10px; font-weight: 600; color: #fff; letter-spacing: 0.07em; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lc-tile-price { max-width: 100%; font-size: clamp(13px, 1.35vw, 16px); font-weight: 400; color: #fff; font-variant-numeric: tabular-nums; align-self: flex-end; white-space: nowrap; }
+.lc-tile-sub { max-width: 100%; font-size: 9px; color: #cfcfcf; line-height: 1.25; overflow-wrap: anywhere; }
 
 
 .lc-tile--lb {
@@ -428,12 +430,12 @@ const CSS = `
   background: #D75F68;
   outline: 1px solid #D75F68;
   aspect-ratio: auto;
-  display: flex; flex-direction: row; align-items: center; justify-content: space-between; text-align: left; gap: 8px;
-  min-height: 56px; padding: 10px 12px;
+  display: flex; flex-direction: column; align-items: flex-start; justify-content: center; text-align: left; gap: 4px;
+  min-height: 54px; padding: 9px 10px;
 }
 .lc-tile--cta:hover { background: #b94e56; outline-color: #b94e56; }
-.lc-tile-cta-label { font-size: 11px; font-weight: 700; letter-spacing: 0.15em; color: #fff; text-transform: uppercase; line-height: 1.2; }
-.lc-tile-cta-price { font-size: 15px; font-weight: 600; color: #fff; font-variant-numeric: tabular-nums; }
+.lc-tile-cta-label { max-width: 100%; font-size: 10px; font-weight: 700; letter-spacing: 0.11em; color: #fff; text-transform: uppercase; line-height: 1.15; }
+.lc-tile-cta-price { max-width: 100%; font-size: 14px; font-weight: 600; color: #fff; font-variant-numeric: tabular-nums; white-space: nowrap; }
 
 
 
