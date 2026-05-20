@@ -731,7 +731,24 @@ const PAGE_CSS = `
   line-height: 1.15;
   color: #000;
   margin-bottom: 28px;
+  display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap;
 }
+.curbism-root .search-results-header .srh-text { flex: 1; min-width: 0; }
+.curbism-root .search-results-header .srh-lightbox {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 14px; background: #fff; color: #111; border: 1px solid #111;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.2em;
+  text-decoration: none; text-transform: uppercase;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.curbism-root .search-results-header .srh-lightbox:hover { background: #D75F68; color: #fff; border-color: #D75F68; }
+.curbism-root .search-results-header .srh-lb-count {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px;
+  background: #D75F68; color: #fff; font-size: 10px; letter-spacing: 0.05em;
+}
+.curbism-root .search-results-header .srh-lightbox:hover .srh-lb-count { background: #111; }
 .curbism-root .search-results-header .srp-hint { color: #e0e0e0; font-weight: 900; }
 .curbism-root .search-results-header .srp-meta { color: #999; font-weight: 900; }
 .curbism-root .search-results-status {
