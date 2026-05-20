@@ -55,6 +55,7 @@ function ImageDetail() {
   const fetchImage = useServerFn(getPublicImage);
   const [img, setImg] = useState<PublicImageDetail | null>(null);
   const [loading, setLoading] = useState(true);
+  const [imgReady, setImgReady] = useState(false);
   const [tier, setTier] = useState<TierId>("medium");
   const [showLicence, setShowLicence] = useState(true);
 
@@ -68,6 +69,7 @@ function ImageDetail() {
   useEffect(() => {
     let alive = true;
     setLoading(true);
+    setImgReady(false);
     fetchImage({ data: { id } })
       .then((r) => {
         if (!alive) return;
@@ -89,7 +91,7 @@ function ImageDetail() {
     <>
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
       <div className="img-root">
-        <header className="img-header">
+        <header className={`img-header${imgReady ? " img-header--ready" : ""}`}>
           <div className="img-header-left">
             <button
               type="button"
@@ -126,7 +128,12 @@ function ImageDetail() {
         <section className="img-stage">
           <div className="img-frame">
             {img?.signed_url ? (
-              <img className="img-el" src={img.signed_url} alt={img.title ?? ""} />
+              <img
+                className={`img-el${imgReady ? " img-el--ready" : ""}`}
+                src={img.signed_url}
+                alt={img.title ?? ""}
+                onLoad={() => setImgReady(true)}
+              />
             ) : (
               <div className="img-empty">{loading ? "LOADING…" : "IMAGE UNAVAILABLE"}</div>
             )}
@@ -134,7 +141,7 @@ function ImageDetail() {
         </section>
 
         {/* LICENCE PANEL — directly under the image, flush-left */}
-        <section className="licence-wrap">
+        <section className={`licence-wrap${imgReady ? " licence-wrap--ready" : ""}`}>
           {showLicence ? (
             <aside className="licence-card">
               <button
@@ -208,7 +215,7 @@ function ImageDetail() {
 
 
         {/* WHITE DETAILS SECTION below the black stage */}
-        {img && (
+        {img && imgReady && (
           <section className="img-details">
             <div className="img-meta-num">#{String(img.image_number).padStart(5, "0")}</div>
             {img.title && <h1 className="img-meta-title">{img.title}</h1>}
@@ -256,7 +263,8 @@ const CSS = `
 .img-root { background: #000; color: #e8e8e8; min-height: 100vh; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
 .img-root * { box-sizing: border-box; }
 
-.img-header { position: fixed; top: 0; left: 0; right: 0; z-index: 20; padding: 22px 36px; display: flex; justify-content: space-between; align-items: center; pointer-events: none; gap: 24px; }
+.img-header { position: fixed; top: 0; left: 0; right: 0; z-index: 20; padding: 22px 36px; display: flex; justify-content: space-between; align-items: center; pointer-events: none; gap: 24px; opacity: 0; transition: opacity 0.4s ease 0.05s; }
+.img-header--ready { opacity: 1; }
 .img-header-left { display: flex; align-items: center; gap: 14px; pointer-events: auto; }
 .img-header-right { display: flex; align-items: center; gap: 10px; pointer-events: auto; }
 .img-back { display: inline-flex; align-items: center; gap: 8px; background: none; border: 0; padding: 0; cursor: pointer; color: #fff; font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; font-weight: 700; opacity: 0.85; transition: opacity 0.2s ease, color 0.2s ease; font-family: inherit; }
@@ -288,7 +296,10 @@ const CSS = `
   width: auto; height: auto;
   background: #0a0a0a;
   border: 1px solid #3a3a3a;
+  opacity: 0;
+  transition: opacity 0.4s ease;
 }
+.img-el--ready { opacity: 1; }
 
 .img-empty {
   display: flex; align-items: center; justify-content: center;
@@ -301,7 +312,10 @@ const CSS = `
 .licence-wrap {
   background: #000;
   padding: 0 ${FRAME}px 75px;
+  opacity: 0;
+  transition: opacity 0.45s ease 0.15s;
 }
+.licence-wrap--ready { opacity: 1; }
 
 .licence-card {
   position: relative;
