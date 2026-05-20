@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as LightboxRouteImport } from './routes/lightbox'
 import { Route as DesignRouteImport } from './routes/design'
+import { Route as BasketRouteImport } from './routes/basket'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
@@ -33,6 +34,11 @@ const LightboxRoute = LightboxRouteImport.update({
 const DesignRoute = DesignRouteImport.update({
   id: '/design',
   path: '/design',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BasketRoute = BasketRouteImport.update({
+  id: '/basket',
+  path: '/basket',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -104,6 +110,7 @@ const AdminImageIdRoute = AdminImageIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/basket': typeof BasketRoute
   '/design': typeof DesignRoute
   '/lightbox': typeof LightboxRoute
   '/admin/customers': typeof AdminCustomersRoute
@@ -120,6 +127,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/basket': typeof BasketRoute
   '/design': typeof DesignRoute
   '/lightbox': typeof LightboxRoute
   '/admin/customers': typeof AdminCustomersRoute
@@ -138,6 +146,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/basket': typeof BasketRoute
   '/design': typeof DesignRoute
   '/lightbox': typeof LightboxRoute
   '/admin/customers': typeof AdminCustomersRoute
@@ -157,6 +166,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/basket'
     | '/design'
     | '/lightbox'
     | '/admin/customers'
@@ -173,6 +183,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/basket'
     | '/design'
     | '/lightbox'
     | '/admin/customers'
@@ -190,6 +201,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
+    | '/basket'
     | '/design'
     | '/lightbox'
     | '/admin/customers'
@@ -208,6 +220,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
+  BasketRoute: typeof BasketRoute
   DesignRoute: typeof DesignRoute
   LightboxRoute: typeof LightboxRoute
   ImageIdRoute: typeof ImageIdRoute
@@ -228,6 +241,13 @@ declare module '@tanstack/react-router' {
       path: '/design'
       fullPath: '/design'
       preLoaderRoute: typeof DesignRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/basket': {
+      id: '/basket'
+      path: '/basket'
+      fullPath: '/basket'
+      preLoaderRoute: typeof BasketRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -353,6 +373,7 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
+  BasketRoute: BasketRoute,
   DesignRoute: DesignRoute,
   LightboxRoute: LightboxRoute,
   ImageIdRoute: ImageIdRoute,
