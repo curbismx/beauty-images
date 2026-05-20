@@ -24,6 +24,9 @@ function AccountPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [sales, setSales] = useState<Sale[]>([]);
+  const [newPassword, setNewPassword] = useState("");
+  const [pwMsg, setPwMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
+  const [pwBusy, setPwBusy] = useState(false);
 
   useEffect(() => {
     if (loading) return;
@@ -48,6 +51,23 @@ function AccountPage() {
   const saveName = async () => {
     if (!session) return;
     await supabase.from("profiles").update({ full_name: name }).eq("id", session.user.id);
+  };
+
+
+  const changePassword = async () => {
+    setPwMsg(null);
+    if (newPassword.length < 8) {
+      setPwMsg({ kind: "err", text: "Password must be at least 8 characters." });
+      return;
+    }
+    setPwBusy(true);
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    setPwBusy(false);
+    if (error) setPwMsg({ kind: "err", text: error.message });
+    else {
+      setNewPassword("");
+      setPwMsg({ kind: "ok", text: "Password updated." });
+    }
   };
 
   const logout = async () => {
@@ -81,6 +101,14 @@ function AccountPage() {
             <label className="acct-label">Email</label>
             <input className="auth-input" value={email} disabled />
           </div>
+
+          <div className="acct-section">
+            <label className="acct-label">Change password</label>
+            <input className="auth-input" type="password" placeholder="New password (min 8 chars)" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} autoComplete="new-password" />
+            {pwMsg && <div className={pwMsg.kind === "ok" ? "acct-ok" : "auth-error"}>{pwMsg.text}</div>}
+            <button type="button" className="auth-btn" onClick={changePassword} disabled={pwBusy || !newPassword}>{pwBusy ? "…" : "Update password"}</button>
+          </div>
+
 
           <div className="acct-section">
             <div className="acct-label">Past purchases</div>
@@ -119,4 +147,5 @@ const accountCss = `
 .acct-status { color: #D75F68; text-transform: uppercase; font-weight: 800; letter-spacing: 0.1em; font-size: 10px; align-self: center; }
 .acct-logout { margin-top: 12px; background: transparent; color: #fff; border-color: #fff; }
 .acct-logout:hover { background: #D75F68; border-color: #D75F68; color: #fff; }
+.acct-ok { color: #6ec77a; font-size: 12px; font-weight: 700; letter-spacing: 0.05em; }
 `;
