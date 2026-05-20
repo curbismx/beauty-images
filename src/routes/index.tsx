@@ -8,6 +8,21 @@ import { getLightbox, subscribeLightbox } from "@/lib/lightbox";
 import { useViewMode, useMasonryCols } from "@/lib/view-mode";
 import { useSession } from "@/lib/use-session";
 
+function AccountLink() {
+  const { session, loading } = useSession();
+  if (loading) return null;
+  if (session) {
+    return (
+      <Link to="/account" className="hero-account">
+        {(session.user.email ?? "Account").split("@")[0]}
+      </Link>
+    );
+  }
+  return (
+    <Link to="/login" className="hero-account">Log in</Link>
+  );
+}
+
 function renderResultCard(r: PublicSearchResult, onClick: () => void) {
   return (
     <Link
