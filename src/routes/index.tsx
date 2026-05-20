@@ -13,8 +13,8 @@ function AccountLink() {
   if (loading) return null;
   if (session) {
     return (
-      <Link to="/account" className="hero-account">
-        {(session.user.email ?? "Account").split("@")[0]}
+      <Link to="/account" className="hero-account" aria-label="Account">
+        <User size={18} strokeWidth={2} />
       </Link>
     );
   }
