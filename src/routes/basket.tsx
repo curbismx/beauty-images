@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState, useSyncExternalStore, useCallback } from "react";
+import { useEffect, useState, useSyncExternalStore, useCallback, useMemo } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { X, LayoutGrid, Rows3 } from "lucide-react";
 import {
@@ -13,6 +13,9 @@ import {
   type PublicSearchResult,
 } from "@/lib/search.functions";
 import { useMasonryCols } from "@/lib/view-mode";
+import { useSession } from "@/lib/use-session";
+import { StripeBasketCheckout } from "@/components/StripeBasketCheckout";
+import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 
 export const Route = createFileRoute("/basket")({
   head: () => ({
@@ -27,6 +30,11 @@ export const Route = createFileRoute("/basket")({
 const TIER_LABEL: Record<string, string> = { small: "S", medium: "M", large: "L" };
 const TIER_NAME: Record<string, string> = { small: "Small", medium: "Medium", large: "Large" };
 const TIER_PRICE: Record<string, number> = { small: 150, medium: 275, large: 375 };
+const TIER_PRICE_ID: Record<string, string> = {
+  small: "license_small_gbp",
+  medium: "license_medium_gbp",
+  large: "license_large_gbp",
+};
 
 function fmt(n: number) {
   return `£${n.toFixed(2)}`;
@@ -48,7 +56,23 @@ function BasketPage() {
   const [loading, setLoading] = useState(true);
   const [masonry, setMasonry] = useState(false);
   const cols = useMasonryCols();
-  const [confirmCheckout, setConfirmCheckout] = useState(false);
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const { session } = useSession();
+
+  const checkoutItems = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const b of basket) {
+      const priceId = TIER_PRICE_ID[b.tier];
+      if (!priceId) continue;
+      counts.set(priceId, (counts.get(priceId) ?? 0) + 1);
+    }
+    return Array.from(counts.entries()).map(([priceId, quantity]) => ({ priceId, quantity }));
+  }, [basketJson]);
+
+  const checkoutImageIds = useMemo(
+    () => Array.from(new Set(basket.map((b) => b.id))),
+    [basketJson],
+  );
 
   const uniqueIds = Array.from(new Set(basket.map((b) => b.id)));
   const idsKey = uniqueIds.join(",");
@@ -166,7 +190,7 @@ function BasketPage() {
               <button
                 type="button"
                 className="basket-checkout-btn"
-                onClick={() => setConfirmCheckout(true)}
+                onClick={() => setCheckoutOpen(true)}
               >
                 CHECKOUT · {fmt(total)}
               </button>
@@ -174,22 +198,33 @@ function BasketPage() {
           )}
         </div>
 
-        {confirmCheckout && (
-          <div className="lb-modal-backdrop" onClick={() => setConfirmCheckout(false)}>
+        {checkoutOpen && (
+          <div className="lb-modal-backdrop" onClick={() => setCheckoutOpen(false)}>
             <div
-              className="lb-modal"
+              className="lb-modal lb-modal--checkout"
               role="dialog"
               aria-modal="true"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="lb-modal-title">CHECKOUT</div>
-              <div className="lb-modal-body">
-                Checkout isn't wired up yet. Total for {basket.length} {basket.length === 1 ? "item" : "items"}: {fmt(total)}.
-              </div>
-              <div className="lb-modal-actions">
-                <button type="button" className="lb-btn lb-btn--ghost" onClick={() => setConfirmCheckout(false)}>
-                  CLOSE
+              <div className="lb-checkout-head">
+                <div className="lb-modal-title">CHECKOUT</div>
+                <button
+                  type="button"
+                  className="lb-checkout-close"
+                  aria-label="Close checkout"
+                  onClick={() => setCheckoutOpen(false)}
+                >
+                  <X size={18} />
                 </button>
+              </div>
+              <PaymentTestModeBanner />
+              <div className="lb-checkout-body">
+                <StripeBasketCheckout
+                  items={checkoutItems}
+                  imageIds={checkoutImageIds}
+                  customerEmail={session?.user?.email ?? undefined}
+                  userId={session?.user?.id}
+                />
               </div>
             </div>
           </div>
@@ -352,10 +387,31 @@ const CSS = `
   padding: 28px 28px 22px;
   box-shadow: 0 30px 80px rgba(0,0,0,0.35);
 }
+.lb-modal--checkout {
+  width: min(720px, calc(100vw - 32px));
+  max-height: calc(100vh - 40px);
+  padding: 0;
+  overflow: hidden;
+  display: flex; flex-direction: column;
+}
+.lb-checkout-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 22px 24px 14px;
+  border-bottom: 1px solid #eee;
+}
+.lb-checkout-close {
+  width: 32px; height: 32px; border: 0; background: transparent; color: #111;
+  display: inline-flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: color 0.15s ease;
+}
+.lb-checkout-close:hover { color: #D75F68; }
+.lb-checkout-body {
+  flex: 1; overflow-y: auto; padding: 16px 24px 24px;
+}
 .lb-modal-title {
   font-family: 'DIN Condensed', 'DIN Alternate', 'Barlow Condensed', 'Oswald', sans-serif;
   font-size: 32px; font-weight: 900; letter-spacing: -0.02em; text-transform: uppercase;
-  line-height: 1; margin-bottom: 14px;
+  line-height: 1; margin: 0;
 }
 .lb-modal-body { font-size: 13px; line-height: 1.5; color: #444; margin-bottom: 22px; }
 .lb-modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
