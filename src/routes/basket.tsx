@@ -229,6 +229,7 @@ function BasketPage() {
                 <StripeBasketCheckout
                   items={checkoutItems}
                   imageIds={checkoutImageIds}
+                  imageTiers={checkoutImageTiers}
                   customerEmail={session?.user?.email ?? undefined}
                   userId={session?.user?.id}
                 />
