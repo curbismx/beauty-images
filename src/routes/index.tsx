@@ -439,7 +439,8 @@ const PAGE_CSS = `
 }
 .curbism-root .hero .bg-img.active { opacity: 1; }
 .curbism-root .hero .bg-img--search { z-index: 1; }
-.curbism-root .hero--results .bg-img { opacity: 0 !important; }
+.curbism-root .hero--results .bg-img:not(.active) { opacity: 0 !important; }
+.curbism-root .hero--results .bg-img--search.active { opacity: 1 !important; }
 
 /* SEARCH BOX */
 .curbism-root .hero-search {
