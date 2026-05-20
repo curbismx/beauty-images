@@ -90,13 +90,18 @@ function Index() {
     img.src = "/hero-search.jpg";
   }, []);
 
-
   const goPrev = () => {
-    if (justClosedSearchRef.current) { justClosedSearchRef.current = false; return; }
+    if (justClosedSearchRef.current) {
+      justClosedSearchRef.current = false;
+      return;
+    }
     setCurrent((c) => (c - 1 + HERO_IMAGES.length) % HERO_IMAGES.length);
   };
   const goNext = () => {
-    if (justClosedSearchRef.current) { justClosedSearchRef.current = false; return; }
+    if (justClosedSearchRef.current) {
+      justClosedSearchRef.current = false;
+      return;
+    }
     setCurrent((c) => (c + 1) % HERO_IMAGES.length);
   };
 
@@ -128,7 +133,9 @@ function Index() {
     if (typeof window === "undefined" || !restoreState?.q) return;
     try {
       sessionStorage.removeItem("bi_restore_search");
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
     const restoreScroll = () => {
       if (typeof restoreState.y === "number") window.scrollTo(0, restoreState.y);
       setRestoringSearch(false);
@@ -148,7 +155,9 @@ function Index() {
         JSON.stringify({ q: submittedQuery || searchValue.trim(), y: window.scrollY, results }),
       );
       sessionStorage.setItem("bi_restore_search", "1");
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
   };
 
   const goHome = (suppressNextHeroClick = false) => {
@@ -158,7 +167,9 @@ function Index() {
     try {
       sessionStorage.removeItem("bi_search_state");
       sessionStorage.removeItem("bi_restore_search");
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
     setSearchValue("");
     setSubmittedQuery("");
     setResults([]);
@@ -189,9 +200,11 @@ function Index() {
     <>
       <style dangerouslySetInnerHTML={{ __html: PAGE_CSS }} />
       <div className="curbism-root">
-
         {/* HERO */}
-        <section ref={heroRef} className={`hero${searchActive ? " hero--search" : ""}${submittedQuery && searchValue.length > 0 ? " hero--results" : ""}${restoringSearch ? " hero--instant" : ""}`}>
+        <section
+          ref={heroRef}
+          className={`hero${searchActive ? " hero--search" : ""}${submittedQuery && searchValue.length > 0 ? " hero--results" : ""}${restoringSearch ? " hero--instant" : ""}`}
+        >
           {HERO_IMAGES.map((src, i) => (
             <img
               key={src}
@@ -206,16 +219,8 @@ function Index() {
             alt=""
           />
 
-          <div
-            className="hero-zone hero-zone--left"
-            aria-label="Previous image"
-            onClick={goPrev}
-          />
-          <div
-            className="hero-zone hero-zone--right"
-            aria-label="Next image"
-            onClick={goNext}
-          />
+          <div className="hero-zone hero-zone--left" aria-label="Previous image" onClick={goPrev} />
+          <div className="hero-zone hero-zone--right" aria-label="Next image" onClick={goNext} />
 
           <button
             type="button"
@@ -253,7 +258,15 @@ function Index() {
               disabled={!searchValue.trim() || searching}
               onMouseDown={(e) => e.preventDefault()}
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="square">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="square"
+              >
                 <path d="M5 12h14M13 5l7 7-7 7" />
               </svg>
             </button>
@@ -270,7 +283,10 @@ function Index() {
               <div className="appeared-in-label">PUBLISHED IN</div>
               <div className="appeared-in-marquee">
                 <div className="appeared-in-track">
-                  <img src="/appeared-in.png" alt="Published in Vogue, Thalgo, El País, Lexus, Apple" />
+                  <img
+                    src="/appeared-in.png"
+                    alt="Published in Vogue, Thalgo, El País, Lexus, Apple"
+                  />
                   <img src="/appeared-in.png" alt="" aria-hidden="true" />
                 </div>
               </div>
@@ -279,7 +295,10 @@ function Index() {
             <div className="intro-text">
               <h2>ADVERTISING DESIGN &amp; EDITORIAL IMAGES</h2>
               <p>
-                PROVIDING IMAGES TO HIGH-END PUBLICATIONS AND ADVERTISING FOR OVER 20 YEARS. ALL OUR IMAGES ARE EXCLUSIVE TO BEAUTY IMAGES AND ARE SOLD ON A <span style={{ color: "#D75F68" }}>RIGHTS MANAGED</span> BASIS. ALL REAL PEOPLE. REAL PHOTOGRAPHY. WITH NO AI PRODUCTION AT ALL.
+                PROVIDING IMAGES TO HIGH-END PUBLICATIONS AND ADVERTISING FOR OVER 20 YEARS. ALL OUR
+                IMAGES ARE EXCLUSIVE TO BEAUTY IMAGES AND ARE SOLD ON A{" "}
+                <span style={{ color: "#D75F68" }}>RIGHTS MANAGED</span> BASIS. ALL REAL PEOPLE.
+                REAL PHOTOGRAPHY. WITH NO AI PRODUCTION AT ALL.
               </p>
               <button
                 type="button"
@@ -300,20 +319,26 @@ function Index() {
             <div className="search-results" ref={resultsRef}>
               <div className="search-results-header">
                 <div className="srh-text">
-                {submittedQuery ? (
-                  <>
-                    SEARCH RESULTS
-                    <span className="srp-meta">
-                      {" "}/ "{submittedQuery}"
-                      {!searching && <> · {results.length} {results.length === 1 ? "IMAGE" : "IMAGES"}</>}
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    SEARCH RESULTS
-                    <span className="srp-hint"> WILL APPEAR HERE</span>
-                  </>
-                )}
+                  {submittedQuery ? (
+                    <>
+                      SEARCH RESULTS
+                      <span className="srp-meta">
+                        {" "}
+                        / "{submittedQuery}"
+                        {!searching && (
+                          <>
+                            {" "}
+                            · {results.length} {results.length === 1 ? "IMAGE" : "IMAGES"}
+                          </>
+                        )}
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      SEARCH RESULTS
+                      <span className="srp-hint"> WILL APPEAR HERE</span>
+                    </>
+                  )}
                 </div>
                 <Link to="/lightbox" className="srh-lightbox" aria-label="Open lightbox">
                   <Layers size={16} />
@@ -393,11 +418,9 @@ function FeaturedMasonry() {
       const rows = data as FeaturedRow[];
       const next = rows.map((r) => ({
         id: r.id,
-        url: supabase.storage
-          .from("featured-images")
-          .getPublicUrl(r.storage_path, {
-            transform: { height: 800, resize: "contain", quality: 75 },
-          }).data.publicUrl,
+        url: supabase.storage.from("featured-images").getPublicUrl(r.storage_path, {
+          transform: { height: 800, resize: "contain", quality: 75 },
+        }).data.publicUrl,
         alt: r.filename,
       }));
       setItems((prev) => [...prev, ...next]);
@@ -449,7 +472,7 @@ function MasonryColumns({ items }: { items: Array<{ id: string; url: string; alt
     window.addEventListener("resize", update);
     return () => window.removeEventListener("resize", update);
   }, []);
-  const buckets: typeof items[] = Array.from({ length: cols }, () => []);
+  const buckets: (typeof items)[] = Array.from({ length: cols }, () => []);
   items.forEach((it, i) => buckets[i % cols].push(it));
   return (
     <div className="featured-masonry-grid">
