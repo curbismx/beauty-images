@@ -330,14 +330,14 @@ const CSS = `
   all: unset; cursor: pointer; text-align: center;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
   padding: 14px 10px;
-  border: 1px dashed rgba(255,255,255,0.45);
+  border: 1px dashed rgba(255,255,255,0.2);
   background: transparent;
   transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
-.lc-btn:hover { background: rgba(255,255,255,0.06); border-color: #fff; }
-.lc-btn--active { background: #e8e8e8; border-color: #e8e8e8; border-style: solid; }
-.lc-btn--active .lc-btn-label,
-.lc-btn--active .lc-btn-price { color: #000; }
+.lc-btn:hover { background: #e8e8e8; border-color: #e8e8e8; border-style: solid; }
+.lc-btn:hover .lc-btn-label,
+.lc-btn:hover .lc-btn-price { color: #000; }
+.lc-btn--active { border-color: rgba(255,255,255,0.55); border-style: solid; }
 .lc-btn--cta { border-color: #D75F68; color: #D75F68; }
 .lc-btn--cta:hover { background: rgba(215,95,104,0.12); border-color: #D75F68; }
 .lc-btn--cta .lc-btn-label { color: #D75F68; }
