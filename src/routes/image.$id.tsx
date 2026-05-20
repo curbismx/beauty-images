@@ -255,16 +255,21 @@ const CSS = `
 }
 .lc-toggle:hover { background: #D75F68; color: #fff; }
 
-.lc-show {
+.lc-mini-cta {
   position: absolute; right: 24px; bottom: 24px;
-  width: 40px; height: 40px;
-  background: rgba(0,0,0,0.55); color: #fff;
-  border: 1px solid rgba(255,255,255,0.25);
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; backdrop-filter: blur(8px);
-  z-index: 6; transition: background 0.2s ease;
+  display: flex; align-items: center; gap: 14px;
+  padding: 12px 18px 12px 14px;
+  background: #D75F68; color: #fff; border: 0; cursor: pointer;
+  font-family: inherit; font-size: 12px; font-weight: 600;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.35);
+  transition: background 0.2s ease;
+  z-index: 6;
 }
-.lc-show:hover { background: #D75F68; }
+.lc-mini-cta:hover { background: #000; box-shadow: inset 0 0 0 1px #D75F68, 0 4px 18px rgba(0,0,0,0.35); }
+.lc-mini-eye { display: flex; align-items: center; justify-content: center; opacity: 0.9; }
+.lc-mini-label { font-weight: 600; }
+.lc-mini-price { font-weight: 700; letter-spacing: 0.05em; font-variant-numeric: tabular-nums; padding-left: 12px; border-left: 1px solid rgba(255,255,255,0.4); }
 
 .lc-eyebrow { font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; color: #fff; margin-bottom: 14px; font-weight: 700; }
 .lc-intro { font-size: 11px; line-height: 1.55; color: #c2c2c2; margin-bottom: 20px; padding-right: 28px; }
