@@ -407,9 +407,10 @@ const CSS = `
 }
 .lc-tile:hover { background: rgba(255,255,255,0.15); }
 .lc-tile--active { background: rgba(255,255,255,0.22); outline: 1px solid #fff; }
-.lc-tile-label { font-size: 11px; font-weight: 600; color: #fff; letter-spacing: 0.08em; text-transform: uppercase; }
-.lc-tile-price { font-size: 16px; font-weight: 400; color: #fff; font-variant-numeric: tabular-nums; }
-.lc-tile-sub { font-size: 9px; color: #cfcfcf; line-height: 1.3; }
+.lc-tile-label { font-size: 10px; font-weight: 600; color: #fff; letter-spacing: 0.08em; text-transform: uppercase; }
+.lc-tile-price { font-size: 14px; font-weight: 400; color: #fff; font-variant-numeric: tabular-nums; }
+.lc-tile-sub { font-size: 8px; color: #cfcfcf; line-height: 1.3; }
+
 
 .lc-tile--lb {
   background: rgba(255,255,255,0.06);
