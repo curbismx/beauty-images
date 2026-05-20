@@ -41,15 +41,15 @@ export const searchPublicImages = createServerFn({ method: "POST" })
 
     const { data: rows, error } = await supabaseAdmin
       .from("images")
-      .select("id, image_number, title, caption, keywords, storage_path, preview_path")
+      .select("id, image_number, title, caption, keywords, preview_path")
       .not("keyworded_at", "is", null)
+      .not("preview_path", "is", null)
       .order("image_number", { ascending: false })
       .limit(200);
     if (error) throw new Error(error.message);
 
-    const merged = rows ?? [];
-
-    const paths = merged.map((r) => r.preview_path ?? r.storage_path);
+    const merged = (rows ?? []).filter((r) => !!r.preview_path);
+    const paths = merged.map((r) => r.preview_path as string);
     const signed = paths.length
       ? await supabaseAdmin.storage
           .from("images-private")
