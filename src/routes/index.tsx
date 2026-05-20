@@ -144,8 +144,25 @@ function Index() {
       requestAnimationFrame(() => requestAnimationFrame(restoreScroll));
       return;
     }
-    submitSearch(restoreState.q, restoreState.y).finally(() => setRestoringSearch(false));
-  }, [restoreState]);
+    let alive = true;
+    const q = restoreState.q.trim();
+    setSearching(true);
+    runSearch({ data: { q, limit: 60 } })
+      .then((r) => {
+        if (!alive) return;
+        setResults(r);
+        restoreScroll();
+      })
+      .catch(() => {
+        if (!alive) return;
+        setResults([]);
+        setRestoringSearch(false);
+      })
+      .finally(() => alive && setSearching(false));
+    return () => {
+      alive = false;
+    };
+  }, [restoreState, runSearch]);
 
   const saveSearchState = () => {
     try {
@@ -436,7 +453,6 @@ function FeaturedMasonry() {
 
   useEffect(() => {
     loadMore();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
