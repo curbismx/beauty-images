@@ -51,6 +51,7 @@ function Index() {
   const [searching, setSearching] = useState(false);
   const runSearch = useServerFn(searchPublicImages);
   const justClosedSearchRef = useRef(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const goPrev = () => {
     if (justClosedSearchRef.current) { justClosedSearchRef.current = false; return; }
@@ -125,6 +126,7 @@ function Index() {
             }}
           >
             <input
+              ref={searchInputRef}
               type="search"
               placeholder="SEARCH"
               value={searchValue}
@@ -175,6 +177,16 @@ function Index() {
               <p>
                 PROVIDING IMAGES TO HIGH-END PUBLICATIONS AND ADVERTISING FOR OVER 20 YEARS. ALL OUR IMAGES ARE EXCLUSIVE TO BEAUTY IMAGES AND ARE SOLD ON A <span style={{ color: "#D75F68" }}>RIGHTS MANAGED</span> BASIS. ALL REAL PEOPLE. REAL PHOTOGRAPHY. WITH NO AI PRODUCTION AT ALL.
               </p>
+              <button
+                type="button"
+                className="intro-cta"
+                onClick={() => {
+                  searchInputRef.current?.focus();
+                  searchInputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+                }}
+              >
+                SEARCH NOW
+              </button>
             </div>
 
             <FeaturedMasonry />
@@ -563,6 +575,8 @@ const PAGE_CSS = `
 .curbism-root .intro-text { background: white; padding: 32px 40px 80px; font-family: 'DIN Condensed', 'DIN Alternate', 'Barlow Condensed', 'Oswald', sans-serif; }
 .curbism-root .intro-text h2 { font-size: clamp(28px, 4.2vw, 56px); font-weight: 900; text-transform: uppercase; letter-spacing: -0.035em; line-height: 1.15; color: #000; margin-bottom: 24px; }
 .curbism-root .intro-text p { font-size: clamp(28px, 4.2vw, 56px); font-weight: 900; text-transform: uppercase; letter-spacing: -0.035em; line-height: 1.15; color: #111; }
+.curbism-root .intro-cta { margin-top: 32px; display: inline-block; background: #D75F68; color: #fff; border: none; padding: 18px 36px; font-size: 16px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; cursor: pointer; border-radius: 0; transition: background 0.2s ease; }
+.curbism-root .intro-cta:hover { background: #000; }
 @media (max-width: 768px) {
   .curbism-root .appeared-in { padding: 24px 24px 12px; }
   .curbism-root .appeared-in-track img { height: 28px; width: auto; max-width: none; padding-right: 0; margin-right: 0; }
