@@ -74,6 +74,7 @@ function Index() {
   const [searching, setSearching] = useState(false);
   const runSearch = useServerFn(searchPublicImages);
   const justClosedSearchRef = useRef(false);
+  const restoreConsumedRef = useRef(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const heroRef = useRef<HTMLElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
@@ -130,7 +131,8 @@ function Index() {
   // Restore previous search immediately when arriving back from /image/:id.
   // The saved result rows avoid replaying the home -> search transition and network search.
   useEffect(() => {
-    if (typeof window === "undefined" || !restoreState?.q) return;
+    if (typeof window === "undefined" || !restoreState?.q || restoreConsumedRef.current) return;
+    restoreConsumedRef.current = true;
     try {
       sessionStorage.removeItem("bi_restore_search");
     } catch {
