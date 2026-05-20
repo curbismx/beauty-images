@@ -211,7 +211,7 @@ const CSS = `
 /* LICENCE PANEL — sits flush-left under the image, on the black stage */
 .licence-wrap {
   background: #000;
-  padding: 0 ${FRAME}px ${FRAME}px;
+  padding: 0 ${FRAME}px 75px;
 }
 
 .licence-card {
