@@ -287,8 +287,9 @@ const CSS = `
 
 .img-frame {
   position: relative;
-  display: inline-block;
+  display: block;
   max-width: 100%;
+  font-size: 0;
 }
 
 .img-el {
