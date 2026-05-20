@@ -190,7 +190,7 @@ function BasketPage() {
               <button
                 type="button"
                 className="basket-checkout-btn"
-                onClick={() => setConfirmCheckout(true)}
+                onClick={() => setCheckoutOpen(true)}
               >
                 CHECKOUT · {fmt(total)}
               </button>
@@ -198,22 +198,33 @@ function BasketPage() {
           )}
         </div>
 
-        {confirmCheckout && (
-          <div className="lb-modal-backdrop" onClick={() => setConfirmCheckout(false)}>
+        {checkoutOpen && (
+          <div className="lb-modal-backdrop" onClick={() => setCheckoutOpen(false)}>
             <div
-              className="lb-modal"
+              className="lb-modal lb-modal--checkout"
               role="dialog"
               aria-modal="true"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="lb-modal-title">CHECKOUT</div>
-              <div className="lb-modal-body">
-                Checkout isn't wired up yet. Total for {basket.length} {basket.length === 1 ? "item" : "items"}: {fmt(total)}.
-              </div>
-              <div className="lb-modal-actions">
-                <button type="button" className="lb-btn lb-btn--ghost" onClick={() => setConfirmCheckout(false)}>
-                  CLOSE
+              <div className="lb-checkout-head">
+                <div className="lb-modal-title">CHECKOUT</div>
+                <button
+                  type="button"
+                  className="lb-checkout-close"
+                  aria-label="Close checkout"
+                  onClick={() => setCheckoutOpen(false)}
+                >
+                  <X size={18} />
                 </button>
+              </div>
+              <PaymentTestModeBanner />
+              <div className="lb-checkout-body">
+                <StripeBasketCheckout
+                  items={checkoutItems}
+                  imageIds={checkoutImageIds}
+                  customerEmail={session?.user?.email ?? undefined}
+                  userId={session?.user?.id}
+                />
               </div>
             </div>
           </div>
