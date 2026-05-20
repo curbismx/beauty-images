@@ -419,6 +419,6 @@ const CSS = `
 @media (max-width: 600px) {
   .img-stage { padding: 0 24px; }
   .img-el { max-height: calc(100vh - 100px); }
-  .lc-btn-row { grid-template-columns: repeat(2, 1fr); }
+  
 }
 `;
