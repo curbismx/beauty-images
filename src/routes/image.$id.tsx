@@ -52,7 +52,19 @@ function ImageDetail() {
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
       <div className="img-root">
         <header className="img-header">
-          <Link to="/" className="img-back">← BEAUTYIMAGES</Link>
+          <button
+            type="button"
+            className="img-back"
+            onClick={() => {
+              if (typeof window !== "undefined" && window.history.length > 1) {
+                window.history.back();
+              } else {
+                window.location.href = "/";
+              }
+            }}
+          >
+            ← BEAUTYIMAGES
+          </button>
         </header>
 
         <div className={`img-stage img-stage--${orientation}`}>
