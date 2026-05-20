@@ -89,18 +89,36 @@ function ImageDetail() {
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
       <div className="img-root">
         <header className="img-header">
-          <button
-            type="button"
-            className="img-back"
-            onClick={() => {
-              // Flag tells "/" to restore previous search + scroll. Full reload so the
-              // index mount effect runs and consumes the flag.
-              try { sessionStorage.setItem("bi_restore_search", "1"); } catch { /* ignore */ }
-              window.location.href = "/";
-            }}
-          >
-            ← BACK TO SEARCH RESULTS
-          </button>
+          <div className="img-header-left">
+            <button
+              type="button"
+              className="img-back"
+              onClick={() => {
+                try { sessionStorage.setItem("bi_restore_search", "1"); } catch { /* ignore */ }
+                window.location.href = "/";
+              }}
+            >
+              <svg className="img-back-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="square">
+                <path d="M19 12H5M11 5l-7 7 7 7" />
+              </svg>
+              <span>BACK TO SEARCH RESULTS</span>
+            </button>
+            <button
+              type="button"
+              className="img-back img-back--home"
+              onClick={() => {
+                try { sessionStorage.removeItem("bi_restore_search"); sessionStorage.removeItem("bi_search_state"); } catch { /* ignore */ }
+                window.location.href = "/";
+              }}
+            >
+              / BACK TO HOME
+            </button>
+          </div>
+          <nav className="img-header-right">
+            <a className="img-nav-link" href="/lightbox">LIGHTBOX</a>
+            <span className="img-nav-sep">/</span>
+            <a className="img-nav-link" href="/basket">BASKET</a>
+          </nav>
         </header>
 
         {/* BLACK STAGE — 150px black border on all four sides of the image */}
@@ -237,14 +255,22 @@ const CSS = `
 .img-root { background: #000; color: #e8e8e8; min-height: 100vh; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
 .img-root * { box-sizing: border-box; }
 
-.img-header { position: fixed; top: 0; left: 0; right: 0; z-index: 20; padding: 22px 36px; display: flex; justify-content: space-between; align-items: center; pointer-events: none; }
-.img-back { pointer-events: auto; background: none; border: 0; padding: 0; cursor: pointer; color: #fff; font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; font-weight: 700; opacity: 0.85; transition: opacity 0.2s ease, color 0.2s ease; font-family: inherit; }
+.img-header { position: fixed; top: 0; left: 0; right: 0; z-index: 20; padding: 22px 36px; display: flex; justify-content: space-between; align-items: center; pointer-events: none; gap: 24px; }
+.img-header-left { display: flex; align-items: center; gap: 14px; pointer-events: auto; }
+.img-header-right { display: flex; align-items: center; gap: 10px; pointer-events: auto; }
+.img-back { display: inline-flex; align-items: center; gap: 8px; background: none; border: 0; padding: 0; cursor: pointer; color: #fff; font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; font-weight: 700; opacity: 0.85; transition: opacity 0.2s ease, color 0.2s ease; font-family: inherit; }
 .img-back:hover { opacity: 1; color: #D75F68; }
+.img-back-arrow { display: block; }
+.img-back--home { opacity: 0.55; font-weight: 600; }
+.img-back--home:hover { opacity: 1; }
+.img-nav-link { color: #fff; font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; font-weight: 700; text-decoration: none; opacity: 0.85; transition: opacity 0.2s ease, color 0.2s ease; }
+.img-nav-link:hover { opacity: 1; color: #D75F68; }
+.img-nav-sep { color: #fff; opacity: 0.45; font-size: 11px; }
 
-/* BLACK STAGE — 150px black frame around the image */
+/* BLACK STAGE — image area; top space reduced to 75px under the fixed header */
 .img-stage {
   background: #000;
-  padding: ${FRAME}px ${FRAME}px 75px;
+  padding: 75px ${FRAME}px 75px;
   display: flex; align-items: flex-start; justify-content: flex-start;
 }
 
@@ -404,8 +430,6 @@ const CSS = `
   .img-stage { padding: 70px 24px 75px; }
   .img-el { max-height: calc(100vh - 100px); }
   .licence-wrap { padding: 0 24px 75px; }
-  .licence-card { padding: 20px 18px 18px; }
-}
   .licence-card { padding: 20px 18px 18px; }
 }
 `;
