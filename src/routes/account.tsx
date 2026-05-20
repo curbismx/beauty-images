@@ -107,6 +107,8 @@ function AccountPage() {
             <input className="auth-input" type="password" placeholder="New password (min 8 chars)" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} autoComplete="new-password" />
             {pwMsg && <div className={pwMsg.kind === "ok" ? "acct-ok" : "auth-error"}>{pwMsg.text}</div>}
             <button type="button" className="auth-btn" onClick={changePassword} disabled={pwBusy || !newPassword}>{pwBusy ? "…" : "Update password"}</button>
+          </div>
+
 
           <div className="acct-section">
             <div className="acct-label">Past purchases</div>
