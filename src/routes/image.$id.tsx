@@ -9,6 +9,13 @@ import {
   getLightbox,
   subscribeLightbox,
 } from "@/lib/lightbox";
+import {
+  addToBasket,
+  removeFromBasket,
+  getBasket,
+  subscribeBasket,
+  type BasketItem,
+} from "@/lib/basket";
 
 export const Route = createFileRoute("/image/$id")({
   component: ImageDetail,
@@ -64,6 +71,15 @@ function ImageDetail() {
     () => "[]",
   );
   const inLightbox = (JSON.parse(lbJson) as string[]).includes(id);
+
+  const basketJson = useSyncExternalStore(
+    subscribeBasket,
+    () => JSON.stringify(getBasket()),
+    () => "[]",
+  );
+  const inBasket = (JSON.parse(basketJson) as BasketItem[]).some(
+    (x) => x.id === id && x.tier === tier,
+  );
 
   useEffect(() => {
     let alive = true;
@@ -178,8 +194,16 @@ function ImageDetail() {
                         </button>
                       );
                     })}
-                    <button type="button" className="lc-btn lc-btn--cta">
-                      <span className="lc-btn-label">ADD TO BASKET</span>
+                    <button
+                      type="button"
+                      className={`lc-btn lc-btn--cta${inBasket ? " lc-btn--cta-on" : ""}`}
+                      onClick={() =>
+                        inBasket ? removeFromBasket(id, tier) : addToBasket(id, tier)
+                      }
+                    >
+                      <span className="lc-btn-label">
+                        {inBasket ? "REMOVE FROM BASKET" : "ADD TO BASKET"}
+                      </span>
                       <span className="lc-btn-price">{activeTier.price}</span>
                     </button>
                   </div>
@@ -318,12 +342,18 @@ const CSS = `
   transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 .lc-btn:hover { background: rgba(255,255,255,0.06); border-color: #fff; }
-.lc-btn--active { background: rgba(255,255,255,0.1); border-color: #fff; }
+.lc-btn--active { background: #e8e8e8; border-color: #e8e8e8; border-style: solid; }
+.lc-btn--active .lc-btn-label,
+.lc-btn--active .lc-btn-price { color: #000; }
 .lc-btn--cta { border-color: #D75F68; color: #D75F68; }
-.lc-btn--cta:hover { background: rgba(215,95,104,0.12); border-color: #D75F68; color: #fff; }
-.lc-btn-label { font-size: 10px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: inherit; color: #fff; }
+.lc-btn--cta:hover { background: rgba(215,95,104,0.12); border-color: #D75F68; }
 .lc-btn--cta .lc-btn-label { color: #D75F68; }
-.lc-btn--cta:hover .lc-btn-label { color: #fff; }
+.lc-btn--cta .lc-btn-price { color: #D75F68; }
+.lc-btn--cta-on { background: #D75F68; border-color: #D75F68; border-style: solid; }
+.lc-btn--cta-on .lc-btn-label,
+.lc-btn--cta-on .lc-btn-price { color: #fff; }
+.lc-btn--cta-on:hover { background: #b94e56; border-color: #b94e56; }
+.lc-btn-label { font-size: 10px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: #fff; }
 .lc-btn-price { font-size: 14px; font-weight: 500; color: #fff; font-variant-numeric: tabular-nums; }
 
 .img-nav-link {
