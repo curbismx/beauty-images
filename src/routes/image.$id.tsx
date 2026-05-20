@@ -257,7 +257,8 @@ function ImageDetail() {
   );
 }
 
-const FRAME = 150;
+const FRAME = 75;
+const IMG_MAX = 600;
 
 const CSS = `
 .img-root { background: #000; color: #e8e8e8; min-height: 100vh; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
@@ -276,23 +277,23 @@ const CSS = `
 .img-nav-link:hover { opacity: 1; color: #D75F68; }
 .img-nav-sep { color: #fff; opacity: 0.45; font-size: 11px; }
 
-/* BLACK STAGE — image area; top space reduced to 75px under the fixed header */
+/* BLACK STAGE — image pinned to top-left with 75px border */
 .img-stage {
   background: #000;
-  padding: 75px ${FRAME}px 75px;
+  padding: ${FRAME}px ${FRAME}px 0;
   display: flex; align-items: flex-start; justify-content: flex-start;
 }
 
 .img-frame {
   position: relative;
   display: inline-block;
-  max-width: 100%;
+  max-width: ${IMG_MAX}px;
 }
 
 .img-el {
   display: block;
-  max-width: 100%;
-  max-height: calc(100vh - ${FRAME * 2}px);
+  max-width: ${IMG_MAX}px;
+  max-height: ${IMG_MAX}px;
   width: auto; height: auto;
   background: #0a0a0a;
   border: 1px solid #3a3a3a;
@@ -303,15 +304,15 @@ const CSS = `
 
 .img-empty {
   display: flex; align-items: center; justify-content: center;
-  width: 60vw; height: 60vh;
+  width: ${IMG_MAX}px; height: ${IMG_MAX}px;
   font-size: 11px; letter-spacing: 0.25em; color: #555;
   background: #0a0a0a;
 }
 
-/* LICENCE PANEL — sits flush-left under the image, on the black stage */
+/* LICENCE PANEL — 75px below image, full width with 75px side margins */
 .licence-wrap {
   background: #000;
-  padding: 0 ${FRAME}px 75px;
+  padding: ${FRAME}px ${FRAME}px ${FRAME}px;
   opacity: 0;
   transition: opacity 0.45s ease 0.15s;
 }
@@ -319,8 +320,8 @@ const CSS = `
 
 .licence-card {
   position: relative;
-  display: inline-block;
-  max-width: 100%;
+  display: block;
+  width: 100%;
   padding: 28px 28px 24px;
   color: #f0f0f0;
   font-size: 13px;
@@ -364,14 +365,14 @@ const CSS = `
 .lc-intro { font-size: 11px; line-height: 1.55; color: #c2c2c2; margin: 0 0 22px; max-width: 560px; }
 
 /* Expanded detail panel above the tiles — updates with the active tier */
-.lc-detail { margin-bottom: 20px; max-width: 720px; }
+.lc-detail { margin-bottom: 20px; }
 .lc-detail-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 8px; }
 .lc-detail-tier { font-size: 13px; font-weight: 700; color: #fff; letter-spacing: 0.18em; }
 .lc-detail-price { font-size: 13px; font-weight: 600; color: #D75F68; font-variant-numeric: tabular-nums; letter-spacing: 0.05em; }
 .lc-detail-text { font-size: 13px; line-height: 1.6; color: #e6e6e6; margin: 0; }
 
 /* TILES for each size + ADD TO LIGHTBOX + ADD TO BASKET */
-.lc-tiles { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; max-width: 720px; }
+.lc-tiles { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
 .lc-tile {
   all: unset; cursor: pointer;
   height: 88px; padding: 10px 12px;
