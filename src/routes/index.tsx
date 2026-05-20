@@ -545,10 +545,9 @@ const PAGE_CSS = `
 }
 .curbism-root .hero-search {
   position: absolute;
-  left: 0;
+  left: 36px;
   top: calc(140px + clamp(28px, 5vw, 64px) * 3 + 147px);
-  padding-left: 36px;
-  width: 50%;
+  width: calc(50% - 36px);
   z-index: 4;
 }
 .curbism-root .hero-search input {
