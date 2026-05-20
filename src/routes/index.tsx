@@ -232,6 +232,7 @@ function Index() {
           {searchActive && (
             <div className="search-results">
               <div className="search-results-header">
+                <div className="srh-text">
                 {submittedQuery ? (
                   <>
                     SEARCH RESULTS
@@ -246,6 +247,12 @@ function Index() {
                     <span className="srp-hint"> WILL APPEAR HERE</span>
                   </>
                 )}
+                </div>
+                <Link to="/lightbox" className="srh-lightbox" aria-label="Open lightbox">
+                  <Layers size={16} />
+                  <span>LIGHTBOX</span>
+                  {lbCount > 0 && <span className="srh-lb-count">{lbCount}</span>}
+                </Link>
               </div>
               {searching && <div className="search-results-status">SEARCHING…</div>}
               {!searching && submittedQuery && results.length === 0 && (
