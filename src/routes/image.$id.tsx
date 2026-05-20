@@ -91,7 +91,7 @@ function ImageDetail() {
     <>
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
       <div className="img-root">
-        <header className="img-header">
+        <header className={`img-header${imgReady ? " img-header--ready" : ""}`}>
           <div className="img-header-left">
             <button
               type="button"
@@ -128,7 +128,12 @@ function ImageDetail() {
         <section className="img-stage">
           <div className="img-frame">
             {img?.signed_url ? (
-              <img className="img-el" src={img.signed_url} alt={img.title ?? ""} />
+              <img
+                className={`img-el${imgReady ? " img-el--ready" : ""}`}
+                src={img.signed_url}
+                alt={img.title ?? ""}
+                onLoad={() => setImgReady(true)}
+              />
             ) : (
               <div className="img-empty">{loading ? "LOADING…" : "IMAGE UNAVAILABLE"}</div>
             )}
@@ -136,7 +141,7 @@ function ImageDetail() {
         </section>
 
         {/* LICENCE PANEL — directly under the image, flush-left */}
-        <section className="licence-wrap">
+        <section className={`licence-wrap${imgReady ? " licence-wrap--ready" : ""}`}>
           {showLicence ? (
             <aside className="licence-card">
               <button
@@ -210,7 +215,7 @@ function ImageDetail() {
 
 
         {/* WHITE DETAILS SECTION below the black stage */}
-        {img && (
+        {img && imgReady && (
           <section className="img-details">
             <div className="img-meta-num">#{String(img.image_number).padStart(5, "0")}</div>
             {img.title && <h1 className="img-meta-title">{img.title}</h1>}
