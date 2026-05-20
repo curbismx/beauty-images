@@ -737,7 +737,7 @@ const PAGE_CSS = `
   flex: 0 0 auto;
   background: rgba(255,255,255,0.3);
   border: none;
-  border-left: 1px solid rgba(0,0,0,0.08);
+  border-left: 1px solid rgba(0,0,0,0.45);
   padding: 0 18px;
   cursor: pointer;
   color: #D75F68;
