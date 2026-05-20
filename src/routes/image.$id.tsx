@@ -295,9 +295,13 @@ const CSS = `
 .img-stage {
   background: #000;
   padding: 0 ${FRAME}px 0 ${FRAME}px;
-  display: flex; align-items: flex-start; justify-content: flex-start;
   min-width: 0;
 }
+.img-stage-inner {
+  display: inline-block;
+  max-width: 100%;
+}
+
 
 .img-frame {
   position: relative;
