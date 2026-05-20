@@ -12,6 +12,7 @@ import {
   getPublicImagesByIds,
   type PublicSearchResult,
 } from "@/lib/search.functions";
+import { useViewMode, useMasonryCols } from "@/lib/view-mode";
 
 export const Route = createFileRoute("/lightbox")({
   head: () => ({
