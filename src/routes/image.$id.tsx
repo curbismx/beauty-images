@@ -323,7 +323,7 @@ const CSS = `
   display: inline-flex;
   flex-wrap: wrap;
   gap: 10px;
-  margin-top: 4px;
+  margin-top: 75px;
 }
 .lc-btn {
   all: unset; cursor: pointer;
