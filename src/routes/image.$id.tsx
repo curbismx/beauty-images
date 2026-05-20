@@ -109,6 +109,15 @@ function ImageDetail() {
     };
   }, [id, fetchImage]);
 
+  useEffect(() => {
+    if (!img) return;
+    let alive = true;
+    fetchSimilar({ data: { excludeId: img.id, imageNumber: img.image_number } })
+      .then((r) => alive && setSimilar(r))
+      .catch(() => alive && setSimilar([]));
+    return () => { alive = false; };
+  }, [img, fetchSimilar]);
+
   const activeTier = TIERS.find((t) => t.id === tier)!;
 
 
