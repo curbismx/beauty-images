@@ -540,6 +540,9 @@ const PAGE_CSS = `
 .curbism-root .hero--results .bg-img--search.active { opacity: 0.25 !important; }
 
 /* SEARCH BOX */
+.curbism-root .hero--search .hero-search {
+  border: 1px solid rgba(0,0,0,0.45);
+}
 .curbism-root .hero-search {
   position: absolute;
   left: 0;
