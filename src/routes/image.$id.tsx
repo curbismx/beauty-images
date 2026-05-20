@@ -41,26 +41,27 @@ const TIERS: Array<{
     id: "small",
     label: "Small",
     price: "£150.00",
-    sub: "1280 px · 300 dpi",
+    sub: "800 px max width",
     description:
-      "Small licence — 1280 px on the long edge at 300 dpi. Perfect for web banners, social media, blog headers and small editorial use. Includes worldwide rights for digital publication for 12 months.",
+      "Small licence — up to 800 px on the longest edge. Perfect for web banners, social media, blog headers and small editorial use. Includes worldwide rights for digital publication for 12 months.",
   },
   {
     id: "medium",
     label: "Medium",
     price: "£275.00",
-    sub: "1957 × 1538 px · 3 MP",
+    sub: "2000 px max width",
     description:
-      "Medium licence — 1957 × 1538 px (16.6 × 13.0 cm) at 300 dpi, around 3 MP. Suited to magazine spreads, brochures, packaging mock-ups and quarter-page print. Worldwide print + digital rights for 12 months.",
+      "Medium licence — up to 2000 px on the longest edge. Suited to magazine spreads, brochures, packaging mock-ups and quarter-page print. Worldwide print + digital rights for 12 months.",
   },
   {
     id: "large",
     label: "Large",
     price: "£375.00",
-    sub: "4000 px · 12 MP",
+    sub: "5400 px max width",
     description:
-      "Large licence — 4000 px on the long edge (33.9 × 22.6 cm) at 300 dpi, around 12 MP. Designed for full-page print, posters, billboards and high-end advertising campaigns. Worldwide print + digital rights for 12 months.",
+      "Large licence — up to 5400 px on the longest edge. Designed for full-page print, posters, billboards and high-end advertising campaigns. Worldwide print + digital rights for 12 months.",
   },
+
 ];
 
 function ImageDetail() {
