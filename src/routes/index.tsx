@@ -362,37 +362,38 @@ function Index() {
                     </>
                   )}
                 </div>
-                <Link to="/lightbox" className="srh-lightbox" aria-label="Open lightbox">
-                  <Layers size={16} />
-                  <span>LIGHTBOX</span>
-                  {lbCount > 0 && <span className="srh-lb-count">{lbCount}</span>}
-                </Link>
+                <div className="srh-actions">
+                  <button
+                    type="button"
+                    className="srh-iconbtn"
+                    aria-label={masonry ? "Show as square grid" : "Show full images (masonry)"}
+                    title={masonry ? "Square grid" : "Masonry"}
+                    onClick={() => setViewMode(masonry ? "square" : "masonry")}
+                  >
+                    {masonry ? <LayoutGrid size={16} /> : <Rows3 size={16} />}
+                  </button>
+                  <Link to="/lightbox" className="srh-lightbox" aria-label="Open lightbox">
+                    <Layers size={16} />
+                    <span>LIGHTBOX</span>
+                    {lbCount > 0 && <span className="srh-lb-count">{lbCount}</span>}
+                  </Link>
+                </div>
               </div>
               {searching && <div className="search-results-status">SEARCHING…</div>}
               {!searching && submittedQuery && results.length === 0 && (
                 <div className="search-results-status">NO MATCHES — TRY ANOTHER TERM</div>
               )}
-              {results.length > 0 && (
+              {results.length > 0 && !masonry && (
                 <div className="search-results-grid">
-                  {results.map((r) => (
-                    <Link
-                      key={r.id}
-                      to="/image/$id"
-                      params={{ id: r.id }}
-                      className="search-result-card"
-                      onMouseDown={(e) => e.preventDefault()}
-                      onClick={saveSearchState}
-                    >
-                      {r.signed_url ? (
-                        <img src={r.signed_url} alt={r.title ?? r.caption ?? ""} loading="lazy" />
-                      ) : (
-                        <div className="search-result-fallback" />
-                      )}
-                      <figcaption>
-                        <div className="src-num">#{String(r.image_number).padStart(5, "0")}</div>
-                        {r.title && <div className="src-title">{r.title}</div>}
-                      </figcaption>
-                    </Link>
+                  {results.map((r) => renderResultCard(r, saveSearchState))}
+                </div>
+              )}
+              {results.length > 0 && masonry && (
+                <div className="search-results-masonry">
+                  {Array.from({ length: cols }, (_, ci) => (
+                    <div className="masonry-col" key={ci}>
+                      {results.filter((_, i) => i % cols === ci).map((r) => renderResultCard(r, saveSearchState))}
+                    </div>
                   ))}
                 </div>
               )}
