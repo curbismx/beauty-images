@@ -145,7 +145,6 @@ function Index() {
       return;
     }
     submitSearch(restoreState.q, restoreState.y).finally(() => setRestoringSearch(false));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [restoreState]);
 
   const saveSearchState = () => {
