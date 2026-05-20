@@ -169,8 +169,6 @@ function ImageDetail() {
 
                 <div className="lc-tiles">
 
-
-                <div className="lc-tiles">
                   {TIERS.map((t) => {
                     const active = tier === t.id;
                     return (
