@@ -74,6 +74,13 @@ function BasketPage() {
     [basketJson],
   );
 
+  // Per-image tier mapping, packed as "imageId:s,imageId:m" etc. for Stripe metadata.
+  const checkoutImageTiers = useMemo(() => {
+    return basket
+      .map((b) => `${b.id}:${b.tier.charAt(0)}`)
+      .join(",");
+  }, [basketJson]);
+
   const uniqueIds = Array.from(new Set(basket.map((b) => b.id)));
   const idsKey = uniqueIds.join(",");
 
