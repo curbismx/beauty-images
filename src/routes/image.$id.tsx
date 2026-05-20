@@ -1,8 +1,13 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState, useSyncExternalStore } from "react";
 
 import { useServerFn } from "@tanstack/react-start";
-import { getPublicImage, type PublicImageDetail } from "@/lib/search.functions";
+import {
+  getPublicImage,
+  getSimilarShootImages,
+  type PublicImageDetail,
+  type PublicSearchResult,
+} from "@/lib/search.functions";
 import {
   addToLightbox,
   removeFromLightbox,
@@ -16,6 +21,8 @@ import {
   subscribeBasket,
   type BasketItem,
 } from "@/lib/basket";
+import { useViewMode, useMasonryCols } from "@/lib/view-mode";
+import { LayoutGrid, Rows3 } from "lucide-react";
 
 export const Route = createFileRoute("/image/$id")({
   component: ImageDetail,
@@ -64,6 +71,11 @@ function ImageDetail() {
   const [loading, setLoading] = useState(true);
   const [imgReady, setImgReady] = useState(false);
   const [tier, setTier] = useState<TierId>("medium");
+  const fetchSimilar = useServerFn(getSimilarShootImages);
+  const [similar, setSimilar] = useState<PublicSearchResult[]>([]);
+  const [viewMode, setViewMode] = useViewMode();
+  const masonry = viewMode === "masonry";
+  const cols = useMasonryCols();
 
   const lbJson = useSyncExternalStore(
     subscribeLightbox,
@@ -96,6 +108,15 @@ function ImageDetail() {
       alive = false;
     };
   }, [id, fetchImage]);
+
+  useEffect(() => {
+    if (!img) return;
+    let alive = true;
+    fetchSimilar({ data: { excludeId: img.id, imageNumber: img.image_number } })
+      .then((r) => alive && setSimilar(r))
+      .catch(() => alive && setSimilar([]));
+    return () => { alive = false; };
+  }, [img, fetchSimilar]);
 
   const activeTier = TIERS.find((t) => t.id === tier)!;
 
@@ -245,8 +266,69 @@ function ImageDetail() {
             </div>
           </section>
         )}
+
+        {img && imgReady && similar.length > 0 && (
+          <section className="img-similar">
+            <div className="search-results-header">
+              <div className="srh-text">
+                SIMILAR IMAGES
+                <span className="srp-meta">
+                  {" "}
+                  · {similar.length} {similar.length === 1 ? "IMAGE" : "IMAGES"}
+                </span>
+              </div>
+              <div className="srh-actions">
+                <button
+                  type="button"
+                  className="srh-iconbtn"
+                  aria-label={masonry ? "Show as square grid" : "Show full images (masonry)"}
+                  title={masonry ? "Square grid" : "Masonry"}
+                  onClick={() => setViewMode(masonry ? "square" : "masonry")}
+                >
+                  {masonry ? <LayoutGrid size={16} /> : <Rows3 size={16} />}
+                </button>
+              </div>
+            </div>
+
+            {!masonry && (
+              <div className="search-results-grid">
+                {similar.map((r) => renderSimCard(r))}
+              </div>
+            )}
+            {masonry && (
+              <div className="search-results-masonry">
+                {Array.from({ length: cols }, (_, ci) => (
+                  <div className="masonry-col" key={ci}>
+                    {similar.filter((_, i) => i % cols === ci).map((r) => renderSimCard(r))}
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+        )}
       </div>
     </>
+  );
+}
+
+function renderSimCard(r: PublicSearchResult) {
+  return (
+    <Link
+      key={r.id}
+      to="/image/$id"
+      params={{ id: r.id }}
+      className="search-result-card"
+    >
+      {r.signed_url ? (
+        <img src={r.signed_url} alt={r.title ?? r.caption ?? ""} loading="lazy" />
+      ) : (
+        <div className="search-result-fallback" />
+      )}
+      <figcaption>
+        <div className="src-num">#{String(r.image_number).padStart(5, "0")}</div>
+        {r.title && <div className="src-title">{r.title}</div>}
+      </figcaption>
+    </Link>
   );
 }
 
@@ -421,5 +503,69 @@ const CSS = `
   .img-stage { padding: 0 24px; }
   .img-el { max-height: calc(100vh - 100px); }
   
+}
+
+/* Similar images section — matches search results / lightbox styling */
+.img-similar { background: #fff; color: #111; padding: 60px 40px 120px; }
+.img-similar .search-results-header {
+  font-family: 'DIN Condensed', 'DIN Alternate', 'Barlow Condensed', 'Oswald', sans-serif;
+  font-size: clamp(28px, 4.2vw, 56px);
+  font-weight: 900; text-transform: uppercase;
+  letter-spacing: -0.035em; line-height: 1.15; color: #000;
+  margin-bottom: 28px;
+  display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap;
+}
+.img-similar .srh-text { flex: 1; min-width: 0; }
+.img-similar .srp-meta { color: #999; font-weight: 900; }
+.img-similar .srh-actions { display: inline-flex; align-items: center; gap: 10px; }
+.img-similar .srh-iconbtn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 38px; height: 38px;
+  background: #fff; color: #111; border: 1px solid #111; cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.img-similar .srh-iconbtn:hover { background: #111; color: #fff; }
+.img-similar .search-results-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 24px;
+}
+.img-similar .search-result-card {
+  display: flex; flex-direction: column; background: #fafafa;
+  text-decoration: none; color: inherit; cursor: pointer;
+  transition: transform 0.25s ease;
+}
+.img-similar .search-result-card:hover { transform: translateY(-2px); }
+.img-similar .search-result-card img,
+.img-similar .search-result-fallback {
+  width: 100%; aspect-ratio: 1 / 1; object-fit: cover; display: block; background: #eee;
+}
+.img-similar .search-result-card figcaption {
+  padding: 10px 2px 0; display: flex; flex-direction: column; gap: 2px;
+}
+.img-similar .src-num {
+  font-size: 10px; letter-spacing: 0.25em; color: #999; text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+}
+.img-similar .src-title {
+  font-size: 12px; color: #111; letter-spacing: 0.04em;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.img-similar .search-results-masonry {
+  display: flex; align-items: flex-start; gap: 24px;
+}
+.img-similar .masonry-col {
+  flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 24px;
+}
+.img-similar .search-results-masonry .search-result-card { display: block; margin: 0; }
+.img-similar .search-results-masonry .search-result-card:hover { transform: none; }
+.img-similar .search-results-masonry .search-result-card img,
+.img-similar .search-results-masonry .search-result-fallback {
+  width: 100%; height: auto; aspect-ratio: auto; object-fit: initial;
+  display: block; background: #eee;
+}
+@media (max-width: 768px) {
+  .img-similar { padding: 36px 22px 80px; }
+  .img-similar .search-results-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  .img-similar .search-results-masonry { gap: 14px; }
+  .img-similar .masonry-col { gap: 14px; }
 }
 `;
