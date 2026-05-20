@@ -53,6 +53,27 @@ function AccountPage() {
     await supabase.from("profiles").update({ full_name: name }).eq("id", session.user.id);
   };
 
+  const saveName = async () => {
+    if (!session) return;
+    await supabase.from("profiles").update({ full_name: name }).eq("id", session.user.id);
+  };
+
+  const changePassword = async () => {
+    setPwMsg(null);
+    if (newPassword.length < 8) {
+      setPwMsg({ kind: "err", text: "Password must be at least 8 characters." });
+      return;
+    }
+    setPwBusy(true);
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    setPwBusy(false);
+    if (error) setPwMsg({ kind: "err", text: error.message });
+    else {
+      setNewPassword("");
+      setPwMsg({ kind: "ok", text: "Password updated." });
+    }
+  };
+
   const logout = async () => {
     await supabase.auth.signOut();
     navigate({ to: "/" });
