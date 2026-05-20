@@ -35,11 +35,6 @@ const DesignRoute = DesignRouteImport.update({
   path: '/design',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LightboxRoute = LightboxRouteImport.update({
-  id: '/lightbox',
-  path: '/lightbox',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
