@@ -430,12 +430,12 @@ const CSS = `
   background: #D75F68;
   outline: 1px solid #D75F68;
   aspect-ratio: auto;
-  display: flex; flex-direction: row; align-items: center; justify-content: space-between; text-align: left; gap: 8px;
-  min-height: 56px; padding: 10px 12px;
+  display: flex; flex-direction: column; align-items: flex-start; justify-content: center; text-align: left; gap: 4px;
+  min-height: 54px; padding: 9px 10px;
 }
 .lc-tile--cta:hover { background: #b94e56; outline-color: #b94e56; }
-.lc-tile-cta-label { font-size: 11px; font-weight: 700; letter-spacing: 0.15em; color: #fff; text-transform: uppercase; line-height: 1.2; }
-.lc-tile-cta-price { font-size: 15px; font-weight: 600; color: #fff; font-variant-numeric: tabular-nums; }
+.lc-tile-cta-label { max-width: 100%; font-size: 10px; font-weight: 700; letter-spacing: 0.11em; color: #fff; text-transform: uppercase; line-height: 1.15; }
+.lc-tile-cta-price { max-width: 100%; font-size: 14px; font-weight: 600; color: #fff; font-variant-numeric: tabular-nums; white-space: nowrap; }
 
 
 
