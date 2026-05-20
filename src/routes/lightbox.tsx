@@ -34,7 +34,7 @@ function useLightboxIdsJson(): string {
 
 
 function LightboxPage() {
-  const idsJson = useSyncExternalStoreServerSafe();
+  const idsJson = useLightboxIdsJson();
   const ids: string[] = JSON.parse(idsJson);
   const fetchImages = useServerFn(getPublicImagesByIds);
   const [items, setItems] = useState<PublicSearchResult[]>([]);
