@@ -316,15 +316,18 @@ const CSS = `
 .img-meta-cell-value { font-size: 14px; color: #111; }
 
 @media (max-width: 900px) {
-  .img-stage { padding: 60px; }
+  .img-stage { padding: 60px 60px 30px; }
   .img-el { max-height: calc(100vh - 120px); }
+  .licence-wrap { padding: 0 60px 60px; }
+  .lc-tiles { grid-template-columns: repeat(2, 1fr); }
+  .lc-tile { width: 100%; height: auto; aspect-ratio: 1 / 1; }
   .img-details { padding: 48px 32px 80px; }
-  .licence-card { width: calc(100% - 32px); right: 16px; top: 16px; }
   .img-meta-title { font-size: 24px; }
 }
 @media (max-width: 600px) {
-  .img-stage { padding: 24px; padding-top: 70px; }
-  .img-el { max-height: calc(100vh - 48px); }
+  .img-stage { padding: 70px 24px 24px; }
+  .img-el { max-height: calc(100vh - 100px); }
+  .licence-wrap { padding: 0 24px 32px; }
   .licence-card { padding: 20px 18px 18px; }
 }
 `;
