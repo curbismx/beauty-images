@@ -131,6 +131,7 @@ function Index() {
               onChange={(e) => setSearchValue(e.target.value)}
               onFocus={() => setSearchFocused(true)}
               onBlur={() => {
+                justClosedSearchRef.current = true;
                 setSearchFocused(false);
                 setSearchValue("");
                 setSubmittedQuery("");
