@@ -165,13 +165,6 @@ function ImageDetail() {
               </div>
               {imgReady && (
                 <div className="lc-detail lc-detail--under">
-                  <div className="lc-detail-eyebrow">LICENCE DETAILS</div>
-                  <div className="lc-detail-head">
-                    <span className="lc-detail-tier">{activeTier.label.toUpperCase()}</span>
-                    <span className="lc-detail-price">{activeTier.price}</span>
-                  </div>
-                  <p className="lc-detail-text">{activeTier.description}</p>
-
                   <div className="lc-btn-row">
                     {TIERS.map((t) => {
                       const active = tier === t.id;
@@ -200,6 +193,12 @@ function ImageDetail() {
                       <span className="lc-btn-price">{activeTier.price}</span>
                     </button>
                   </div>
+                  <div className="lc-detail-eyebrow">LICENCE DETAILS</div>
+                  <div className="lc-detail-head">
+                    <span className="lc-detail-tier">{activeTier.label.toUpperCase()}</span>
+                    <span className="lc-detail-price">{activeTier.price}</span>
+                  </div>
+                  <p className="lc-detail-text">{activeTier.description}</p>
                 </div>
               )}
             </div>
