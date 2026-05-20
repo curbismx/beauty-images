@@ -42,6 +42,7 @@ export const createBasketCheckoutSession = createServerFn({ method: "POST" })
     customerEmail?: string;
     userId?: string;
     imageIds?: string[];
+    imageTiers?: string;
     returnUrl: string;
     environment: StripeEnv;
   }) => {
@@ -53,6 +54,10 @@ export const createBasketCheckoutSession = createServerFn({ method: "POST" })
       if (!Number.isInteger(it.quantity) || it.quantity < 1 || it.quantity > 100) {
         throw new Error("Invalid quantity");
       }
+    }
+    if (data.imageTiers && data.imageTiers.length > 450) {
+      // Stripe metadata values cap at 500 chars; truncate at id boundary.
+      data.imageTiers = data.imageTiers.slice(0, 450).replace(/,[^,]*$/, "");
     }
     return data;
   })
@@ -97,6 +102,7 @@ export const createBasketCheckoutSession = createServerFn({ method: "POST" })
         ...(data.imageIds && data.imageIds.length > 0 && {
           imageIds: data.imageIds.slice(0, 50).join(","),
         }),
+        ...(data.imageTiers && { imageTiers: data.imageTiers }),
       },
     } as any);
 
