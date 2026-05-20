@@ -55,6 +55,7 @@ function ImageDetail() {
   const fetchImage = useServerFn(getPublicImage);
   const [img, setImg] = useState<PublicImageDetail | null>(null);
   const [loading, setLoading] = useState(true);
+  const [imgReady, setImgReady] = useState(false);
   const [tier, setTier] = useState<TierId>("medium");
   const [showLicence, setShowLicence] = useState(true);
 
