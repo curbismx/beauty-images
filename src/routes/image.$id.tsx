@@ -101,16 +101,12 @@ function ImageDetail() {
                     </button>
                   );
                 })}
-              </div>
-
-              <div className="lc-footer">
-                <div className="lc-total">
-                  <span className="lc-total-amount">
+                <button type="button" className="lc-tile lc-tile--cta">
+                  <span className="lc-tile-cta-label">ADD TO BASKET</span>
+                  <span className="lc-tile-cta-price">
                     {TIERS.find((t) => t.id === tier)?.price}
                   </span>
-                  <span className="lc-total-currency">GBP</span>
-                </div>
-                <button type="button" className="lc-cta">ADD TO BASKET</button>
+                </button>
               </div>
             </aside>
           ) : (
