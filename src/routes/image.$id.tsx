@@ -138,7 +138,7 @@ function ImageDetail() {
           </nav>
         </header>
 
-        {/* 2/3 image + 1/3 pricing layout */}
+        {/* Single column image + licence */}
         <section className="img-split">
           <div className="img-stage">
             <div className="img-stage-inner">
@@ -156,40 +156,37 @@ function ImageDetail() {
               </div>
               {imgReady && (
                 <div className="lc-detail lc-detail--under">
+                  <div className="lc-detail-eyebrow">LICENCE DETAILS</div>
                   <div className="lc-detail-head">
                     <span className="lc-detail-tier">{activeTier.label.toUpperCase()}</span>
                     <span className="lc-detail-price">{activeTier.price}</span>
                   </div>
                   <p className="lc-detail-text">{activeTier.description}</p>
+
+                  <div className="lc-btn-row">
+                    {TIERS.map((t) => {
+                      const active = tier === t.id;
+                      return (
+                        <button
+                          key={t.id}
+                          type="button"
+                          className={`lc-btn${active ? " lc-btn--active" : ""}`}
+                          onClick={() => setTier(t.id)}
+                        >
+                          <span className="lc-btn-label">{t.label.toUpperCase()}</span>
+                          <span className="lc-btn-price">{t.price}</span>
+                        </button>
+                      );
+                    })}
+                    <button type="button" className="lc-btn lc-btn--cta">
+                      <span className="lc-btn-label">ADD TO BASKET</span>
+                      <span className="lc-btn-price">{activeTier.price}</span>
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
           </div>
-
-
-          <aside className={`licence-wrap${imgReady ? " licence-wrap--ready" : ""}`}>
-            <div className="lc-eyebrow">LICENCE</div>
-            <div className="lc-tiles">
-              {TIERS.map((t) => {
-                const active = tier === t.id;
-                return (
-                  <button
-                    key={t.id}
-                    type="button"
-                    className={`lc-tile${active ? " lc-tile--active" : ""}`}
-                    onClick={() => setTier(t.id)}
-                  >
-                    <span className="lc-tile-label">{t.label}</span>
-                    <span className="lc-tile-price">{t.price}</span>
-                    <span className="lc-tile-sub">{t.sub}</span>
-                  </button>
-                );
-              })}
-            </div>
-            <button type="button" className="lc-basket">
-              ADD TO BASKET <span className="lc-basket-price">{activeTier.price}</span>
-            </button>
-          </aside>
         </section>
 
 
@@ -256,25 +253,21 @@ const CSS = `
 .img-nav-link:hover { opacity: 1; color: #D75F68; }
 .img-nav-sep { color: #fff; opacity: 0.45; font-size: 11px; }
 
-/* 2/3 image + 1/3 pricing split */
+/* Image stage (single column) */
 .img-split {
-  display: grid;
-  grid-template-columns: 17fr 3fr;
-  align-items: start;
   background: #000;
-  padding: ${FRAME}px ${FRAME}px ${FRAME}px 0;
+  padding: ${FRAME}px 0;
 }
 
 .img-stage {
   background: #000;
-  padding: 0 ${FRAME}px 0 ${FRAME}px;
+  padding: 0 ${FRAME}px;
   min-width: 0;
 }
 .img-stage-inner {
   display: inline-block;
   max-width: 100%;
 }
-
 
 .img-frame {
   position: relative;
@@ -301,72 +294,37 @@ const CSS = `
   background: #0a0a0a;
 }
 
-/* LICENCE PANEL — right column: 3 small price tiles + basket button */
-.licence-wrap {
-  display: flex; flex-direction: column; gap: 10px;
-  padding: 0 12px 0 0;
-  opacity: 0;
-  transition: opacity 0.45s ease 0.15s;
-  min-width: 0;
-}
-.licence-wrap--ready { opacity: 1; }
-
-.lc-eyebrow {
-  font-size: 9px; letter-spacing: 0.28em; text-transform: uppercase;
-  color: #888; font-weight: 700; margin: 0 0 2px;
-}
-
-.lc-tiles { display: flex; flex-direction: column; gap: 8px; }
-
-.lc-tile {
-  all: unset; cursor: pointer;
-  display: grid;
-  grid-template-columns: 1fr auto;
-  grid-template-rows: auto auto;
-  column-gap: 10px; row-gap: 2px;
-  padding: 10px 12px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.15);
-  transition: background 0.15s ease, border-color 0.15s ease;
-}
-.lc-tile:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.35); }
-.lc-tile--active { background: rgba(255,255,255,0.14); border-color: #fff; }
-
-.lc-tile-label {
-  grid-column: 1; grid-row: 1;
-  font-size: 11px; font-weight: 700; color: #fff;
-  letter-spacing: 0.18em; text-transform: uppercase;
-}
-.lc-tile-price {
-  grid-column: 2; grid-row: 1 / span 2;
-  align-self: center;
-  font-size: 16px; font-weight: 500; color: #fff;
-  font-variant-numeric: tabular-nums; white-space: nowrap;
-}
-.lc-tile-sub {
-  grid-column: 1; grid-row: 2;
-  font-size: 10px; color: #999; line-height: 1.3;
-}
-
-.lc-basket {
-  all: unset; cursor: pointer; text-align: center;
-  margin-top: 4px;
-  padding: 12px 10px;
-  background: #D75F68; color: #fff;
-  font-size: 11px; font-weight: 700; letter-spacing: 0.22em;
-  text-transform: uppercase;
-  transition: background 0.2s ease;
-}
-.lc-basket:hover { background: #b94e56; }
-.lc-basket-price { font-weight: 600; letter-spacing: 0.05em; margin-left: 8px; font-variant-numeric: tabular-nums; }
-
 /* Detail under image (left-aligned with image) */
-.lc-detail { margin-bottom: 20px; }
-.lc-detail--under { margin: 24px 0 0; max-width: 100%; }
+.lc-detail { margin-bottom: 0; }
+.lc-detail--under { margin: 28px 0 0; max-width: 100%; }
+.lc-detail-eyebrow { font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; color: #888; font-weight: 700; margin-bottom: 12px; }
 .lc-detail-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 8px; }
-.lc-detail-tier { font-size: 13px; font-weight: 700; color: #fff; letter-spacing: 0.18em; }
-.lc-detail-price { font-size: 13px; font-weight: 600; color: #D75F68; font-variant-numeric: tabular-nums; letter-spacing: 0.05em; }
-.lc-detail-text { font-size: 13px; line-height: 1.6; color: #e6e6e6; margin: 0; }
+.lc-detail-tier { font-size: 14px; font-weight: 700; color: #fff; letter-spacing: 0.2em; }
+.lc-detail-price { font-size: 14px; font-weight: 600; color: #D75F68; font-variant-numeric: tabular-nums; letter-spacing: 0.05em; }
+.lc-detail-text { font-size: 13px; line-height: 1.6; color: #e6e6e6; margin: 0 0 22px; }
+
+.lc-btn-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-top: 4px;
+}
+.lc-btn {
+  all: unset; cursor: pointer; text-align: center;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  padding: 14px 10px;
+  border: 1px dashed rgba(255,255,255,0.45);
+  background: transparent;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+.lc-btn:hover { background: rgba(255,255,255,0.06); border-color: #fff; }
+.lc-btn--active { background: rgba(255,255,255,0.1); border-color: #fff; }
+.lc-btn--cta { border-color: #D75F68; color: #D75F68; }
+.lc-btn--cta:hover { background: rgba(215,95,104,0.12); border-color: #D75F68; color: #fff; }
+.lc-btn-label { font-size: 10px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: inherit; color: #fff; }
+.lc-btn--cta .lc-btn-label { color: #D75F68; }
+.lc-btn--cta:hover .lc-btn-label { color: #fff; }
+.lc-btn-price { font-size: 14px; font-weight: 500; color: #fff; font-variant-numeric: tabular-nums; }
 
 .img-nav-link {
   background: none; border: 0; padding: 0; cursor: pointer; font-family: inherit;
@@ -401,15 +359,14 @@ const CSS = `
 .img-meta-cell-value { font-size: 14px; color: #111; }
 
 @media (max-width: 900px) {
-  .img-stage { padding: 60px 60px 75px; }
+  .img-stage { padding: 0 60px; }
   .img-el { max-height: calc(100vh - 120px); }
-  .licence-wrap { padding: 0 60px 75px; }
   .img-details { padding: 48px 32px 80px; }
   .img-meta-title { font-size: 24px; }
 }
 @media (max-width: 600px) {
-  .img-stage { padding: 70px 24px 75px; }
+  .img-stage { padding: 0 24px; }
   .img-el { max-height: calc(100vh - 100px); }
-  .licence-wrap { padding: 0 24px 75px; }
+  .lc-btn-row { grid-template-columns: repeat(2, 1fr); }
 }
 `;
