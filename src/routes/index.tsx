@@ -493,9 +493,11 @@ const PAGE_CSS = `
 
 .curbism-root .hero-logo {
   position: absolute; top: 70px; left: 0;
-  height: 56px; z-index: 3; pointer-events: none;
+  height: 56px; z-index: 4;
+  background: none; border: 0; padding: 0; margin: 0;
+  cursor: pointer; appearance: none;
 }
-.curbism-root .hero-logo img { height: 100%; width: auto; display: block; }
+.curbism-root .hero-logo img { height: 100%; width: auto; display: block; pointer-events: none; }
 
 .curbism-root .hero-title {
   position: absolute; left: 0; top: 155px; z-index: 3; max-width: 50%;
