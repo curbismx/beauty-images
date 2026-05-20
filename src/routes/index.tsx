@@ -481,6 +481,13 @@ const PAGE_CSS = `
 .curbism-root .hero--results {
   background: white;
 }
+.curbism-root .hero--instant,
+.curbism-root .hero--instant .bg-img,
+.curbism-root .hero--instant + .home-stack .home-fade,
+.curbism-root .hero--instant + .home-stack .search-results {
+  transition: none !important;
+  animation: none !important;
+}
 .curbism-root .hero .bg-img {
   position: absolute; inset: 0;
   width: 100%; height: 100%;
