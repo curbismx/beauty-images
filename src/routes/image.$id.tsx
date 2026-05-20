@@ -296,7 +296,10 @@ const CSS = `
   width: auto; height: auto;
   background: #0a0a0a;
   border: 1px solid #3a3a3a;
+  opacity: 0;
+  transition: opacity 0.4s ease;
 }
+.img-el--ready { opacity: 1; }
 
 .img-empty {
   display: flex; align-items: center; justify-content: center;
