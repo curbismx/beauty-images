@@ -79,11 +79,36 @@ function LightboxPage() {
     setConfirmOpen(false);
   }, []);
 
+  const renderCard = (r: PublicSearchResult) => (
+    <div key={r.id} className="search-result-card">
+      <Link to="/image/$id" params={{ id: r.id }} className="src-link">
+        {r.signed_url ? (
+          <img src={r.signed_url} alt={r.title ?? r.caption ?? ""} loading="lazy" />
+        ) : (
+          <div className="search-result-fallback" />
+        )}
+      </Link>
+      <button
+        type="button"
+        className="src-remove"
+        aria-label="Remove from lightbox"
+        onClick={() => removeFromLightbox(r.id)}
+      >
+        <X size={14} />
+      </button>
+      <figcaption>
+        <div className="src-num">#{String(r.image_number).padStart(5, "0")}</div>
+        {r.title && <div className="src-title">{r.title}</div>}
+      </figcaption>
+    </div>
+  );
+
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
       <div className="lb-root">
         <Link to="/" className="lb-back">← BACK TO SEARCH</Link>
+
 
         <div className="search-results">
           <div className="search-results-header">
