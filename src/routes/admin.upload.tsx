@@ -216,8 +216,33 @@ function Upload() {
               ? "Sending…"
               : `Keyword ${Math.min(stats.data?.pending ?? 0, 25)} now`}
           </button>
+          <button
+            type="button"
+            onClick={runBackfill}
+            disabled={backfill.running}
+            title="Generate 800px previews for any images that don't have one"
+            style={{
+              background: "#fff",
+              color: "#000",
+              border: "1px solid #000",
+              padding: "10px 16px",
+              fontSize: 11,
+              fontWeight: 800,
+              letterSpacing: "0.04em",
+              textTransform: "uppercase",
+              cursor: backfill.running ? "not-allowed" : "pointer",
+              opacity: backfill.running ? 0.5 : 1,
+            }}
+          >
+            {backfill.running
+              ? `Previews: ${backfill.done}✓ ${backfill.failed ? backfill.failed + "✗ " : ""}…`
+              : backfill.message === "Done"
+                ? `Previews done: ${backfill.done}✓ ${backfill.failed}✗`
+                : "Generate 800px previews"}
+          </button>
         </div>
       </div>
+
 
       <div
         className="bi-drop"
