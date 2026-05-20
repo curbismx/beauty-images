@@ -301,7 +301,30 @@ const CSS = `
 .lc-detail-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 8px; }
 .lc-detail-tier { font-size: 14px; font-weight: 700; color: #fff; letter-spacing: 0.2em; }
 .lc-detail-price { font-size: 14px; font-weight: 600; color: #D75F68; font-variant-numeric: tabular-nums; letter-spacing: 0.05em; }
-.lc-detail-text { font-size: 13px; line-height: 1.6; color: #e6e6e6; margin: 0; }
+.lc-detail-text { font-size: 13px; line-height: 1.6; color: #e6e6e6; margin: 0 0 22px; }
+
+.lc-btn-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-top: 4px;
+}
+.lc-btn {
+  all: unset; cursor: pointer; text-align: center;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  padding: 14px 10px;
+  border: 1px dashed rgba(255,255,255,0.45);
+  background: transparent;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+.lc-btn:hover { background: rgba(255,255,255,0.06); border-color: #fff; }
+.lc-btn--active { background: rgba(255,255,255,0.1); border-color: #fff; }
+.lc-btn--cta { border-color: #D75F68; color: #D75F68; }
+.lc-btn--cta:hover { background: rgba(215,95,104,0.12); border-color: #D75F68; color: #fff; }
+.lc-btn-label { font-size: 10px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: inherit; color: #fff; }
+.lc-btn--cta .lc-btn-label { color: #D75F68; }
+.lc-btn--cta:hover .lc-btn-label { color: #fff; }
+.lc-btn-price { font-size: 14px; font-weight: 500; color: #fff; font-variant-numeric: tabular-nums; }
 
 .img-nav-link {
   background: none; border: 0; padding: 0; cursor: pointer; font-family: inherit;
