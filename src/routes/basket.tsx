@@ -46,8 +46,7 @@ function BasketPage() {
   const fetchImages = useServerFn(getPublicImagesByIds);
   const [items, setItems] = useState<PublicSearchResult[]>([]);
   const [loading, setLoading] = useState(true);
-  const [viewMode, setViewMode] = useViewMode();
-  const masonry = viewMode === "masonry";
+  const [masonry, setMasonry] = useState(false);
   const cols = useMasonryCols();
   const [confirmCheckout, setConfirmCheckout] = useState(false);
 
