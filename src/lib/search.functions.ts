@@ -71,15 +71,14 @@ export const getPublicImage = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<PublicImageDetail | null> => {
     const { data: row, error } = await supabaseAdmin
       .from("images")
-      .select("id, image_number, title, caption, keywords, category, pricing_tier, storage_path, preview_path")
+      .select("id, image_number, title, caption, keywords, category, pricing_tier, preview_path")
       .eq("id", data.id)
       .maybeSingle();
     if (error) throw new Error(error.message);
-    if (!row) return null;
-    const path = row.preview_path ?? row.storage_path;
+    if (!row || !row.preview_path) return null;
     const signed = await supabaseAdmin.storage
       .from("images-private")
-      .createSignedUrl(path, 3600);
+      .createSignedUrl(row.preview_path, 3600);
     return {
       id: row.id,
       image_number: row.image_number as number,
