@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, useSyncExternalStore } from "react";
-import { Check } from "lucide-react";
+
 import { useServerFn } from "@tanstack/react-start";
 import { getPublicImage, type PublicImageDetail } from "@/lib/search.functions";
 import {
@@ -138,14 +138,7 @@ function ImageDetail() {
               className={`img-nav-link${inLightbox ? " img-nav-link--on" : ""}`}
               onClick={() => (inLightbox ? removeFromLightbox(id) : addToLightbox(id))}
             >
-              {inLightbox ? (
-                <>
-                  <Check size={12} style={{ marginRight: 6, verticalAlign: "-2px" }} />
-                  IN LIGHTBOX
-                </>
-              ) : (
-                "ADD TO LIGHTBOX"
-              )}
+              {inLightbox ? "IN LIGHTBOX" : "ADD TO LIGHTBOX"}
             </button>
             <span className="img-nav-sep">/</span>
             <a className="img-nav-link" href="/lightbox">LIGHTBOX</a>
@@ -325,7 +318,7 @@ const CSS = `
 .lc-detail-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 8px; }
 .lc-detail-tier { font-size: 14px; font-weight: 700; color: #fff; letter-spacing: 0.2em; }
 .lc-detail-price { font-size: 14px; font-weight: 600; color: #D75F68; font-variant-numeric: tabular-nums; letter-spacing: 0.05em; }
-.lc-detail-text { font-size: 13px; line-height: 1.6; color: #e6e6e6; margin: 0 0 22px; }
+.lc-detail-text { font-size: 13px; line-height: 1.6; color: #e6e6e6; margin: 0 0 22px; max-width: 66%; }
 
 .lc-btn-row {
   display: grid;
@@ -337,18 +330,20 @@ const CSS = `
   all: unset; cursor: pointer; text-align: center;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
   padding: 14px 10px;
-  border: 1px dashed rgba(255,255,255,0.45);
+  border: 1px dashed rgba(255,255,255,0.2);
   background: transparent;
   transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
-.lc-btn:hover { background: rgba(255,255,255,0.06); border-color: #fff; }
-.lc-btn--active { background: #e8e8e8; border-color: #e8e8e8; border-style: solid; }
-.lc-btn--active .lc-btn-label,
-.lc-btn--active .lc-btn-price { color: #000; }
+.lc-btn:hover { background: #e8e8e8; border-color: #e8e8e8; border-style: solid; }
+.lc-btn:hover .lc-btn-label,
+.lc-btn:hover .lc-btn-price { color: #000; }
+.lc-btn--active { border-color: rgba(255,255,255,0.55); border-style: solid; }
 .lc-btn--cta { border-color: #D75F68; color: #D75F68; }
-.lc-btn--cta:hover { background: rgba(215,95,104,0.12); border-color: #D75F68; }
-.lc-btn--cta .lc-btn-label { color: #D75F68; }
-.lc-btn--cta .lc-btn-price { color: #D75F68; }
+.lc-btn--cta:hover { background: rgba(215,95,104,0.12); border-color: #D75F68; border-style: dashed; }
+.lc-btn--cta .lc-btn-label,
+.lc-btn--cta:hover .lc-btn-label { color: #D75F68; }
+.lc-btn--cta .lc-btn-price,
+.lc-btn--cta:hover .lc-btn-price { color: #D75F68; }
 .lc-btn--cta-on { background: #D75F68; border-color: #D75F68; border-style: solid; }
 .lc-btn--cta-on .lc-btn-label,
 .lc-btn--cta-on .lc-btn-price { color: #fff; }
