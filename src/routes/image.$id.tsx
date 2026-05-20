@@ -96,7 +96,7 @@ function ImageDetail() {
               className="img-back"
               onClick={() => {
                 try { sessionStorage.setItem("bi_restore_search", "1"); } catch { /* ignore */ }
-                window.location.href = "/";
+                navigate({ to: "/" });
               }}
             >
               <svg className="img-back-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="square">
@@ -109,7 +109,7 @@ function ImageDetail() {
               className="img-back img-back--home"
               onClick={() => {
                 try { sessionStorage.removeItem("bi_restore_search"); sessionStorage.removeItem("bi_search_state"); } catch { /* ignore */ }
-                window.location.href = "/";
+                navigate({ to: "/" });
               }}
             >
               / BACK TO HOME
