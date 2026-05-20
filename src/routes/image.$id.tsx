@@ -1,20 +1,68 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { useEffect, useState, useSyncExternalStore } from "react";
+import { Eye, EyeOff, Check, Plus } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { getPublicImage, type PublicImageDetail } from "@/lib/search.functions";
+import {
+  addToLightbox,
+  removeFromLightbox,
+  getLightbox,
+  subscribeLightbox,
+} from "@/lib/lightbox";
 
 export const Route = createFileRoute("/image/$id")({
   component: ImageDetail,
 });
+
+type TierId = "small" | "medium" | "large";
+
+const TIERS: Array<{
+  id: TierId;
+  label: string;
+  price: string;
+  sub: string;
+  description: string;
+}> = [
+  {
+    id: "small",
+    label: "Small",
+    price: "£150.00",
+    sub: "1280 px · 300 dpi",
+    description:
+      "Small licence — 1280 px on the long edge at 300 dpi. Perfect for web banners, social media, blog headers and small editorial use. Includes worldwide rights for digital publication for 12 months.",
+  },
+  {
+    id: "medium",
+    label: "Medium",
+    price: "£275.00",
+    sub: "1957 × 1538 px · 3 MP",
+    description:
+      "Medium licence — 1957 × 1538 px (16.6 × 13.0 cm) at 300 dpi, around 3 MP. Suited to magazine spreads, brochures, packaging mock-ups and quarter-page print. Worldwide print + digital rights for 12 months.",
+  },
+  {
+    id: "large",
+    label: "Large",
+    price: "£375.00",
+    sub: "4000 px · 12 MP",
+    description:
+      "Large licence — 4000 px on the long edge (33.9 × 22.6 cm) at 300 dpi, around 12 MP. Designed for full-page print, posters, billboards and high-end advertising campaigns. Worldwide print + digital rights for 12 months.",
+  },
+];
 
 function ImageDetail() {
   const { id } = Route.useParams();
   const fetchImage = useServerFn(getPublicImage);
   const [img, setImg] = useState<PublicImageDetail | null>(null);
   const [loading, setLoading] = useState(true);
-  const [tier, setTier] = useState<"small" | "medium" | "large">("medium");
+  const [tier, setTier] = useState<TierId>("medium");
   const [showLicence, setShowLicence] = useState(true);
+
+  const lbJson = useSyncExternalStore(
+    subscribeLightbox,
+    () => JSON.stringify(getLightbox()),
+    () => "[]",
+  );
+  const inLightbox = (JSON.parse(lbJson) as string[]).includes(id);
 
   useEffect(() => {
     let alive = true;
@@ -31,11 +79,9 @@ function ImageDetail() {
     };
   }, [id, fetchImage]);
 
-  const TIERS = [
-    { id: "small" as const, label: "Small", price: "£150.00", sub: "1280 px · 300 dpi" },
-    { id: "medium" as const, label: "Medium", price: "£275.00", sub: "1957 x 1538 px · 3 MP" },
-    { id: "large" as const, label: "Large", price: "£375.00", sub: "4000 px · 12 MP" },
-  ];
+  const activeTier = TIERS.find((t) => t.id === tier)!;
+
+
 
 
   return (
@@ -80,10 +126,13 @@ function ImageDetail() {
               </button>
 
               <div className="lc-eyebrow">PURCHASE A LICENCE</div>
-              <p className="lc-intro">
-                All Royalty-Free licences include global use rights, comprehensive protection,
-                and simple pricing with volume discounts available.
-              </p>
+              <div className="lc-detail">
+                <div className="lc-detail-head">
+                  <span className="lc-detail-tier">{activeTier.label.toUpperCase()}</span>
+                  <span className="lc-detail-price">{activeTier.price}</span>
+                </div>
+                <p className="lc-detail-text">{activeTier.description}</p>
+              </div>
 
               <div className="lc-tiles">
                 {TIERS.map((t) => {
@@ -101,10 +150,22 @@ function ImageDetail() {
                     </button>
                   );
                 })}
+                <button
+                  type="button"
+                  className={`lc-tile lc-tile--lb${inLightbox ? " lc-tile--lb-on" : ""}`}
+                  onClick={() => (inLightbox ? removeFromLightbox(id) : addToLightbox(id))}
+                >
+                  <span className="lc-tile-lb-icon" aria-hidden="true">
+                    {inLightbox ? <Check size={18} /> : <Plus size={18} />}
+                  </span>
+                  <span className="lc-tile-lb-label">
+                    {inLightbox ? "IN LIGHTBOX" : "ADD TO LIGHTBOX"}
+                  </span>
+                </button>
                 <button type="button" className="lc-tile lc-tile--cta">
                   <span className="lc-tile-cta-label">ADD TO BASKET</span>
                   <span className="lc-tile-cta-price">
-                    {TIERS.find((t) => t.id === tier)?.price}
+                    {activeTier.price}
                   </span>
                 </button>
               </div>
@@ -119,9 +180,7 @@ function ImageDetail() {
                 <EyeOff size={14} />
               </span>
               <span className="lc-mini-label">ADD TO BASKET</span>
-              <span className="lc-mini-price">
-                {TIERS.find((t) => t.id === tier)?.price}
-              </span>
+              <span className="lc-mini-price">{activeTier.price}</span>
             </button>
           )}
         </section>
@@ -260,11 +319,18 @@ const CSS = `
 .lc-eyebrow { font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; color: #fff; margin-bottom: 14px; font-weight: 700; }
 .lc-intro { font-size: 11px; line-height: 1.55; color: #c2c2c2; margin: 0 0 22px; max-width: 560px; }
 
-/* TILES for each size + the ADD TO BASKET tile */
-.lc-tiles { display: grid; grid-template-columns: repeat(4, 130px); gap: 10px; }
+/* Expanded detail panel above the tiles — updates with the active tier */
+.lc-detail { margin-bottom: 20px; max-width: 720px; }
+.lc-detail-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 8px; }
+.lc-detail-tier { font-size: 13px; font-weight: 700; color: #fff; letter-spacing: 0.18em; }
+.lc-detail-price { font-size: 13px; font-weight: 600; color: #D75F68; font-variant-numeric: tabular-nums; letter-spacing: 0.05em; }
+.lc-detail-text { font-size: 13px; line-height: 1.6; color: #e6e6e6; margin: 0; }
+
+/* TILES for each size + ADD TO LIGHTBOX + ADD TO BASKET */
+.lc-tiles { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; max-width: 720px; }
 .lc-tile {
   all: unset; cursor: pointer;
-  width: 130px; height: 110px; padding: 12px;
+  height: 88px; padding: 10px 12px;
   display: flex; flex-direction: column; justify-content: space-between;
   background: rgba(255,255,255,0.08);
   outline: 1px solid rgba(255,255,255,0.18);
@@ -274,18 +340,28 @@ const CSS = `
 .lc-tile:hover { background: rgba(255,255,255,0.15); }
 .lc-tile--active { background: rgba(255,255,255,0.22); outline: 1px solid #fff; }
 .lc-tile-label { font-size: 11px; font-weight: 600; color: #fff; letter-spacing: 0.08em; text-transform: uppercase; }
-.lc-tile-price { font-size: 18px; font-weight: 400; color: #fff; font-variant-numeric: tabular-nums; }
-.lc-tile-sub { font-size: 9px; color: #cfcfcf; line-height: 1.4; }
+.lc-tile-price { font-size: 16px; font-weight: 400; color: #fff; font-variant-numeric: tabular-nums; }
+.lc-tile-sub { font-size: 9px; color: #cfcfcf; line-height: 1.3; }
+
+.lc-tile--lb {
+  background: rgba(255,255,255,0.06);
+  outline: 1px dashed rgba(255,255,255,0.35);
+  align-items: center; justify-content: center; text-align: center; gap: 6px;
+}
+.lc-tile--lb:hover { background: rgba(255,255,255,0.14); outline-color: #fff; }
+.lc-tile--lb-on { background: rgba(215,95,104,0.18); outline: 1px solid #D75F68; }
+.lc-tile-lb-icon { display: flex; align-items: center; justify-content: center; color: #fff; }
+.lc-tile-lb-label { font-size: 10px; font-weight: 700; letter-spacing: 0.18em; color: #fff; text-transform: uppercase; line-height: 1.2; }
 
 .lc-tile--cta {
   background: #D75F68;
   outline: 1px solid #D75F68;
-  align-items: center; justify-content: center;
-  text-align: center; gap: 8px;
+  align-items: center; justify-content: center; text-align: center; gap: 6px;
 }
 .lc-tile--cta:hover { background: #b94e56; outline-color: #b94e56; }
-.lc-tile-cta-label { font-size: 11px; font-weight: 700; letter-spacing: 0.2em; color: #fff; text-transform: uppercase; }
-.lc-tile-cta-price { font-size: 18px; font-weight: 600; color: #fff; font-variant-numeric: tabular-nums; }
+.lc-tile-cta-label { font-size: 10px; font-weight: 700; letter-spacing: 0.18em; color: #fff; text-transform: uppercase; line-height: 1.2; }
+.lc-tile-cta-price { font-size: 16px; font-weight: 600; color: #fff; font-variant-numeric: tabular-nums; }
+
 
 
 
@@ -316,8 +392,8 @@ const CSS = `
   .img-stage { padding: 60px 60px 75px; }
   .img-el { max-height: calc(100vh - 120px); }
   .licence-wrap { padding: 0 60px 75px; }
-  .lc-tiles { grid-template-columns: repeat(2, 1fr); }
-  .lc-tile { width: 100%; height: 110px; }
+  .lc-tiles { grid-template-columns: repeat(2, 1fr); max-width: none; }
+  .lc-tile { width: 100%; height: 88px; }
   .img-details { padding: 48px 32px 80px; }
   .img-meta-title { font-size: 24px; }
 }

@@ -90,3 +90,38 @@ export const getPublicImage = createServerFn({ method: "POST" })
       signed_url: signed.data?.signedUrl ?? null,
     };
   });
+
+export const getPublicImagesByIds = createServerFn({ method: "POST" })
+  .inputValidator(
+    z.object({ ids: z.array(z.string().uuid()).max(200) }).parse,
+  )
+  .handler(async ({ data }): Promise<PublicSearchResult[]> => {
+    if (data.ids.length === 0) return [];
+    const { data: rows, error } = await supabaseAdmin
+      .from("images")
+      .select("id, image_number, title, caption, keywords, storage_path")
+      .in("id", data.ids);
+    if (error) throw new Error(error.message);
+
+    const byId = new Map((rows ?? []).map((r) => [r.id, r]));
+    const ordered = data.ids.map((id) => byId.get(id)).filter(Boolean) as Array<
+      NonNullable<ReturnType<typeof byId.get>>
+    >;
+
+    const paths = ordered.map((r) => r.storage_path);
+    const signed = paths.length
+      ? await supabaseAdmin.storage
+          .from("images-private")
+          .createSignedUrls(paths, 3600)
+      : { data: [] as Array<{ signedUrl: string | null }> };
+
+    return ordered.map((r, i) => ({
+      id: r.id,
+      image_number: r.image_number as number,
+      title: r.title,
+      caption: r.caption,
+      keywords: (r.keywords ?? []) as string[],
+      signed_url: signed.data?.[i]?.signedUrl ?? null,
+    }));
+  });
+

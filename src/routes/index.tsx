@@ -1,8 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useServerFn } from "@tanstack/react-start";
+import { Layers } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { searchPublicImages, type PublicSearchResult } from "@/lib/search.functions";
+import { getLightbox, subscribeLightbox } from "@/lib/lightbox";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -52,6 +54,12 @@ function Index() {
   const runSearch = useServerFn(searchPublicImages);
   const justClosedSearchRef = useRef(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const lbCount = useSyncExternalStore(
+    subscribeLightbox,
+    () => getLightbox().length,
+    () => 0,
+  );
+
 
   const goPrev = () => {
     if (justClosedSearchRef.current) { justClosedSearchRef.current = false; return; }
@@ -224,6 +232,7 @@ function Index() {
           {searchActive && (
             <div className="search-results">
               <div className="search-results-header">
+                <div className="srh-text">
                 {submittedQuery ? (
                   <>
                     SEARCH RESULTS
@@ -238,6 +247,12 @@ function Index() {
                     <span className="srp-hint"> WILL APPEAR HERE</span>
                   </>
                 )}
+                </div>
+                <Link to="/lightbox" className="srh-lightbox" aria-label="Open lightbox">
+                  <Layers size={16} />
+                  <span>LIGHTBOX</span>
+                  {lbCount > 0 && <span className="srh-lb-count">{lbCount}</span>}
+                </Link>
               </div>
               {searching && <div className="search-results-status">SEARCHING…</div>}
               {!searching && submittedQuery && results.length === 0 && (
@@ -716,7 +731,24 @@ const PAGE_CSS = `
   line-height: 1.15;
   color: #000;
   margin-bottom: 28px;
+  display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap;
 }
+.curbism-root .search-results-header .srh-text { flex: 1; min-width: 0; }
+.curbism-root .search-results-header .srh-lightbox {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 14px; background: #fff; color: #111; border: 1px solid #111;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.2em;
+  text-decoration: none; text-transform: uppercase;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.curbism-root .search-results-header .srh-lightbox:hover { background: #D75F68; color: #fff; border-color: #D75F68; }
+.curbism-root .search-results-header .srh-lb-count {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px;
+  background: #D75F68; color: #fff; font-size: 10px; letter-spacing: 0.05em;
+}
+.curbism-root .search-results-header .srh-lightbox:hover .srh-lb-count { background: #111; }
 .curbism-root .search-results-header .srp-hint { color: #e0e0e0; font-weight: 900; }
 .curbism-root .search-results-header .srp-meta { color: #999; font-weight: 900; }
 .curbism-root .search-results-status {

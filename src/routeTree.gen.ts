@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as LightboxRouteImport } from './routes/lightbox'
 import { Route as DesignRouteImport } from './routes/design'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
@@ -24,6 +25,11 @@ import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
 import { Route as ApiPublicTrackRouteImport } from './routes/api/public/track'
 import { Route as AdminImageIdRouteImport } from './routes/admin.image.$id'
 
+const LightboxRoute = LightboxRouteImport.update({
+  id: '/lightbox',
+  path: '/lightbox',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DesignRoute = DesignRouteImport.update({
   id: '/design',
   path: '/design',
@@ -99,6 +105,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/design': typeof DesignRoute
+  '/lightbox': typeof LightboxRoute
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/featured': typeof AdminFeaturedRoute
   '/admin/library': typeof AdminLibraryRoute
@@ -114,6 +121,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/design': typeof DesignRoute
+  '/lightbox': typeof LightboxRoute
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/featured': typeof AdminFeaturedRoute
   '/admin/library': typeof AdminLibraryRoute
@@ -131,6 +139,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/design': typeof DesignRoute
+  '/lightbox': typeof LightboxRoute
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/featured': typeof AdminFeaturedRoute
   '/admin/library': typeof AdminLibraryRoute
@@ -149,6 +158,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/design'
+    | '/lightbox'
     | '/admin/customers'
     | '/admin/featured'
     | '/admin/library'
@@ -164,6 +174,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/design'
+    | '/lightbox'
     | '/admin/customers'
     | '/admin/featured'
     | '/admin/library'
@@ -180,6 +191,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/design'
+    | '/lightbox'
     | '/admin/customers'
     | '/admin/featured'
     | '/admin/library'
@@ -197,12 +209,20 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
   DesignRoute: typeof DesignRoute
+  LightboxRoute: typeof LightboxRoute
   ImageIdRoute: typeof ImageIdRoute
   ApiPublicTrackRoute: typeof ApiPublicTrackRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/lightbox': {
+      id: '/lightbox'
+      path: '/lightbox'
+      fullPath: '/lightbox'
+      preLoaderRoute: typeof LightboxRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/design': {
       id: '/design'
       path: '/design'
@@ -334,6 +354,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
   DesignRoute: DesignRoute,
+  LightboxRoute: LightboxRoute,
   ImageIdRoute: ImageIdRoute,
   ApiPublicTrackRoute: ApiPublicTrackRoute,
 }
