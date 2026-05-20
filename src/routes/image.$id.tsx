@@ -180,9 +180,7 @@ function ImageDetail() {
                 <EyeOff size={14} />
               </span>
               <span className="lc-mini-label">ADD TO BASKET</span>
-              <span className="lc-mini-price">
-                {TIERS.find((t) => t.id === tier)?.price}
-              </span>
+              <span className="lc-mini-price">{activeTier.price}</span>
             </button>
           )}
         </section>
