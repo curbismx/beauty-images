@@ -213,7 +213,7 @@ function Index() {
           <button
             type="button"
             className="hero-logo"
-            onClick={goHome}
+            onClick={() => goHome()}
             aria-label="Beauty Images — home"
           >
             <img src="/beauty-logo.png" alt="Beauty Images" />
