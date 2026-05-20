@@ -404,8 +404,6 @@ const CSS = `
   .img-stage { padding: 60px 60px 75px; }
   .img-el { max-height: calc(100vh - 120px); }
   .licence-wrap { padding: 0 60px 75px; }
-  .lc-tiles { grid-template-columns: repeat(2, 1fr); max-width: none; }
-  .lc-tile { width: 100%; height: 88px; }
   .img-details { padding: 48px 32px 80px; }
   .img-meta-title { font-size: 24px; }
 }
@@ -413,6 +411,5 @@ const CSS = `
   .img-stage { padding: 70px 24px 75px; }
   .img-el { max-height: calc(100vh - 100px); }
   .licence-wrap { padding: 0 24px 75px; }
-  .licence-card { padding: 20px 18px 18px; }
 }
 `;
