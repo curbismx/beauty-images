@@ -7,6 +7,30 @@ import { searchPublicImages, type PublicSearchResult } from "@/lib/search.functi
 import { getLightbox, subscribeLightbox } from "@/lib/lightbox";
 import { useViewMode, useMasonryCols } from "@/lib/view-mode";
 
+function renderResultCard(r: PublicSearchResult, onClick: () => void) {
+  return (
+    <Link
+      key={r.id}
+      to="/image/$id"
+      params={{ id: r.id }}
+      className="search-result-card"
+      onMouseDown={(e) => e.preventDefault()}
+      onClick={onClick}
+    >
+      {r.signed_url ? (
+        <img src={r.signed_url} alt={r.title ?? r.caption ?? ""} loading="lazy" />
+      ) : (
+        <div className="search-result-fallback" />
+      )}
+      <figcaption>
+        <div className="src-num">#{String(r.image_number).padStart(5, "0")}</div>
+        {r.title && <div className="src-title">{r.title}</div>}
+      </figcaption>
+    </Link>
+  );
+}
+
+
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
