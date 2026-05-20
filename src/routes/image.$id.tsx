@@ -284,8 +284,7 @@ const CSS = `
   grid-template-columns: 2fr 1fr;
   align-items: start;
   background: #000;
-  padding-top: ${FRAME}px;
-  padding-right: ${FRAME}px;
+  padding: ${FRAME}px ${FRAME}px ${FRAME}px 0;
 }
 
 .img-stage {
