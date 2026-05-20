@@ -340,10 +340,14 @@ export const deleteImages = createServerFn({ method: "POST" })
     const { supabase } = context;
     const { data: rows, error: selErr } = await supabase
       .from("images")
-      .select("id, storage_path")
+      .select("id, storage_path, preview_path")
       .in("id", data.ids);
     if (selErr) throw new Error(selErr.message);
-    const paths = (rows ?? []).map((r) => r.storage_path);
+    const paths: string[] = [];
+    for (const r of rows ?? []) {
+      if (r.storage_path) paths.push(r.storage_path);
+      if (r.preview_path) paths.push(r.preview_path);
+    }
     if (paths.length) {
       await supabase.storage.from("images-private").remove(paths);
     }
@@ -351,3 +355,54 @@ export const deleteImages = createServerFn({ method: "POST" })
     if (delErr) throw new Error(delErr.message);
     return { deleted: rows?.length ?? 0 };
   });
+
+export const listImagesMissingPreview = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(z.object({ limit: z.number().int().min(1).max(50).default(10) }).parse)
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+    const { data: rows, error } = await supabase
+      .from("images")
+      .select("id, image_number, filename, storage_path")
+      .is("preview_path", null)
+      .order("image_number", { ascending: true })
+      .limit(data.limit);
+    if (error) throw new Error(error.message);
+    const paths = (rows ?? []).map((r) => r.storage_path);
+    const signed = paths.length
+      ? await supabase.storage.from("images-private").createSignedUrls(paths, 3600)
+      : { data: [] as Array<{ signedUrl: string | null }> };
+    return (rows ?? []).map((r, i) => ({
+      id: r.id,
+      image_number: r.image_number as number,
+      filename: r.filename,
+      storage_path: r.storage_path,
+      signed_url: signed.data?.[i]?.signedUrl ?? null,
+    }));
+  });
+
+export const countImagesMissingPreview = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { count, error } = await context.supabase
+      .from("images")
+      .select("id", { count: "exact", head: true })
+      .is("preview_path", null);
+    if (error) throw new Error(error.message);
+    return { missing: count ?? 0 };
+  });
+
+export const setImagePreviewPath = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(
+    z.object({ id: z.string().uuid(), preview_path: z.string().min(1).max(500) }).parse,
+  )
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase
+      .from("images")
+      .update({ preview_path: data.preview_path })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true as const };
+  });
+
