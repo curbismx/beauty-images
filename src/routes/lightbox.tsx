@@ -251,19 +251,22 @@ const CSS = `
   gap: 24px;
 }
 
-/* Masonry: full images, not square-cropped */
+/* Masonry: flex-based columns guarantee top-row alignment */
 .search-results-masonry {
-  column-count: 4;
-  column-gap: 24px;
-  column-fill: balance;
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
 }
-@media (max-width: 1200px) { .search-results-masonry { column-count: 3; } }
-@media (max-width: 768px)  { .search-results-masonry { column-count: 2; column-gap: 14px; } }
+.masonry-col {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
 .search-results-masonry .search-result-card {
-  break-inside: avoid;
-  margin: 0 0 24px;
   display: block;
-  vertical-align: top;
+  margin: 0;
 }
 .search-results-masonry .search-result-card:hover { transform: none; }
 .search-results-masonry .search-result-card img,
@@ -274,6 +277,10 @@ const CSS = `
   object-fit: initial;
   display: block;
   background: #eee;
+}
+@media (max-width: 768px) {
+  .search-results-masonry { gap: 14px; }
+  .masonry-col { gap: 14px; }
 }
 
 .search-result-card {
