@@ -92,10 +92,15 @@ function Index() {
     }
   };
 
-  // Restore previous search + scroll position on mount (e.g. after coming back from /image/:id)
+  // Restore previous search + scroll position ONLY when arriving back from /image/:id.
+  // saveSearchState() sets a one-shot flag we consume + clear here, so a fresh
+  // navigation to "/" (e.g. clicking the logo) shows the home page, not stale results.
   useEffect(() => {
     if (typeof window === "undefined") return;
     try {
+      const flag = sessionStorage.getItem("bi_restore_search");
+      if (!flag) return;
+      sessionStorage.removeItem("bi_restore_search");
       const raw = sessionStorage.getItem("bi_search_state");
       if (!raw) return;
       const saved = JSON.parse(raw) as { q?: string; y?: number };
@@ -113,7 +118,21 @@ function Index() {
         "bi_search_state",
         JSON.stringify({ q: submittedQuery, y: window.scrollY }),
       );
+      sessionStorage.setItem("bi_restore_search", "1");
     } catch { /* ignore */ }
+  };
+
+  const goHome = () => {
+    try {
+      sessionStorage.removeItem("bi_search_state");
+      sessionStorage.removeItem("bi_restore_search");
+    } catch { /* ignore */ }
+    setSearchValue("");
+    setSubmittedQuery("");
+    setResults([]);
+    setSearchFocused(false);
+    setCurrent(0);
+    window.scrollTo(0, 0);
   };
 
   return (
