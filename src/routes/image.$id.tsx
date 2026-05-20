@@ -54,7 +54,7 @@ function ImageDetail() {
               }
             }}
           >
-            ← BEAUTYIMAGES
+            ← BACK TO SEARCH RESULTS
           </button>
         </header>
 
