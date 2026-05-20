@@ -175,8 +175,7 @@ function ImageDetail() {
                           className={`lc-btn${active ? " lc-btn--active" : ""}`}
                           onClick={() => setTier(t.id)}
                         >
-                          <span className="lc-btn-label">{t.label.charAt(0).toUpperCase()}</span>
-                          <span className="lc-btn-sep">—</span>
+                          <span className="lc-btn-box">{t.label.charAt(0).toUpperCase()}</span>
                           <span className="lc-btn-price">{t.price}</span>
                         </button>
                       );
