@@ -281,7 +281,7 @@ const CSS = `
 /* 2/3 image + 1/3 pricing split */
 .img-split {
   display: grid;
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: 4fr 1fr;
   align-items: start;
   background: #000;
   padding: ${FRAME}px ${FRAME}px ${FRAME}px 0;
