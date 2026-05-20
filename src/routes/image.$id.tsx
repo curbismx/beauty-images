@@ -175,7 +175,8 @@ function ImageDetail() {
                           className={`lc-btn${active ? " lc-btn--active" : ""}`}
                           onClick={() => setTier(t.id)}
                         >
-                          <span className="lc-btn-label">{t.label.toUpperCase()}</span>
+                          <span className="lc-btn-label">{t.label.charAt(0).toUpperCase()}</span>
+                          <span className="lc-btn-sep">—</span>
                           <span className="lc-btn-price">{t.price}</span>
                         </button>
                       );
@@ -313,7 +314,7 @@ const CSS = `
 /* Detail under image (left-aligned with image) */
 .lc-detail { margin-bottom: 0; }
 .lc-detail--under { margin: 28px 0 0; max-width: 100%; }
-.lc-detail-eyebrow { font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; color: #888; font-weight: 700; margin-bottom: 12px; }
+.lc-detail-eyebrow { font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; color: #888; font-weight: 700; margin: 28px 0 12px; }
 .lc-detail-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 8px; }
 .lc-detail-tier { font-size: 14px; font-weight: 700; color: #fff; letter-spacing: 0.2em; }
 .lc-detail-price { font-size: 14px; font-weight: 600; color: #D75F68; font-variant-numeric: tabular-nums; letter-spacing: 0.05em; }
@@ -327,15 +328,17 @@ const CSS = `
 }
 .lc-btn {
   all: unset; cursor: pointer; text-align: center;
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
-  padding: 14px 10px;
+  display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 8px;
+  height: 48px; padding: 0 12px;
+  white-space: nowrap;
   border: 1px dashed rgba(255,255,255,0.2);
   background: transparent;
   transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 .lc-btn:hover { background: #e8e8e8; border-color: #e8e8e8; border-style: solid; }
 .lc-btn:hover .lc-btn-label,
-.lc-btn:hover .lc-btn-price { color: #000; }
+.lc-btn:hover .lc-btn-price,
+.lc-btn:hover .lc-btn-sep { color: #000; }
 .lc-btn--active { border-color: rgba(255,255,255,0.55); border-style: solid; }
 .lc-btn--cta { border-color: #D75F68; color: #D75F68; }
 .lc-btn--cta:hover { background: rgba(215,95,104,0.12); border-color: #D75F68; border-style: dashed; }
@@ -347,8 +350,9 @@ const CSS = `
 .lc-btn--cta-on .lc-btn-label,
 .lc-btn--cta-on .lc-btn-price { color: #fff; }
 .lc-btn--cta-on:hover { background: #b94e56; border-color: #b94e56; }
-.lc-btn-label { font-size: 10px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: #fff; }
-.lc-btn-price { font-size: 14px; font-weight: 500; color: #fff; font-variant-numeric: tabular-nums; }
+.lc-btn-label { font-size: 13px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: #fff; }
+.lc-btn-sep { font-size: 12px; color: #888; }
+.lc-btn-price { font-size: 13px; font-weight: 500; color: #fff; font-variant-numeric: tabular-nums; }
 
 .img-nav-link {
   background: none; border: 0; padding: 0; cursor: pointer; font-family: inherit;
