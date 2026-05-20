@@ -126,4 +126,46 @@ export const getPublicImagesByIds = createServerFn({ method: "POST" })
     }));
   });
 
+export const getSimilarShootImages = createServerFn({ method: "POST" })
+  .inputValidator(
+    z.object({
+      excludeId: z.string().uuid(),
+      imageNumber: z.number().int().nonnegative(),
+    }).parse,
+  )
+  .handler(async ({ data }): Promise<PublicSearchResult[]> => {
+    // First 4 digits of an 8-digit padded number = shoot id.
+    const shoot = Math.floor(data.imageNumber / 10000);
+    const min = shoot * 10000;
+    const max = min + 9999;
+
+    const { data: rows, error } = await supabaseAdmin
+      .from("images")
+      .select("id, image_number, title, caption, keywords, storage_path, preview_path")
+      .gte("image_number", min)
+      .lte("image_number", max)
+      .neq("id", data.excludeId)
+      .not("keyworded_at", "is", null)
+      .order("image_number", { ascending: true })
+      .limit(60);
+    if (error) throw new Error(error.message);
+    const merged = rows ?? [];
+    if (merged.length === 0) return [];
+
+    const paths = merged.map((r) => r.preview_path ?? r.storage_path);
+    const signed = await supabaseAdmin.storage
+      .from("images-private")
+      .createSignedUrls(paths, 3600);
+
+    return merged.map((r, i) => ({
+      id: r.id,
+      image_number: r.image_number as number,
+      title: r.title,
+      caption: r.caption,
+      keywords: (r.keywords ?? []) as string[],
+      signed_url: signed.data?.[i]?.signedUrl ?? null,
+    }));
+  });
+
+
 
