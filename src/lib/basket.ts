@@ -42,6 +42,10 @@ export function removeFromBasket(id: string, tier: string) {
   write(read().filter((x) => !(x.id === id && x.tier === tier)));
 }
 
+export function clearBasket() {
+  write([]);
+}
+
 export function subscribeBasket(cb: () => void): () => void {
   if (typeof window === "undefined") return () => {};
   const handler = () => cb();
