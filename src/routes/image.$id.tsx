@@ -124,94 +124,96 @@ function ImageDetail() {
           </nav>
         </header>
 
-        {/* BLACK STAGE — 150px black border on all four sides of the image */}
-        <section className="img-stage">
-          <div className="img-frame">
-            {img?.signed_url ? (
-              <img
-                className={`img-el${imgReady ? " img-el--ready" : ""}`}
-                src={img.signed_url}
-                alt={img.title ?? ""}
-                onLoad={() => setImgReady(true)}
-              />
+        {/* 2/3 image + 1/3 pricing layout */}
+        <section className="img-split">
+          <div className="img-stage">
+            <div className="img-frame">
+              {img?.signed_url ? (
+                <img
+                  className={`img-el${imgReady ? " img-el--ready" : ""}`}
+                  src={img.signed_url}
+                  alt={img.title ?? ""}
+                  onLoad={() => setImgReady(true)}
+                />
+              ) : (
+                <div className="img-empty">{loading ? "LOADING…" : "IMAGE UNAVAILABLE"}</div>
+              )}
+            </div>
+          </div>
+
+          <div className={`licence-wrap${imgReady ? " licence-wrap--ready" : ""}`}>
+            {showLicence ? (
+              <aside className="licence-card">
+                <button
+                  type="button"
+                  className="lc-toggle"
+                  aria-label="Hide pricing"
+                  onClick={() => setShowLicence(false)}
+                >
+                  <Eye size={16} />
+                </button>
+
+                <div className="lc-eyebrow">PURCHASE A LICENCE</div>
+                <div className="lc-detail">
+                  <div className="lc-detail-head">
+                    <span className="lc-detail-tier">{activeTier.label.toUpperCase()}</span>
+                    <span className="lc-detail-price">{activeTier.price}</span>
+                  </div>
+                  <p className="lc-detail-text">{activeTier.description}</p>
+                </div>
+
+                <div className="lc-tiles">
+                  {TIERS.map((t) => {
+                    const active = tier === t.id;
+                    return (
+                      <button
+                        key={t.id}
+                        type="button"
+                        className={`lc-tile${active ? " lc-tile--active" : ""}`}
+                        onClick={() => setTier(t.id)}
+                      >
+                        <span className="lc-tile-label">{t.label}</span>
+                        <span className="lc-tile-price">{t.price}</span>
+                        <span className="lc-tile-sub">{t.sub}</span>
+                      </button>
+                    );
+                  })}
+                  <button
+                    type="button"
+                    className={`lc-tile lc-tile--lb${inLightbox ? " lc-tile--lb-on" : ""}`}
+                    onClick={() => (inLightbox ? removeFromLightbox(id) : addToLightbox(id))}
+                  >
+                    <span className="lc-tile-lb-icon" aria-hidden="true">
+                      {inLightbox ? <Check size={18} /> : <Plus size={18} />}
+                    </span>
+                    <span className="lc-tile-lb-label">
+                      {inLightbox ? "IN LIGHTBOX" : "ADD TO LIGHTBOX"}
+                    </span>
+                  </button>
+                  <button type="button" className="lc-tile lc-tile--cta">
+                    <span className="lc-tile-cta-label">ADD TO BASKET</span>
+                    <span className="lc-tile-cta-price">
+                      {activeTier.price}
+                    </span>
+                  </button>
+                </div>
+              </aside>
             ) : (
-              <div className="img-empty">{loading ? "LOADING…" : "IMAGE UNAVAILABLE"}</div>
+              <button
+                type="button"
+                className="lc-mini-cta"
+                onClick={() => setShowLicence(true)}
+              >
+                <span className="lc-mini-eye" aria-hidden="true">
+                  <EyeOff size={14} />
+                </span>
+                <span className="lc-mini-label">ADD TO BASKET</span>
+                <span className="lc-mini-price">{activeTier.price}</span>
+              </button>
             )}
           </div>
         </section>
 
-        {/* LICENCE PANEL — directly under the image, flush-left */}
-        <section className={`licence-wrap${imgReady ? " licence-wrap--ready" : ""}`}>
-          {showLicence ? (
-            <aside className="licence-card">
-              <button
-                type="button"
-                className="lc-toggle"
-                aria-label="Hide pricing"
-                onClick={() => setShowLicence(false)}
-              >
-                <Eye size={16} />
-              </button>
-
-              <div className="lc-eyebrow">PURCHASE A LICENCE</div>
-              <div className="lc-detail">
-                <div className="lc-detail-head">
-                  <span className="lc-detail-tier">{activeTier.label.toUpperCase()}</span>
-                  <span className="lc-detail-price">{activeTier.price}</span>
-                </div>
-                <p className="lc-detail-text">{activeTier.description}</p>
-              </div>
-
-              <div className="lc-tiles">
-                {TIERS.map((t) => {
-                  const active = tier === t.id;
-                  return (
-                    <button
-                      key={t.id}
-                      type="button"
-                      className={`lc-tile${active ? " lc-tile--active" : ""}`}
-                      onClick={() => setTier(t.id)}
-                    >
-                      <span className="lc-tile-label">{t.label}</span>
-                      <span className="lc-tile-price">{t.price}</span>
-                      <span className="lc-tile-sub">{t.sub}</span>
-                    </button>
-                  );
-                })}
-                <button
-                  type="button"
-                  className={`lc-tile lc-tile--lb${inLightbox ? " lc-tile--lb-on" : ""}`}
-                  onClick={() => (inLightbox ? removeFromLightbox(id) : addToLightbox(id))}
-                >
-                  <span className="lc-tile-lb-icon" aria-hidden="true">
-                    {inLightbox ? <Check size={18} /> : <Plus size={18} />}
-                  </span>
-                  <span className="lc-tile-lb-label">
-                    {inLightbox ? "IN LIGHTBOX" : "ADD TO LIGHTBOX"}
-                  </span>
-                </button>
-                <button type="button" className="lc-tile lc-tile--cta">
-                  <span className="lc-tile-cta-label">ADD TO BASKET</span>
-                  <span className="lc-tile-cta-price">
-                    {activeTier.price}
-                  </span>
-                </button>
-              </div>
-            </aside>
-          ) : (
-            <button
-              type="button"
-              className="lc-mini-cta"
-              onClick={() => setShowLicence(true)}
-            >
-              <span className="lc-mini-eye" aria-hidden="true">
-                <EyeOff size={14} />
-              </span>
-              <span className="lc-mini-label">ADD TO BASKET</span>
-              <span className="lc-mini-price">{activeTier.price}</span>
-            </button>
-          )}
-        </section>
 
 
         {/* WHITE DETAILS SECTION below the black stage */}
