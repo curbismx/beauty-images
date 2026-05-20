@@ -385,15 +385,17 @@ const CSS = `
 .lc-eyebrow { font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; color: #fff; margin-bottom: 14px; font-weight: 700; }
 .lc-intro { font-size: 11px; line-height: 1.55; color: #c2c2c2; margin: 0 0 22px; max-width: 560px; }
 
-/* Expanded detail panel above the tiles — updates with the active tier */
+/* Detail under image (left-aligned with image) */
 .lc-detail { margin-bottom: 20px; }
+.lc-detail--under { margin: 24px 0 0; max-width: 100%; }
 .lc-detail-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 8px; }
 .lc-detail-tier { font-size: 13px; font-weight: 700; color: #fff; letter-spacing: 0.18em; }
 .lc-detail-price { font-size: 13px; font-weight: 600; color: #D75F68; font-variant-numeric: tabular-nums; letter-spacing: 0.05em; }
 .lc-detail-text { font-size: 13px; line-height: 1.6; color: #e6e6e6; margin: 0; }
 
-/* TILES for each size + ADD TO LIGHTBOX + ADD TO BASKET */
+/* TILES for each size + LIGHTBOX + ADD TO BASKET — square */
 .lc-tiles { display: grid; grid-template-columns: 1fr; gap: 10px; }
+
 .lc-tile {
   all: unset; cursor: pointer;
   height: 88px; padding: 10px 12px;
