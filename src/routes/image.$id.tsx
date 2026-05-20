@@ -260,6 +260,7 @@ const CSS = `
   max-height: calc(100vh - ${FRAME * 2}px);
   width: auto; height: auto;
   background: #0a0a0a;
+  border: 1px solid #3a3a3a;
 }
 
 .img-empty {
