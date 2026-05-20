@@ -99,16 +99,16 @@ export const getPublicImagesByIds = createServerFn({ method: "POST" })
     if (data.ids.length === 0) return [];
     const { data: rows, error } = await supabaseAdmin
       .from("images")
-      .select("id, image_number, title, caption, keywords, storage_path, preview_path")
+      .select("id, image_number, title, caption, keywords, preview_path")
       .in("id", data.ids);
     if (error) throw new Error(error.message);
 
-    const byId = new Map((rows ?? []).map((r) => [r.id, r]));
+    const byId = new Map((rows ?? []).filter((r) => !!r.preview_path).map((r) => [r.id, r]));
     const ordered = data.ids.map((id) => byId.get(id)).filter(Boolean) as Array<
       NonNullable<ReturnType<typeof byId.get>>
     >;
 
-    const paths = ordered.map((r) => r.preview_path ?? r.storage_path);
+    const paths = ordered.map((r) => r.preview_path as string);
     const signed = paths.length
       ? await supabaseAdmin.storage
           .from("images-private")
