@@ -635,7 +635,7 @@ const PAGE_CSS = `
   border-left: 1px solid rgba(0,0,0,0.08);
   padding: 0 18px;
   cursor: pointer;
-  color: #000;
+  color: #D75F68;
   display: flex; align-items: center; justify-content: center;
   transition: background 0.25s ease, color 0.25s ease, opacity 0.2s ease;
 }
