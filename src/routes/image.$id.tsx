@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { getPublicImage, type PublicImageDetail } from "@/lib/search.functions";
 
@@ -7,15 +8,13 @@ export const Route = createFileRoute("/image/$id")({
   component: ImageDetail,
 });
 
-type Orientation = "landscape" | "portrait" | "square";
-
 function ImageDetail() {
   const { id } = Route.useParams();
   const fetchImage = useServerFn(getPublicImage);
   const [img, setImg] = useState<PublicImageDetail | null>(null);
   const [loading, setLoading] = useState(true);
-  const [orientation, setOrientation] = useState<Orientation>("landscape");
   const [tier, setTier] = useState<"small" | "medium" | "large" | "pack">("medium");
+  const [showLicence, setShowLicence] = useState(true);
 
   useEffect(() => {
     let alive = true;
@@ -31,14 +30,6 @@ function ImageDetail() {
       alive = false;
     };
   }, [id, fetchImage]);
-
-  const onImgLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    const el = e.currentTarget;
-    const r = el.naturalWidth / el.naturalHeight;
-    if (r > 1.05) setOrientation("landscape");
-    else if (r < 0.95) setOrientation("portrait");
-    else setOrientation("square");
-  };
 
   const TIERS = [
     { id: "small" as const, label: "Small", price: "£150.00", sub: "1280 px (4.27 x 2.85 cm) · 300 dpi" },
@@ -67,209 +58,282 @@ function ImageDetail() {
           </button>
         </header>
 
-        <div className={`img-stage img-stage--${orientation}`}>
-          {/* Image positioned tight to top-left of the square stage */}
-          <div className="img-wrap">
+        {/* BLACK STAGE — 150px black border on all four sides of the image */}
+        <section className="img-stage">
+          <div className="img-frame">
             {img?.signed_url ? (
-              <img src={img.signed_url} alt={img.title ?? ""} onLoad={onImgLoad} />
+              <img className="img-el" src={img.signed_url} alt={img.title ?? ""} />
             ) : (
               <div className="img-empty">{loading ? "LOADING…" : "IMAGE UNAVAILABLE"}</div>
             )}
+
+            {/* LICENCE CARD — overlays the image, translucent */}
+            {showLicence && (
+              <aside className="licence-card">
+                <button
+                  type="button"
+                  className="lc-toggle"
+                  aria-label="Hide pricing"
+                  onClick={() => setShowLicence(false)}
+                >
+                  <Eye size={16} />
+                </button>
+
+                <div className="lc-eyebrow">PURCHASE A LICENCE</div>
+                <p className="lc-intro">
+                  All Royalty-Free licences include global use rights, comprehensive protection, and simple pricing with volume discounts available.
+                </p>
+
+                <div className="lc-tiers">
+                  {TIERS.map((t) => {
+                    const active = tier === t.id;
+                    return (
+                      <button
+                        key={t.id}
+                        type="button"
+                        className={`lc-tier${active ? " lc-tier--active" : ""}`}
+                        onClick={() => setTier(t.id)}
+                      >
+                        <span className={`lc-radio${active ? " lc-radio--on" : ""}`} aria-hidden="true" />
+                        <span className="lc-tier-body">
+                          <span className="lc-tier-row">
+                            <span className="lc-tier-label">{t.label}</span>
+                            <span className="lc-tier-price">{t.price}</span>
+                          </span>
+                          <span className="lc-tier-sub">{t.sub}</span>
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="lc-freeze">
+                  <div className="lc-freeze-title">Market-freeze ↗</div>
+                  <div className="lc-freeze-sub">
+                    We'll remove this image from our site for as long as you need it.
+                  </div>
+                </div>
+
+                <div className="lc-total">
+                  <span className="lc-total-amount">
+                    {TIERS.find((t) => t.id === tier)?.price}
+                  </span>
+                  <span className="lc-total-currency">GBP</span>
+                </div>
+
+                <button type="button" className="lc-cta">ADD TO BASKET</button>
+              </aside>
+            )}
+
+            {!showLicence && (
+              <button
+                type="button"
+                className="lc-show"
+                aria-label="Show pricing"
+                onClick={() => setShowLicence(true)}
+              >
+                <EyeOff size={16} />
+              </button>
+            )}
           </div>
+        </section>
 
-          {/* Licence card sits in the negative space — top-right for
-              portrait, bottom-right for landscape, overlay for square */}
-          <aside className="licence-card">
-            <div className="lc-corner lc-corner--tl" />
-            <div className="lc-corner lc-corner--tr" />
-            <div className="lc-corner lc-corner--bl" />
-            <div className="lc-corner lc-corner--br" />
+        {/* WHITE DETAILS SECTION below the black stage */}
+        {img && (
+          <section className="img-details">
+            <div className="img-meta-num">#{String(img.image_number).padStart(5, "0")}</div>
+            {img.title && <h1 className="img-meta-title">{img.title}</h1>}
+            {img.caption && <p className="img-meta-caption">{img.caption}</p>}
 
-            <div className="lc-eyebrow">PURCHASE A LICENCE</div>
-            <p className="lc-intro">
-              All Royalty-Free licences include global use rights, comprehensive protection, and simple pricing with volume discounts available.
-            </p>
-
-            <div className="lc-tiers">
-              {TIERS.map((t) => {
-                const active = tier === t.id;
-                return (
-                  <button
-                    key={t.id}
-                    type="button"
-                    className={`lc-tier${active ? " lc-tier--active" : ""}`}
-                    onClick={() => setTier(t.id)}
-                  >
-                    <span className={`lc-radio${active ? " lc-radio--on" : ""}`} aria-hidden="true" />
-                    <span className="lc-tier-body">
-                      <span className="lc-tier-row">
-                        <span className="lc-tier-label">{t.label}</span>
-                        <span className="lc-tier-price">{t.price}</span>
-                      </span>
-                      <span className="lc-tier-sub">{t.sub}</span>
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-
-            <div className="lc-freeze">
-              <div className="lc-freeze-title">Market-freeze ↗</div>
-              <div className="lc-freeze-sub">
-                We'll remove this image from our site for as long as you need it.
-              </div>
-            </div>
-
-            <div className="lc-total">
-              <span className="lc-total-amount">
-                {TIERS.find((t) => t.id === tier)?.price}
-              </span>
-              <span className="lc-total-currency">GBP</span>
-            </div>
-
-            <button type="button" className="lc-cta">ADD TO BASKET</button>
-          </aside>
-
-          {img && (
-            <div className="img-meta">
-              <div className="img-meta-num">#{String(img.image_number).padStart(5, "0")}</div>
-              {img.title && <div className="img-meta-title">{img.title}</div>}
-              {img.caption && <div className="img-meta-caption">{img.caption}</div>}
-              {img.keywords.length > 0 && (
+            {img.keywords.length > 0 && (
+              <div className="img-meta-kw-block">
+                <div className="img-meta-kw-label">KEYWORDS</div>
                 <div className="img-meta-kw">
-                  {img.keywords.slice(0, 24).map((k) => (
+                  {img.keywords.map((k) => (
                     <span key={k}>{k}</span>
                   ))}
                 </div>
+              </div>
+            )}
+
+            <div className="img-meta-grid">
+              {img.category && (
+                <div className="img-meta-cell">
+                  <div className="img-meta-cell-label">CATEGORY</div>
+                  <div className="img-meta-cell-value">{img.category}</div>
+                </div>
               )}
+              {img.pricing_tier && (
+                <div className="img-meta-cell">
+                  <div className="img-meta-cell-label">PRICING TIER</div>
+                  <div className="img-meta-cell-value">{img.pricing_tier}</div>
+                </div>
+              )}
+              <div className="img-meta-cell">
+                <div className="img-meta-cell-label">USAGE</div>
+                <div className="img-meta-cell-value">Rights-managed · Real photography · No AI</div>
+              </div>
             </div>
-          )}
-        </div>
+          </section>
+        )}
       </div>
     </>
   );
 }
 
+const FRAME = 150;
+
 const CSS = `
 .img-root { background: #000; color: #e8e8e8; min-height: 100vh; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
 .img-root * { box-sizing: border-box; }
 
-.img-header { position: fixed; top: 0; left: 0; right: 0; z-index: 10; padding: 22px 36px; display: flex; justify-content: space-between; align-items: center; pointer-events: none; }
-.img-back { pointer-events: auto; background: none; border: 0; padding: 0; cursor: pointer; color: #fff; text-decoration: none; font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; font-weight: 700; opacity: 0.85; transition: opacity 0.2s ease; font-family: inherit; }
+.img-header { position: fixed; top: 0; left: 0; right: 0; z-index: 20; padding: 22px 36px; display: flex; justify-content: space-between; align-items: center; pointer-events: none; }
+.img-back { pointer-events: auto; background: none; border: 0; padding: 0; cursor: pointer; color: #fff; font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; font-weight: 700; opacity: 0.85; transition: opacity 0.2s ease, color 0.2s ease; font-family: inherit; }
 .img-back:hover { opacity: 1; color: #D75F68; }
 
-/* Square stage — width == height == viewport width */
-.img-stage { position: relative; width: 100%; height: 100vw; background: #000; }
+/* BLACK STAGE — 150px black frame around the image on all sides */
+.img-stage {
+  background: #000;
+  padding: ${FRAME}px;
+  display: flex; align-items: center; justify-content: center;
+  min-height: 100vh;
+}
 
-/* IMAGE WRAP — tight to top-left */
-.img-wrap { position: absolute; top: 0; left: 0; background: #0a0a0a; overflow: hidden; }
-.img-wrap img { display: block; width: 100%; height: 100%; object-fit: cover; }
-.img-empty { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; font-size: 11px; letter-spacing: 0.25em; color: #555; }
+.img-frame {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+}
 
-/* Landscape: image fills the top — full width, height auto via aspect, but we cap to 56% of square */
-.img-stage--landscape .img-wrap { width: 100%; height: 60%; }
-/* Portrait: fills the left — full height, width auto via aspect cap */
-.img-stage--portrait .img-wrap { width: 60%; height: 100%; }
-/* Square: fills entire stage */
-.img-stage--square .img-wrap { width: 100%; height: 100%; }
+.img-el {
+  display: block;
+  max-width: 100%;
+  max-height: calc(100vh - ${FRAME * 2}px);
+  width: auto; height: auto;
+  background: #0a0a0a;
+}
 
-/* LICENCE CARD */
+.img-empty {
+  display: flex; align-items: center; justify-content: center;
+  width: 60vw; height: 60vh;
+  font-size: 11px; letter-spacing: 0.25em; color: #555;
+  background: #0a0a0a;
+}
+
+/* LICENCE CARD — overlays the image, bottom-right, translucent */
 .licence-card {
   position: absolute;
   z-index: 5;
-  width: 380px;
-  padding: 32px 28px 28px;
-  background: rgba(10, 10, 10, 0.78);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  color: #e8e8e8;
+  right: 24px; bottom: 24px;
+  width: 360px;
+  padding: 28px 26px 24px;
+  color: #f0f0f0;
   font-size: 13px;
   line-height: 1.5;
-}
-/* Dotted grey border via background-image so corners can also show ticks */
-.licence-card {
-  background-image:
-    rgba(10,10,10,0.78),
-    repeating-linear-gradient(90deg, rgba(255,255,255,0.25) 0 2px, transparent 2px 6px),
-    repeating-linear-gradient(0deg, rgba(255,255,255,0.25) 0 2px, transparent 2px 6px);
-}
-.licence-card {
-  /* layered: dotted border on edges */
   background:
-    linear-gradient(rgba(10,10,10,0.82), rgba(10,10,10,0.82)) padding-box,
-    repeating-linear-gradient(90deg, rgba(255,255,255,0.4) 0 2px, transparent 2px 6px) top/100% 1px no-repeat,
-    repeating-linear-gradient(90deg, rgba(255,255,255,0.4) 0 2px, transparent 2px 6px) bottom/100% 1px no-repeat,
-    repeating-linear-gradient(0deg, rgba(255,255,255,0.4) 0 2px, transparent 2px 6px) left/1px 100% no-repeat,
-    repeating-linear-gradient(0deg, rgba(255,255,255,0.4) 0 2px, transparent 2px 6px) right/1px 100% no-repeat,
-    rgba(8,8,8,0.82);
+    linear-gradient(rgba(10,10,10,0.72), rgba(10,10,10,0.72)) padding-box,
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.35) 0 2px, transparent 2px 6px) top/100% 1px no-repeat,
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.35) 0 2px, transparent 2px 6px) bottom/100% 1px no-repeat,
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.35) 0 2px, transparent 2px 6px) left/1px 100% no-repeat,
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.35) 0 2px, transparent 2px 6px) right/1px 100% no-repeat,
+    rgba(8,8,8,0.55);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
 
-/* Position by orientation */
-.img-stage--landscape .licence-card { top: calc(60% + 40px); right: 40px; }
-.img-stage--portrait .licence-card { top: 40px; right: 40px; }
-.img-stage--square .licence-card { top: 40px; right: 40px; }
+.lc-toggle {
+  position: absolute; top: 10px; right: 10px;
+  background: rgba(0,0,0,0.4); color: #fff;
+  border: 0; width: 30px; height: 30px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: background 0.2s ease, color 0.2s ease;
+  z-index: 6;
+}
+.lc-toggle:hover { background: #D75F68; color: #fff; }
 
-/* Decorative tick corners */
-.lc-corner { position: absolute; width: 14px; height: 14px; }
-.lc-corner--tl { top: -1px; left: -1px; border-top: 1px solid #D75F68; border-left: 1px solid #D75F68; }
-.lc-corner--tr { top: -1px; right: -1px; border-top: 1px solid #D75F68; border-right: 1px solid #D75F68; }
-.lc-corner--bl { bottom: -1px; left: -1px; border-bottom: 1px solid #D75F68; border-left: 1px solid #D75F68; }
-.lc-corner--br { bottom: -1px; right: -1px; border-bottom: 1px solid #D75F68; border-right: 1px solid #D75F68; }
+.lc-show {
+  position: absolute; right: 24px; bottom: 24px;
+  width: 40px; height: 40px;
+  background: rgba(0,0,0,0.55); color: #fff;
+  border: 1px solid rgba(255,255,255,0.25);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; backdrop-filter: blur(8px);
+  z-index: 6; transition: background 0.2s ease;
+}
+.lc-show:hover { background: #D75F68; }
 
 .lc-eyebrow { font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; color: #fff; margin-bottom: 14px; font-weight: 700; }
-.lc-intro { font-size: 11px; line-height: 1.55; color: #a8a8a8; margin-bottom: 22px; }
+.lc-intro { font-size: 11px; line-height: 1.55; color: #c2c2c2; margin-bottom: 20px; padding-right: 28px; }
 
-.lc-tiers { display: flex; flex-direction: column; gap: 1px; background: rgba(255,255,255,0.08); margin-bottom: 20px; }
+.lc-tiers { display: flex; flex-direction: column; gap: 1px; background: rgba(255,255,255,0.08); margin-bottom: 18px; }
 .lc-tier {
   all: unset; cursor: pointer;
   display: flex; gap: 12px; align-items: flex-start;
-  padding: 14px 12px; background: rgba(20,20,20,0.9);
+  padding: 12px 12px; background: rgba(20,20,20,0.7);
   transition: background 0.15s ease;
 }
-.lc-tier:hover { background: rgba(35,35,35,0.95); }
-.lc-tier--active { background: rgba(50,50,50,0.95); }
+.lc-tier:hover { background: rgba(40,40,40,0.85); }
+.lc-tier--active { background: rgba(55,55,55,0.9); }
 
 .lc-radio { flex: 0 0 14px; width: 14px; height: 14px; border: 1px solid #888; border-radius: 50%; margin-top: 3px; position: relative; }
 .lc-radio--on { border-color: #fff; }
 .lc-radio--on::after { content: ""; position: absolute; inset: 2px; background: #fff; border-radius: 50%; }
 
-.lc-tier-body { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.lc-tier-body { flex: 1; display: flex; flex-direction: column; gap: 3px; }
 .lc-tier-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
-.lc-tier-label { font-size: 13px; font-weight: 500; color: #f5f5f5; }
+.lc-tier-label { font-size: 12px; font-weight: 500; color: #f5f5f5; }
 .lc-tier-price { font-size: 13px; font-weight: 600; color: #fff; font-variant-numeric: tabular-nums; }
-.lc-tier-sub { font-size: 10px; color: #888; letter-spacing: 0.02em; }
+.lc-tier-sub { font-size: 10px; color: #999; letter-spacing: 0.02em; }
 
-.lc-freeze { padding: 14px 12px; background: rgba(20,20,20,0.6); margin-bottom: 20px; border-left: 2px solid #D75F68; }
-.lc-freeze-title { font-size: 12px; color: #D75F68; font-weight: 600; margin-bottom: 4px; }
-.lc-freeze-sub { font-size: 10px; color: #888; line-height: 1.5; }
+.lc-freeze { padding: 10px 12px; background: rgba(20,20,20,0.5); margin-bottom: 16px; border-left: 2px solid #D75F68; }
+.lc-freeze-title { font-size: 11px; color: #D75F68; font-weight: 600; margin-bottom: 4px; }
+.lc-freeze-sub { font-size: 10px; color: #aaa; line-height: 1.5; }
 
-.lc-total { display: flex; align-items: baseline; gap: 8px; justify-content: center; padding: 14px 0 18px; }
-.lc-total-amount { font-size: 28px; font-weight: 300; color: #fff; font-variant-numeric: tabular-nums; }
-.lc-total-currency { font-size: 11px; color: #888; letter-spacing: 0.2em; }
+.lc-total { display: flex; align-items: baseline; gap: 8px; justify-content: center; padding: 8px 0 14px; }
+.lc-total-amount { font-size: 26px; font-weight: 300; color: #fff; font-variant-numeric: tabular-nums; }
+.lc-total-currency { font-size: 11px; color: #aaa; letter-spacing: 0.2em; }
 
 .lc-cta {
   all: unset; cursor: pointer; display: block; width: 100%;
-  text-align: center; padding: 16px; background: #D75F68; color: #fff;
-  font-size: 13px; font-weight: 600; letter-spacing: 0.2em;
+  text-align: center; padding: 14px; background: #D75F68; color: #fff;
+  font-size: 12px; font-weight: 600; letter-spacing: 0.2em;
   transition: background 0.2s ease;
 }
 .lc-cta:hover { background: #000; box-shadow: inset 0 0 0 1px #D75F68; }
 
-/* META below the square */
-.img-meta { position: absolute; left: 36px; right: 36px; top: calc(100vw + 40px); color: #ccc; }
-.img-meta-num { font-size: 11px; letter-spacing: 0.25em; color: #666; margin-bottom: 8px; }
-.img-meta-title { font-size: 22px; font-weight: 500; color: #fff; margin-bottom: 10px; max-width: 720px; }
-.img-meta-caption { font-size: 13px; color: #999; max-width: 720px; line-height: 1.6; margin-bottom: 20px; }
+/* WHITE DETAILS SECTION below the black stage */
+.img-details {
+  background: #fff;
+  color: #111;
+  padding: 64px ${FRAME}px 120px;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+.img-meta-num { font-size: 11px; letter-spacing: 0.3em; color: #888; margin-bottom: 16px; font-weight: 600; }
+.img-meta-title { font-size: 32px; font-weight: 500; color: #000; margin: 0 0 16px; max-width: 820px; line-height: 1.2; letter-spacing: -0.01em; }
+.img-meta-caption { font-size: 15px; color: #444; max-width: 820px; line-height: 1.65; margin: 0 0 36px; }
+
+.img-meta-kw-block { margin-bottom: 40px; }
+.img-meta-kw-label { font-size: 10px; letter-spacing: 0.3em; color: #888; margin-bottom: 12px; font-weight: 600; }
 .img-meta-kw { display: flex; flex-wrap: wrap; gap: 6px; }
-.img-meta-kw span { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; padding: 4px 10px; background: rgba(255,255,255,0.05); color: #aaa; }
+.img-meta-kw span { font-size: 11px; letter-spacing: 0.05em; padding: 6px 12px; background: #f3f3f3; color: #333; border: 1px solid #e8e8e8; }
 
-/* Push body to give meta room */
-.img-root { padding-bottom: 200px; }
+.img-meta-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 28px; padding-top: 32px; border-top: 1px solid #eee;
+}
+.img-meta-cell-label { font-size: 10px; letter-spacing: 0.3em; color: #888; margin-bottom: 8px; font-weight: 600; }
+.img-meta-cell-value { font-size: 14px; color: #111; }
 
-@media (max-width: 720px) {
-  .licence-card { width: calc(100% - 32px); right: 16px; left: 16px; }
-  .img-stage--landscape .licence-card { top: calc(60% + 16px); }
-  .img-stage--portrait .img-wrap { width: 100%; height: 60%; }
-  .img-stage--portrait .licence-card { top: calc(60% + 16px); }
+@media (max-width: 900px) {
+  .img-stage { padding: 60px; }
+  .img-el { max-height: calc(100vh - 120px); }
+  .img-details { padding: 48px 32px 80px; }
+  .licence-card { width: calc(100% - 32px); right: 16px; bottom: 16px; }
+  .img-meta-title { font-size: 24px; }
+}
+@media (max-width: 600px) {
+  .img-stage { padding: 24px; padding-top: 70px; }
+  .img-el { max-height: calc(100vh - 48px); }
+  .licence-card { padding: 20px 18px 18px; }
 }
 `;
