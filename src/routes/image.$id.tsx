@@ -398,8 +398,8 @@ const CSS = `
 
 .lc-tile {
   all: unset; cursor: pointer;
-  min-height: 64px; padding: 10px 12px;
-  display: grid; grid-template-columns: 1fr auto; align-items: center; row-gap: 2px; column-gap: 8px;
+  aspect-ratio: 1 / 1; padding: 12px;
+  display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between;
   background: rgba(255,255,255,0.08);
   outline: 1px solid rgba(255,255,255,0.18);
   transition: background 0.15s ease, outline-color 0.15s ease;
@@ -408,8 +408,8 @@ const CSS = `
 .lc-tile:hover { background: rgba(255,255,255,0.15); }
 .lc-tile--active { background: rgba(255,255,255,0.22); outline: 1px solid #fff; }
 .lc-tile-label { font-size: 11px; font-weight: 600; color: #fff; letter-spacing: 0.08em; text-transform: uppercase; }
-.lc-tile-price { font-size: 15px; font-weight: 400; color: #fff; font-variant-numeric: tabular-nums; text-align: right; }
-.lc-tile-sub { grid-column: 1 / -1; font-size: 9px; color: #cfcfcf; line-height: 1.3; }
+.lc-tile-price { font-size: 18px; font-weight: 400; color: #fff; font-variant-numeric: tabular-nums; align-self: flex-end; }
+.lc-tile-sub { font-size: 10px; color: #cfcfcf; line-height: 1.3; }
 
 
 .lc-tile--lb {
