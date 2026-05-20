@@ -54,6 +54,12 @@ function Index() {
   const runSearch = useServerFn(searchPublicImages);
   const justClosedSearchRef = useRef(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const lbCount = useSyncExternalStore(
+    subscribeLightbox,
+    () => getLightbox().length,
+    () => 0,
+  );
+
 
   const goPrev = () => {
     if (justClosedSearchRef.current) { justClosedSearchRef.current = false; return; }
