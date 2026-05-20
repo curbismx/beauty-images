@@ -272,7 +272,7 @@ const CSS = `
 /* Image stage (single column) */
 .img-split {
   background: #000;
-  padding: ${FRAME}px 0;
+  padding: ${FRAME}px 0 15px;
 }
 
 .img-stage {
