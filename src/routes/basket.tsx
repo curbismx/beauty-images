@@ -56,7 +56,23 @@ function BasketPage() {
   const [loading, setLoading] = useState(true);
   const [masonry, setMasonry] = useState(false);
   const cols = useMasonryCols();
-  const [confirmCheckout, setConfirmCheckout] = useState(false);
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const { session } = useSession();
+
+  const checkoutItems = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const b of basket) {
+      const priceId = TIER_PRICE_ID[b.tier];
+      if (!priceId) continue;
+      counts.set(priceId, (counts.get(priceId) ?? 0) + 1);
+    }
+    return Array.from(counts.entries()).map(([priceId, quantity]) => ({ priceId, quantity }));
+  }, [basketJson]);
+
+  const checkoutImageIds = useMemo(
+    () => Array.from(new Set(basket.map((b) => b.id))),
+    [basketJson],
+  );
 
   const uniqueIds = Array.from(new Set(basket.map((b) => b.id)));
   const idsKey = uniqueIds.join(",");
