@@ -158,14 +158,18 @@ export type Database = {
           created_at: string
           currency: string
           customer_id: string | null
+          download_count: number
+          download_tier: string | null
           duration_months: number | null
           exclusivity: string | null
           id: string
           image_id: string | null
+          last_downloaded_at: string | null
           license_ends: string | null
           license_starts: string | null
           status: string
           stripe_payment_id: string | null
+          stripe_session_id: string | null
           territory: string | null
           usage_type: string | null
           user_id: string | null
@@ -175,14 +179,18 @@ export type Database = {
           created_at?: string
           currency?: string
           customer_id?: string | null
+          download_count?: number
+          download_tier?: string | null
           duration_months?: number | null
           exclusivity?: string | null
           id?: string
           image_id?: string | null
+          last_downloaded_at?: string | null
           license_ends?: string | null
           license_starts?: string | null
           status?: string
           stripe_payment_id?: string | null
+          stripe_session_id?: string | null
           territory?: string | null
           usage_type?: string | null
           user_id?: string | null
@@ -192,14 +200,18 @@ export type Database = {
           created_at?: string
           currency?: string
           customer_id?: string | null
+          download_count?: number
+          download_tier?: string | null
           duration_months?: number | null
           exclusivity?: string | null
           id?: string
           image_id?: string | null
+          last_downloaded_at?: string | null
           license_ends?: string | null
           license_starts?: string | null
           status?: string
           stripe_payment_id?: string | null
+          stripe_session_id?: string | null
           territory?: string | null
           usage_type?: string | null
           user_id?: string | null

@@ -28,6 +28,7 @@ import { Route as AdminLibraryRouteImport } from './routes/admin.library'
 import { Route as AdminFeaturedRouteImport } from './routes/admin.featured'
 import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
 import { Route as ApiPublicTrackRouteImport } from './routes/api/public/track'
+import { Route as ApiPublicDownloadRouteImport } from './routes/api/public/download'
 import { Route as AdminImageIdRouteImport } from './routes/admin.image.$id'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 
@@ -126,6 +127,11 @@ const ApiPublicTrackRoute = ApiPublicTrackRouteImport.update({
   path: '/api/public/track',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicDownloadRoute = ApiPublicDownloadRouteImport.update({
+  id: '/api/public/download',
+  path: '/api/public/download',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminImageIdRoute = AdminImageIdRouteImport.update({
   id: '/image/$id',
   path: '/image/$id',
@@ -158,6 +164,7 @@ export interface FileRoutesByFullPath {
   '/image/$id': typeof ImageIdRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/image/$id': typeof AdminImageIdRoute
+  '/api/public/download': typeof ApiPublicDownloadRoute
   '/api/public/track': typeof ApiPublicTrackRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -180,6 +187,7 @@ export interface FileRoutesByTo {
   '/image/$id': typeof ImageIdRoute
   '/admin': typeof AdminIndexRoute
   '/admin/image/$id': typeof AdminImageIdRoute
+  '/api/public/download': typeof ApiPublicDownloadRoute
   '/api/public/track': typeof ApiPublicTrackRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -204,6 +212,7 @@ export interface FileRoutesById {
   '/image/$id': typeof ImageIdRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/image/$id': typeof AdminImageIdRoute
+  '/api/public/download': typeof ApiPublicDownloadRoute
   '/api/public/track': typeof ApiPublicTrackRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -229,6 +238,7 @@ export interface FileRouteTypes {
     | '/image/$id'
     | '/admin/'
     | '/admin/image/$id'
+    | '/api/public/download'
     | '/api/public/track'
     | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
@@ -251,6 +261,7 @@ export interface FileRouteTypes {
     | '/image/$id'
     | '/admin'
     | '/admin/image/$id'
+    | '/api/public/download'
     | '/api/public/track'
     | '/api/public/payments/webhook'
   id:
@@ -274,6 +285,7 @@ export interface FileRouteTypes {
     | '/image/$id'
     | '/admin/'
     | '/admin/image/$id'
+    | '/api/public/download'
     | '/api/public/track'
     | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
@@ -289,6 +301,7 @@ export interface RootRouteChildren {
   SignupRoute: typeof SignupRoute
   CheckoutReturnRoute: typeof CheckoutReturnRoute
   ImageIdRoute: typeof ImageIdRoute
+  ApiPublicDownloadRoute: typeof ApiPublicDownloadRoute
   ApiPublicTrackRoute: typeof ApiPublicTrackRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
@@ -428,6 +441,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicTrackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/download': {
+      id: '/api/public/download'
+      path: '/api/public/download'
+      fullPath: '/api/public/download'
+      preLoaderRoute: typeof ApiPublicDownloadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/image/$id': {
       id: '/admin/image/$id'
       path: '/image/$id'
@@ -482,6 +502,7 @@ const rootRouteChildren: RootRouteChildren = {
   SignupRoute: SignupRoute,
   CheckoutReturnRoute: CheckoutReturnRoute,
   ImageIdRoute: ImageIdRoute,
+  ApiPublicDownloadRoute: ApiPublicDownloadRoute,
   ApiPublicTrackRoute: ApiPublicTrackRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
