@@ -365,14 +365,14 @@ const CSS = `
 .lc-intro { font-size: 11px; line-height: 1.55; color: #c2c2c2; margin: 0 0 22px; max-width: 560px; }
 
 /* Expanded detail panel above the tiles — updates with the active tier */
-.lc-detail { margin-bottom: 20px; max-width: 720px; }
+.lc-detail { margin-bottom: 20px; }
 .lc-detail-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 8px; }
 .lc-detail-tier { font-size: 13px; font-weight: 700; color: #fff; letter-spacing: 0.18em; }
 .lc-detail-price { font-size: 13px; font-weight: 600; color: #D75F68; font-variant-numeric: tabular-nums; letter-spacing: 0.05em; }
 .lc-detail-text { font-size: 13px; line-height: 1.6; color: #e6e6e6; margin: 0; }
 
 /* TILES for each size + ADD TO LIGHTBOX + ADD TO BASKET */
-.lc-tiles { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; max-width: 720px; }
+.lc-tiles { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
 .lc-tile {
   all: unset; cursor: pointer;
   height: 88px; padding: 10px 12px;
