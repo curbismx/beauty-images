@@ -339,9 +339,11 @@ const CSS = `
 .lc-btn:hover .lc-btn-price { color: #000; }
 .lc-btn--active { border-color: rgba(255,255,255,0.55); border-style: solid; }
 .lc-btn--cta { border-color: #D75F68; color: #D75F68; }
-.lc-btn--cta:hover { background: rgba(215,95,104,0.12); border-color: #D75F68; }
-.lc-btn--cta .lc-btn-label { color: #D75F68; }
-.lc-btn--cta .lc-btn-price { color: #D75F68; }
+.lc-btn--cta:hover { background: rgba(215,95,104,0.12); border-color: #D75F68; border-style: dashed; }
+.lc-btn--cta .lc-btn-label,
+.lc-btn--cta:hover .lc-btn-label { color: #D75F68; }
+.lc-btn--cta .lc-btn-price,
+.lc-btn--cta:hover .lc-btn-price { color: #D75F68; }
 .lc-btn--cta-on { background: #D75F68; border-color: #D75F68; border-style: solid; }
 .lc-btn--cta-on .lc-btn-label,
 .lc-btn--cta-on .lc-btn-price { color: #fff; }
