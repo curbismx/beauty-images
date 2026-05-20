@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as LightboxRouteImport } from './routes/lightbox'
 import { Route as DesignRouteImport } from './routes/design'
+import { Route as LightboxRouteImport } from './routes/lightbox'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
