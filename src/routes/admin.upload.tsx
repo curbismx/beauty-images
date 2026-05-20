@@ -4,7 +4,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "./admin";
-import { getRecentImages, getImageStats, keywordPendingBatch } from "@/lib/images.functions";
+import { getRecentImages, getImageStats, keywordPendingBatch, listImagesMissingPreview, setImagePreviewPath } from "@/lib/images.functions";
+import { resizeImageToBlob } from "@/lib/resize-image";
 
 export const Route = createFileRoute("/admin/upload")({
   component: Upload,
@@ -43,6 +44,53 @@ function Upload() {
     },
   });
 
+  const fetchMissing = useServerFn(listImagesMissingPreview);
+  const savePreview = useServerFn(setImagePreviewPath);
+  const [backfill, setBackfill] = useState<{
+    running: boolean;
+    done: number;
+    failed: number;
+    remaining: number | null;
+    message?: string;
+  }>({ running: false, done: 0, failed: 0, remaining: null });
+
+  const runBackfill = useCallback(async () => {
+    setBackfill({ running: true, done: 0, failed: 0, remaining: null, message: "Starting…" });
+    let done = 0;
+    let failed = 0;
+    // Loop in batches until no more rows are missing previews.
+    // We work in batches of 10 to keep memory and signed-URL counts modest.
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      const rows = await fetchMissing({ data: { limit: 10 } });
+      if (!rows.length) break;
+      setBackfill((s) => ({ ...s, remaining: rows.length, message: `Processing ${rows.length}…` }));
+      for (const r of rows) {
+        try {
+          if (!r.signed_url) throw new Error("no signed url");
+          const resp = await fetch(r.signed_url);
+          if (!resp.ok) throw new Error(`download ${resp.status}`);
+          const orig = await resp.blob();
+          const previewBlob = await resizeImageToBlob(orig, 800, 0.82);
+          const previewPath = `previews/${r.id}.jpg`;
+          const up = await supabase.storage
+            .from("images-private")
+            .upload(previewPath, previewBlob, { contentType: "image/jpeg", upsert: true });
+          if (up.error) throw new Error(up.error.message);
+          await savePreview({ data: { id: r.id, preview_path: previewPath } });
+          done += 1;
+        } catch (e) {
+          failed += 1;
+          console.error("backfill failed", r.id, e);
+        }
+        setBackfill((s) => ({ ...s, done, failed }));
+      }
+    }
+    setBackfill({ running: false, done, failed, remaining: 0, message: "Done" });
+    qc.invalidateQueries({ queryKey: ["recent-images"] });
+  }, [fetchMissing, savePreview, qc]);
+
+
   // Revoke object URLs when component unmounts
   useEffect(() => {
     return () => {
@@ -68,14 +116,33 @@ function Upload() {
         setQueue((q) => q.map((it) => (it.id === item.id ? { ...it, status: "uploading" } : it)));
         try {
           const ext = file.name.split(".").pop() ?? "jpg";
-          const storagePath = `${crypto.randomUUID()}.${ext}`;
+          const uid = crypto.randomUUID();
+          const storagePath = `${uid}.${ext}`;
+          const previewPath = `previews/${uid}.jpg`;
           const up = await supabase.storage
             .from("images-private")
             .upload(storagePath, file, { contentType: file.type, upsert: false });
           if (up.error) throw new Error(up.error.message);
+
+          // Build 800px preview (longest edge) and upload alongside the original
+          let savedPreviewPath: string | null = null;
+          try {
+            const previewBlob = await resizeImageToBlob(file, 800, 0.82);
+            const upPrev = await supabase.storage
+              .from("images-private")
+              .upload(previewPath, previewBlob, { contentType: "image/jpeg", upsert: false });
+            if (!upPrev.error) savedPreviewPath = previewPath;
+          } catch {
+            // preview generation is non-fatal; original still uploaded
+          }
+
           const ins = await supabase
             .from("images")
-            .insert({ filename: file.name, storage_path: storagePath })
+            .insert({
+              filename: file.name,
+              storage_path: storagePath,
+              preview_path: savedPreviewPath,
+            })
             .select("image_number")
             .single();
           if (ins.error) throw new Error(ins.error.message);
@@ -149,8 +216,33 @@ function Upload() {
               ? "Sending…"
               : `Keyword ${Math.min(stats.data?.pending ?? 0, 25)} now`}
           </button>
+          <button
+            type="button"
+            onClick={runBackfill}
+            disabled={backfill.running}
+            title="Generate 800px previews for any images that don't have one"
+            style={{
+              background: "#fff",
+              color: "#000",
+              border: "1px solid #000",
+              padding: "10px 16px",
+              fontSize: 11,
+              fontWeight: 800,
+              letterSpacing: "0.04em",
+              textTransform: "uppercase",
+              cursor: backfill.running ? "not-allowed" : "pointer",
+              opacity: backfill.running ? 0.5 : 1,
+            }}
+          >
+            {backfill.running
+              ? `Previews: ${backfill.done}✓ ${backfill.failed ? backfill.failed + "✗ " : ""}…`
+              : backfill.message === "Done"
+                ? `Previews done: ${backfill.done}✓ ${backfill.failed}✗`
+                : "Generate 800px previews"}
+          </button>
         </div>
       </div>
+
 
       <div
         className="bi-drop"

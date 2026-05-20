@@ -41,7 +41,7 @@ export const searchPublicImages = createServerFn({ method: "POST" })
 
     const { data: rows, error } = await supabaseAdmin
       .from("images")
-      .select("id, image_number, title, caption, keywords, storage_path")
+      .select("id, image_number, title, caption, keywords, storage_path, preview_path")
       .not("keyworded_at", "is", null)
       .order("image_number", { ascending: false })
       .limit(200);
@@ -49,7 +49,7 @@ export const searchPublicImages = createServerFn({ method: "POST" })
 
     const merged = rows ?? [];
 
-    const paths = merged.map((r) => r.storage_path);
+    const paths = merged.map((r) => r.preview_path ?? r.storage_path);
     const signed = paths.length
       ? await supabaseAdmin.storage
           .from("images-private")
@@ -71,14 +71,15 @@ export const getPublicImage = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<PublicImageDetail | null> => {
     const { data: row, error } = await supabaseAdmin
       .from("images")
-      .select("id, image_number, title, caption, keywords, category, pricing_tier, storage_path")
+      .select("id, image_number, title, caption, keywords, category, pricing_tier, storage_path, preview_path")
       .eq("id", data.id)
       .maybeSingle();
     if (error) throw new Error(error.message);
     if (!row) return null;
+    const path = row.preview_path ?? row.storage_path;
     const signed = await supabaseAdmin.storage
       .from("images-private")
-      .createSignedUrl(row.storage_path, 3600);
+      .createSignedUrl(path, 3600);
     return {
       id: row.id,
       image_number: row.image_number as number,
@@ -99,7 +100,7 @@ export const getPublicImagesByIds = createServerFn({ method: "POST" })
     if (data.ids.length === 0) return [];
     const { data: rows, error } = await supabaseAdmin
       .from("images")
-      .select("id, image_number, title, caption, keywords, storage_path")
+      .select("id, image_number, title, caption, keywords, storage_path, preview_path")
       .in("id", data.ids);
     if (error) throw new Error(error.message);
 
@@ -108,7 +109,7 @@ export const getPublicImagesByIds = createServerFn({ method: "POST" })
       NonNullable<ReturnType<typeof byId.get>>
     >;
 
-    const paths = ordered.map((r) => r.storage_path);
+    const paths = ordered.map((r) => r.preview_path ?? r.storage_path);
     const signed = paths.length
       ? await supabaseAdmin.storage
           .from("images-private")
@@ -124,4 +125,5 @@ export const getPublicImagesByIds = createServerFn({ method: "POST" })
       signed_url: signed.data?.[i]?.signedUrl ?? null,
     }));
   });
+
 
