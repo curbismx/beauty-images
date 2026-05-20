@@ -337,7 +337,7 @@ const CSS = `
   .img-stage { padding: 60px; }
   .img-el { max-height: calc(100vh - 120px); }
   .img-details { padding: 48px 32px 80px; }
-  .licence-card { width: calc(100% - 32px); right: 16px; bottom: 16px; }
+  .licence-card { width: calc(100% - 32px); right: 16px; top: 16px; }
   .img-meta-title { font-size: 24px; }
 }
 @media (max-width: 600px) {
