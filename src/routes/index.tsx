@@ -675,13 +675,13 @@ const PAGE_CSS = `
 
 .curbism-root .hero-account {
   position: absolute; top: 36px; right: 36px; z-index: 5;
-  color: #fff; text-decoration: none;
+  color: #D75F68; text-decoration: none;
   font-size: 12px; font-weight: 800; letter-spacing: 0.2em; text-transform: uppercase;
-  padding: 8px 14px; border: 1px solid rgba(255,255,255,0.6); background: rgba(0,0,0,0.25);
-  backdrop-filter: blur(2px);
-  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  line-height: 1;
+  display: inline-flex; align-items: center;
+  transition: opacity 0.15s ease;
 }
-.curbism-root .hero-account:hover { background: #D75F68; border-color: #D75F68; color: #fff; }
+.curbism-root .hero-account:hover { opacity: 0.7; }
 
 
 
