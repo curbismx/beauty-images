@@ -309,7 +309,7 @@ const CSS = `
   margin-top: 48px;
   border-top: 1px solid #eee;
   padding-top: 28px;
-  display: flex; flex-direction: column; align-items: stretch; gap: 18px;
+  display: flex; flex-direction: column; align-items: flex-start; gap: 18px;
 }
 .basket-total {
   display: flex; align-items: baseline; justify-content: space-between; gap: 16px;
@@ -323,13 +323,13 @@ const CSS = `
   font-variant-numeric: tabular-nums;
 }
 .basket-checkout-btn {
-  width: 100%;
-  height: 72px;
+  display: inline-flex; align-items: center; gap: 10px;
+  height: 38px; padding: 0 18px;
   border: 0;
   background: #D75F68;
   color: #fff;
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  font-size: 16px; font-weight: 700; letter-spacing: 0.3em; text-transform: uppercase;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.25em; text-transform: uppercase;
   cursor: pointer;
   transition: background 0.2s ease, transform 0.15s ease;
 }
