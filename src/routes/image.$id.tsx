@@ -128,11 +128,16 @@ function ImageDetail() {
             {!showLicence && (
               <button
                 type="button"
-                className="lc-show"
-                aria-label="Show pricing"
+                className="lc-mini-cta"
                 onClick={() => setShowLicence(true)}
               >
-                <EyeOff size={16} />
+                <span className="lc-mini-eye" aria-hidden="true">
+                  <EyeOff size={14} />
+                </span>
+                <span className="lc-mini-label">ADD TO BASKET</span>
+                <span className="lc-mini-price">
+                  {TIERS.find((t) => t.id === tier)?.price}
+                </span>
               </button>
             )}
           </div>
