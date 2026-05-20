@@ -40,29 +40,37 @@ const HERO_IMAGES = [
   "/hero-10.jpg",
 ];
 
+type SavedSearchState = {
+  q?: string;
+  y?: number;
+  results?: PublicSearchResult[];
+};
+
+function readRestoreSearchState(): SavedSearchState | null {
+  if (typeof window === "undefined") return null;
+  try {
+    if (!sessionStorage.getItem("bi_restore_search")) return null;
+    const raw = sessionStorage.getItem("bi_search_state");
+    if (!raw) return null;
+    const saved = JSON.parse(raw) as SavedSearchState;
+    return saved.q ? saved : null;
+  } catch {
+    return null;
+  }
+}
+
 function pad(n: number) {
   return String(n).padStart(2, "0");
 }
 
 function Index() {
-  const initialQuery = (() => {
-    if (typeof window === "undefined") return "";
-    try {
-      if (sessionStorage.getItem("bi_restore_search")) {
-        const raw = sessionStorage.getItem("bi_search_state");
-        if (raw) {
-          const saved = JSON.parse(raw) as { q?: string };
-          return saved.q ?? "";
-        }
-      }
-    } catch { /* ignore */ }
-    return "";
-  })();
+  const [restoreState] = useState<SavedSearchState | null>(() => readRestoreSearchState());
+  const [restoringSearch, setRestoringSearch] = useState(() => Boolean(restoreState?.q));
   const [current, setCurrent] = useState(0);
   const [searchFocused, setSearchFocused] = useState(false);
-  const [searchValue, setSearchValue] = useState(initialQuery);
-  const [submittedQuery, setSubmittedQuery] = useState(initialQuery);
-  const [results, setResults] = useState<PublicSearchResult[]>([]);
+  const [searchValue, setSearchValue] = useState(restoreState?.q ?? "");
+  const [submittedQuery, setSubmittedQuery] = useState(restoreState?.q ?? "");
+  const [results, setResults] = useState<PublicSearchResult[]>(restoreState?.results ?? []);
   const [searching, setSearching] = useState(false);
   const runSearch = useServerFn(searchPublicImages);
   const justClosedSearchRef = useRef(false);
@@ -114,31 +122,30 @@ function Index() {
     }
   };
 
-  // Restore previous search + scroll position ONLY when arriving back from /image/:id.
-  // saveSearchState() sets a one-shot flag we consume + clear here, so a fresh
-  // navigation to "/" (e.g. clicking the logo) shows the home page, not stale results.
+  // Restore previous search immediately when arriving back from /image/:id.
+  // The saved result rows avoid replaying the home -> search transition and network search.
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined" || !restoreState?.q) return;
     try {
-      const flag = sessionStorage.getItem("bi_restore_search");
-      if (!flag) return;
       sessionStorage.removeItem("bi_restore_search");
-      const raw = sessionStorage.getItem("bi_search_state");
-      if (!raw) return;
-      const saved = JSON.parse(raw) as { q?: string; y?: number };
-      if (saved.q) {
-        setSearchValue(saved.q);
-        submitSearch(saved.q, saved.y);
-      }
     } catch { /* ignore */ }
+    const restoreScroll = () => {
+      if (typeof restoreState.y === "number") window.scrollTo(0, restoreState.y);
+      setRestoringSearch(false);
+    };
+    if (restoreState.results?.length) {
+      requestAnimationFrame(() => requestAnimationFrame(restoreScroll));
+      return;
+    }
+    submitSearch(restoreState.q, restoreState.y).finally(() => setRestoringSearch(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [restoreState]);
 
   const saveSearchState = () => {
     try {
       sessionStorage.setItem(
         "bi_search_state",
-        JSON.stringify({ q: submittedQuery, y: window.scrollY }),
+        JSON.stringify({ q: submittedQuery || searchValue.trim(), y: window.scrollY, results }),
       );
       sessionStorage.setItem("bi_restore_search", "1");
     } catch { /* ignore */ }
@@ -184,7 +191,7 @@ function Index() {
       <div className="curbism-root">
 
         {/* HERO */}
-        <section ref={heroRef} className={`hero${searchActive ? " hero--search" : ""}${submittedQuery && searchValue.length > 0 ? " hero--results" : ""}`}>
+        <section ref={heroRef} className={`hero${searchActive ? " hero--search" : ""}${submittedQuery && searchValue.length > 0 ? " hero--results" : ""}${restoringSearch ? " hero--instant" : ""}`}>
           {HERO_IMAGES.map((src, i) => (
             <img
               key={src}
