@@ -917,6 +917,24 @@ const PAGE_CSS = `
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 24px;
 }
+.curbism-root .search-results-masonry {
+  display: flex; align-items: flex-start; gap: 24px;
+}
+.curbism-root .masonry-col {
+  flex: 1 1 0; min-width: 0;
+  display: flex; flex-direction: column; gap: 24px;
+}
+.curbism-root .search-results-masonry .search-result-card { display: block; margin: 0; }
+.curbism-root .search-results-masonry .search-result-card:hover { transform: none; }
+.curbism-root .search-results-masonry .search-result-card img,
+.curbism-root .search-results-masonry .search-result-fallback {
+  width: 100%; height: auto; aspect-ratio: auto; object-fit: initial;
+  display: block; background: #eee;
+}
+@media (max-width: 768px) {
+  .curbism-root .search-results-masonry { gap: 14px; }
+  .curbism-root .masonry-col { gap: 14px; }
+}
 .curbism-root .search-result-card {
   display: flex; flex-direction: column;
   background: #fafafa;
