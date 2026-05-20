@@ -125,7 +125,7 @@ function BasketPage() {
                   className="srh-iconbtn"
                   aria-label={masonry ? "Show as square grid" : "Show full images (masonry)"}
                   title={masonry ? "Square grid" : "Masonry"}
-                  onClick={() => setViewMode(masonry ? "square" : "masonry")}
+                  onClick={() => setMasonry((v) => !v)}
                 >
                   {masonry ? <LayoutGrid size={16} /> : <Rows3 size={16} />}
                 </button>
