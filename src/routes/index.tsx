@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { searchPublicImages, type PublicSearchResult } from "@/lib/search.functions";
 import { getLightbox, subscribeLightbox } from "@/lib/lightbox";
 import { useViewMode, useMasonryCols } from "@/lib/view-mode";
+import { useSession } from "@/lib/use-session";
 
 function renderResultCard(r: PublicSearchResult, onClick: () => void) {
   return (
@@ -277,6 +278,9 @@ function Index() {
 
           <div className="hero-zone hero-zone--left" aria-label="Previous image" onClick={goPrev} />
           <div className="hero-zone hero-zone--right" aria-label="Next image" onClick={goNext} />
+
+          <AccountLink />
+
 
           <button
             type="button"
