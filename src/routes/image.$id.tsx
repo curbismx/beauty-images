@@ -93,7 +93,9 @@ function ImageDetail() {
             type="button"
             className="img-back"
             onClick={() => {
-              // Always go to "/" — index restores the previous search/scroll from sessionStorage.
+              // Flag tells "/" to restore previous search + scroll. Full reload so the
+              // index mount effect runs and consumes the flag.
+              try { sessionStorage.setItem("bi_restore_search", "1"); } catch { /* ignore */ }
               window.location.href = "/";
             }}
           >

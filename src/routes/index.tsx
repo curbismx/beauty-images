@@ -92,10 +92,15 @@ function Index() {
     }
   };
 
-  // Restore previous search + scroll position on mount (e.g. after coming back from /image/:id)
+  // Restore previous search + scroll position ONLY when arriving back from /image/:id.
+  // saveSearchState() sets a one-shot flag we consume + clear here, so a fresh
+  // navigation to "/" (e.g. clicking the logo) shows the home page, not stale results.
   useEffect(() => {
     if (typeof window === "undefined") return;
     try {
+      const flag = sessionStorage.getItem("bi_restore_search");
+      if (!flag) return;
+      sessionStorage.removeItem("bi_restore_search");
       const raw = sessionStorage.getItem("bi_search_state");
       if (!raw) return;
       const saved = JSON.parse(raw) as { q?: string; y?: number };
@@ -113,7 +118,21 @@ function Index() {
         "bi_search_state",
         JSON.stringify({ q: submittedQuery, y: window.scrollY }),
       );
+      sessionStorage.setItem("bi_restore_search", "1");
     } catch { /* ignore */ }
+  };
+
+  const goHome = () => {
+    try {
+      sessionStorage.removeItem("bi_search_state");
+      sessionStorage.removeItem("bi_restore_search");
+    } catch { /* ignore */ }
+    setSearchValue("");
+    setSubmittedQuery("");
+    setResults([]);
+    setSearchFocused(false);
+    setCurrent(0);
+    window.scrollTo(0, 0);
   };
 
   return (
@@ -148,9 +167,14 @@ function Index() {
             onClick={goNext}
           />
 
-          <div className="hero-logo">
+          <button
+            type="button"
+            className="hero-logo"
+            onClick={goHome}
+            aria-label="Beauty Images — home"
+          >
             <img src="/beauty-logo.png" alt="Beauty Images" />
-          </div>
+          </button>
           <h1 className="hero-title">
             Rights Managed Images / Real People / Real Photography / No AI
           </h1>
@@ -169,14 +193,7 @@ function Index() {
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
               onFocus={() => setSearchFocused(true)}
-              onBlur={() => {
-                justClosedSearchRef.current = true;
-                setSearchFocused(false);
-                setSearchValue("");
-                setSubmittedQuery("");
-                setResults([]);
-                setCurrent(0);
-              }}
+              onBlur={() => setSearchFocused(false)}
               aria-label="Search images"
             />
             <button
@@ -476,9 +493,11 @@ const PAGE_CSS = `
 
 .curbism-root .hero-logo {
   position: absolute; top: 70px; left: 0;
-  height: 56px; z-index: 3; pointer-events: none;
+  height: 56px; z-index: 4;
+  background: none; border: 0; padding: 0; margin: 0;
+  cursor: pointer; appearance: none;
 }
-.curbism-root .hero-logo img { height: 100%; width: auto; display: block; }
+.curbism-root .hero-logo img { height: 100%; width: auto; display: block; pointer-events: none; }
 
 .curbism-root .hero-title {
   position: absolute; left: 0; top: 155px; z-index: 3; max-width: 50%;
