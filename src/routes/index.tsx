@@ -355,7 +355,7 @@ const PAGE_CSS = `
   position: relative; width: 100%;
   aspect-ratio: 1200 / 1600;
   overflow: hidden; background: black;
-  transition: aspect-ratio 0.6s ease, background-color 0.6s ease;
+  transition: aspect-ratio 2.5s ease, background-color 2.5s ease;
 }
 .curbism-root .hero--search {
   aspect-ratio: 1920 / 1080;
