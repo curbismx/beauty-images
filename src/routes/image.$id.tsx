@@ -1,8 +1,13 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState, useSyncExternalStore } from "react";
 
 import { useServerFn } from "@tanstack/react-start";
-import { getPublicImage, type PublicImageDetail } from "@/lib/search.functions";
+import {
+  getPublicImage,
+  getSimilarShootImages,
+  type PublicImageDetail,
+  type PublicSearchResult,
+} from "@/lib/search.functions";
 import {
   addToLightbox,
   removeFromLightbox,
@@ -16,6 +21,8 @@ import {
   subscribeBasket,
   type BasketItem,
 } from "@/lib/basket";
+import { useViewMode, useMasonryCols } from "@/lib/view-mode";
+import { LayoutGrid, Rows3 } from "lucide-react";
 
 export const Route = createFileRoute("/image/$id")({
   component: ImageDetail,
