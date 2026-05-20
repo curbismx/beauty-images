@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState, useSyncExternalStore, useCallback } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Trash2, X } from "lucide-react";
+import { Trash2, X, LayoutGrid, Rows3 } from "lucide-react";
 import {
   getLightbox,
   removeFromLightbox,
@@ -37,6 +37,8 @@ function LightboxPage() {
   const fetchImages = useServerFn(getPublicImagesByIds);
   const [items, setItems] = useState<PublicSearchResult[]>([]);
   const [loading, setLoading] = useState(true);
+  const [masonry, setMasonry] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -58,8 +60,10 @@ function LightboxPage() {
     };
   }, [idsJson, fetchImages]);
 
-  const handleClear = useCallback(() => {
-    if (window.confirm("Remove all images from your Lightbox?")) clearLightbox();
+  const handleClear = useCallback(() => setConfirmOpen(true), []);
+  const confirmClear = useCallback(() => {
+    clearLightbox();
+    setConfirmOpen(false);
   }, []);
 
   return (
@@ -78,10 +82,21 @@ function LightboxPage() {
               </span>
             </div>
             {ids.length > 0 && (
-              <button type="button" className="srh-lightbox" onClick={handleClear}>
-                <Trash2 size={16} />
-                <span>CLEAR</span>
-              </button>
+              <div className="srh-actions">
+                <button
+                  type="button"
+                  className="srh-iconbtn"
+                  aria-label={masonry ? "Show as square grid" : "Show full images (masonry)"}
+                  title={masonry ? "Square grid" : "Masonry"}
+                  onClick={() => setMasonry((v) => !v)}
+                >
+                  {masonry ? <LayoutGrid size={16} /> : <Rows3 size={16} />}
+                </button>
+                <button type="button" className="srh-lightbox" onClick={handleClear}>
+                  <Trash2 size={16} />
+                  <span>CLEAR</span>
+                </button>
+              </div>
             )}
           </div>
 
@@ -94,7 +109,7 @@ function LightboxPage() {
           )}
 
           {!loading && items.length > 0 && (
-            <div className="search-results-grid">
+            <div className={masonry ? "search-results-masonry" : "search-results-grid"}>
               {items.map((r) => (
                 <div key={r.id} className="search-result-card">
                   <Link
@@ -125,6 +140,31 @@ function LightboxPage() {
             </div>
           )}
         </div>
+
+        {confirmOpen && (
+          <div className="lb-modal-backdrop" onClick={() => setConfirmOpen(false)}>
+            <div
+              className="lb-modal"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="lb-modal-title"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div id="lb-modal-title" className="lb-modal-title">CLEAR LIGHTBOX</div>
+              <div className="lb-modal-body">
+                Remove all {ids.length} {ids.length === 1 ? "image" : "images"} from your Lightbox? This can't be undone.
+              </div>
+              <div className="lb-modal-actions">
+                <button type="button" className="lb-btn lb-btn--ghost" onClick={() => setConfirmOpen(false)}>
+                  CANCEL
+                </button>
+                <button type="button" className="lb-btn lb-btn--danger" onClick={confirmClear}>
+                  CLEAR ALL
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );
@@ -155,12 +195,21 @@ const CSS = `
   line-height: 1.15;
   color: #000;
   margin-bottom: 28px;
-  display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap;
+  display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap;
 }
 .search-results-header .srh-text { flex: 1; min-width: 0; }
+.srh-actions { display: inline-flex; align-items: center; gap: 10px; }
+.search-results-header .srh-iconbtn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 38px; height: 38px;
+  background: #fff; color: #111; border: 1px solid #111;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.search-results-header .srh-iconbtn:hover { background: #111; color: #fff; }
 .search-results-header .srh-lightbox {
   display: inline-flex; align-items: center; gap: 8px;
-  padding: 10px 14px; background: #fff; color: #111; border: 1px solid #111;
+  height: 38px; padding: 0 14px; background: #fff; color: #111; border: 1px solid #111;
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 11px; font-weight: 700; letter-spacing: 0.2em;
   text-decoration: none; text-transform: uppercase; cursor: pointer;
@@ -179,6 +228,29 @@ const CSS = `
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 24px;
 }
+
+/* Masonry: full images, not square-cropped */
+.search-results-masonry {
+  column-count: 4;
+  column-gap: 24px;
+}
+@media (max-width: 1200px) { .search-results-masonry { column-count: 3; } }
+@media (max-width: 768px)  { .search-results-masonry { column-count: 2; column-gap: 14px; } }
+.search-results-masonry .search-result-card {
+  break-inside: avoid;
+  margin-bottom: 24px;
+  display: block;
+}
+.search-results-masonry .search-result-card img,
+.search-results-masonry .search-result-fallback {
+  width: 100%;
+  height: auto;
+  aspect-ratio: auto;
+  object-fit: initial;
+  display: block;
+  background: #eee;
+}
+
 .search-result-card {
   position: relative;
   display: flex; flex-direction: column;
@@ -216,6 +288,42 @@ const CSS = `
   z-index: 2;
 }
 .src-remove:hover { background: #D75F68; }
+
+/* Custom modal */
+.lb-modal-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.55);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000;
+  animation: lb-fade 0.15s ease;
+}
+@keyframes lb-fade { from { opacity: 0; } to { opacity: 1; } }
+.lb-modal {
+  background: #fff; color: #111;
+  width: min(440px, calc(100vw - 32px));
+  border: 1px solid #111;
+  padding: 28px 28px 22px;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.35);
+}
+.lb-modal-title {
+  font-family: 'DIN Condensed', 'DIN Alternate', 'Barlow Condensed', 'Oswald', sans-serif;
+  font-size: 32px; font-weight: 900; letter-spacing: -0.02em; text-transform: uppercase;
+  line-height: 1; margin-bottom: 14px;
+}
+.lb-modal-body {
+  font-size: 13px; line-height: 1.5; color: #444; margin-bottom: 22px;
+}
+.lb-modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+.lb-btn {
+  height: 38px; padding: 0 16px; border: 1px solid #111;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase;
+  cursor: pointer; transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+.lb-btn--ghost { background: #fff; color: #111; }
+.lb-btn--ghost:hover { background: #111; color: #fff; }
+.lb-btn--danger { background: #111; color: #fff; }
+.lb-btn--danger:hover { background: #D75F68; border-color: #D75F68; }
 
 @media (max-width: 768px) {
   .lb-back { padding: 18px 22px 0; }
