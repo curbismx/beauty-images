@@ -217,7 +217,13 @@ function Index() {
               {results.length > 0 && (
                 <div className="search-results-grid">
                   {results.map((r) => (
-                    <figure key={r.id} className="search-result-card">
+                    <Link
+                      key={r.id}
+                      to="/image/$id"
+                      params={{ id: r.id }}
+                      className="search-result-card"
+                      onMouseDown={(e) => e.preventDefault()}
+                    >
                       {r.signed_url ? (
                         <img src={r.signed_url} alt={r.title ?? r.caption ?? ""} loading="lazy" />
                       ) : (
@@ -227,7 +233,7 @@ function Index() {
                         <div className="src-num">#{String(r.image_number).padStart(5, "0")}</div>
                         {r.title && <div className="src-title">{r.title}</div>}
                       </figcaption>
-                    </figure>
+                    </Link>
                   ))}
                 </div>
               )}
