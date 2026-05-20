@@ -41,7 +41,7 @@ export const searchPublicImages = createServerFn({ method: "POST" })
 
     const { data: rows, error } = await supabaseAdmin
       .from("images")
-      .select("id, image_number, title, caption, keywords, storage_path")
+      .select("id, image_number, title, caption, keywords, storage_path, preview_path")
       .not("keyworded_at", "is", null)
       .order("image_number", { ascending: false })
       .limit(200);
@@ -49,7 +49,7 @@ export const searchPublicImages = createServerFn({ method: "POST" })
 
     const merged = rows ?? [];
 
-    const paths = merged.map((r) => r.storage_path);
+    const paths = merged.map((r) => r.preview_path ?? r.storage_path);
     const signed = paths.length
       ? await supabaseAdmin.storage
           .from("images-private")
