@@ -343,7 +343,7 @@ const CSS = `
   position: relative;
   display: block;
   width: 100%;
-  padding: 28px 28px 24px;
+  padding: 18px 18px 16px;
   color: #f0f0f0;
   font-size: 13px;
   line-height: 1.5;
