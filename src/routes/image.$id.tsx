@@ -94,8 +94,9 @@ function ImageDetail() {
             type="button"
             className="img-back"
             onClick={() => {
-              // Always go to "/" — index restores the previous search/scroll from sessionStorage.
-              window.location.href = "/";
+              // Flag tells "/" to restore the previous search + scroll position.
+              try { sessionStorage.setItem("bi_restore_search", "1"); } catch { /* ignore */ }
+              navigate({ to: "/" });
             }}
           >
             ← BACK TO SEARCH RESULTS
