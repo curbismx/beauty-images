@@ -312,7 +312,10 @@ const CSS = `
 .licence-wrap {
   background: #000;
   padding: 0 ${FRAME}px 75px;
+  opacity: 0;
+  transition: opacity 0.45s ease 0.15s;
 }
+.licence-wrap--ready { opacity: 1; }
 
 .licence-card {
   position: relative;
