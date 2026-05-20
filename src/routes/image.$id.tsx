@@ -279,23 +279,33 @@ const CSS = `
 .img-nav-link:hover { opacity: 1; color: #D75F68; }
 .img-nav-sep { color: #fff; opacity: 0.45; font-size: 11px; }
 
-/* BLACK STAGE — image pinned to top-left with 75px border */
+/* 2/3 image + 1/3 pricing split */
+.img-split {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  align-items: start;
+  background: #000;
+  padding-top: ${FRAME}px;
+  padding-right: ${FRAME}px;
+}
+
 .img-stage {
   background: #000;
-  padding: ${FRAME}px ${FRAME}px 0;
+  padding: 0 ${FRAME}px 0 ${FRAME}px;
   display: flex; align-items: flex-start; justify-content: flex-start;
+  min-width: 0;
 }
 
 .img-frame {
   position: relative;
   display: inline-block;
-  max-width: ${IMG_MAX}px;
+  max-width: 100%;
 }
 
 .img-el {
   display: block;
-  max-width: ${IMG_MAX}px;
-  max-height: ${IMG_MAX}px;
+  max-width: 100%;
+  max-height: calc(100vh - ${FRAME * 2}px);
   width: auto; height: auto;
   background: #0a0a0a;
   border: 1px solid #3a3a3a;
@@ -306,19 +316,21 @@ const CSS = `
 
 .img-empty {
   display: flex; align-items: center; justify-content: center;
-  width: ${IMG_MAX}px; height: ${IMG_MAX}px;
+  width: 100%; aspect-ratio: 1 / 1;
   font-size: 11px; letter-spacing: 0.25em; color: #555;
   background: #0a0a0a;
 }
 
-/* LICENCE PANEL — 75px below image, full width with 75px side margins */
+/* LICENCE PANEL — right column */
 .licence-wrap {
   background: #000;
-  padding: ${FRAME}px ${FRAME}px ${FRAME}px;
+  padding: 0;
   opacity: 0;
   transition: opacity 0.45s ease 0.15s;
+  min-width: 0;
 }
 .licence-wrap--ready { opacity: 1; }
+
 
 .licence-card {
   position: relative;
