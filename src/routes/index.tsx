@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Layers, LayoutGrid, Rows3 } from "lucide-react";
+import { Layers, LayoutGrid, Rows3, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { searchPublicImages, type PublicSearchResult } from "@/lib/search.functions";
 import { getLightbox, subscribeLightbox } from "@/lib/lightbox";
@@ -13,8 +13,8 @@ function AccountLink() {
   if (loading) return null;
   if (session) {
     return (
-      <Link to="/account" className="hero-account">
-        {(session.user.email ?? "Account").split("@")[0]}
+      <Link to="/account" className="hero-account" aria-label="Account">
+        <User size={18} strokeWidth={2} />
       </Link>
     );
   }
@@ -675,13 +675,13 @@ const PAGE_CSS = `
 
 .curbism-root .hero-account {
   position: absolute; top: 36px; right: 36px; z-index: 5;
-  color: #fff; text-decoration: none;
+  color: #D75F68; text-decoration: none;
   font-size: 12px; font-weight: 800; letter-spacing: 0.2em; text-transform: uppercase;
-  padding: 8px 14px; border: 1px solid rgba(255,255,255,0.6); background: rgba(0,0,0,0.25);
-  backdrop-filter: blur(2px);
-  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  line-height: 1;
+  display: inline-flex; align-items: center;
+  transition: opacity 0.15s ease;
 }
-.curbism-root .hero-account:hover { background: #D75F68; border-color: #D75F68; color: #fff; }
+.curbism-root .hero-account:hover { opacity: 0.7; }
 
 
 
@@ -837,6 +837,7 @@ const PAGE_CSS = `
   .curbism-root .hero-search { left: 22px; width: calc(80% - 22px); padding-left: 0; top: calc(100px + clamp(20px, 5.5vw, 36px) * 3 + 18px); }
   .curbism-root .hero-search input { padding: 12px 14px; font-size: 14px; }
   .curbism-root .hero-counter { bottom: 22px; right: 22px; font-size: 10px; }
+  .curbism-root .hero-account { top: 22px; right: 22px; }
   .curbism-root .section { min-height: 380px; }
   .curbism-root .section--apps { min-height: 460px; }
   .curbism-root .section-label { bottom: 16px; left: 24px; font-size: 10px; }
