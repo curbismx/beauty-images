@@ -286,7 +286,7 @@ function Index() {
           </div>
 
           {searchActive && (
-            <div className="search-results">
+            <div className="search-results" ref={resultsRef}>
               <div className="search-results-header">
                 <div className="srh-text">
                 {submittedQuery ? (
