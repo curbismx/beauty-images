@@ -23,26 +23,15 @@ export const Route = createFileRoute("/lightbox")({
   component: LightboxPage,
 });
 
-function useLightboxIds(): string[] {
-  return useSyncExternalStore(
-    subscribeLightbox,
-    () => JSON.stringify(getLightbox()),
-    () => "[]",
-  ).length
-    ? JSON.parse(
-        useSyncExternalStoreServerSafe(),
-      )
-    : [];
-}
-
-// safe wrapper to avoid SSR issues with useSyncExternalStore + JSON parsing
-function useSyncExternalStoreServerSafe(): string {
+function useLightboxIdsJson(): string {
   return useSyncExternalStore(
     subscribeLightbox,
     () => JSON.stringify(getLightbox()),
     () => "[]",
   );
 }
+
+
 
 function LightboxPage() {
   const idsJson = useSyncExternalStoreServerSafe();
