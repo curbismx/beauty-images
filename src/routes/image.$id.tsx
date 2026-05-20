@@ -192,9 +192,8 @@ function ImageDetail() {
                     <span className="lc-tile-lb-icon" aria-hidden="true">
                       {inLightbox ? <Check size={18} /> : <Plus size={18} />}
                     </span>
-                    <span className="lc-tile-lb-label">
-                      {inLightbox ? "IN LIGHTBOX" : "ADD TO LIGHTBOX"}
-                    </span>
+                    <span className="lc-tile-lb-label">LIGHTBOX</span>
+
                   </button>
                   <button type="button" className="lc-tile lc-tile--cta">
                     <span className="lc-tile-cta-label">ADD TO BASKET</span>
