@@ -13,7 +13,7 @@ function ImageDetail() {
   const fetchImage = useServerFn(getPublicImage);
   const [img, setImg] = useState<PublicImageDetail | null>(null);
   const [loading, setLoading] = useState(true);
-  const [tier, setTier] = useState<"small" | "medium" | "large" | "pack">("medium");
+  const [tier, setTier] = useState<"small" | "medium" | "large">("medium");
   const [showLicence, setShowLicence] = useState(true);
 
   useEffect(() => {
