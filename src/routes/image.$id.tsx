@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { Eye, EyeOff, Check, Plus } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
@@ -51,6 +51,7 @@ const TIERS: Array<{
 
 function ImageDetail() {
   const { id } = Route.useParams();
+  const navigate = useNavigate();
   const fetchImage = useServerFn(getPublicImage);
   const [img, setImg] = useState<PublicImageDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -95,7 +96,7 @@ function ImageDetail() {
               className="img-back"
               onClick={() => {
                 try { sessionStorage.setItem("bi_restore_search", "1"); } catch { /* ignore */ }
-                window.location.href = "/";
+                navigate({ to: "/" });
               }}
             >
               <svg className="img-back-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="square">
@@ -108,7 +109,7 @@ function ImageDetail() {
               className="img-back img-back--home"
               onClick={() => {
                 try { sessionStorage.removeItem("bi_restore_search"); sessionStorage.removeItem("bi_search_state"); } catch { /* ignore */ }
-                window.location.href = "/";
+                navigate({ to: "/" });
               }}
             >
               / BACK TO HOME
