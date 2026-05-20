@@ -167,9 +167,14 @@ function Index() {
             onClick={goNext}
           />
 
-          <div className="hero-logo">
+          <button
+            type="button"
+            className="hero-logo"
+            onClick={goHome}
+            aria-label="Beauty Images — home"
+          >
             <img src="/beauty-logo.png" alt="Beauty Images" />
-          </div>
+          </button>
           <h1 className="hero-title">
             Rights Managed Images / Real People / Real Photography / No AI
           </h1>
