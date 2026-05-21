@@ -269,7 +269,7 @@ function EditableRow({
       </div>
       <div style={contentCol}>
         <div style={topRow}>
-          <span style={numBadge}>{row.image_number}</span>
+          <span style={numBadge}>{String(row.image_number).padStart(8, "0")}</span>
           {!row.keyworded_at && <span style={{ ...statusBadge, background: "#D75F68" }}>PENDING</span>}
           {row.keyworded_at && row.public && <span style={{ ...statusBadge, background: "#1f7a3d" }}>LIVE</span>}
           {row.keyworded_at && !row.public && <span style={{ ...statusBadge, background: "#888" }}>READY</span>}
