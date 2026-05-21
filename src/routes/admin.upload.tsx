@@ -485,7 +485,7 @@ function Upload() {
       <div className="bi-section" style={{ marginTop: 32 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap", marginBottom: 12 }}>
           <h2 className="bi-section-title" style={{ margin: 0 }}>
-            Processing queue {allQueueRows.length ? `(${failedOnly ? `${queueRows.length} of ${allQueueRows.length}` : allQueueRows.length})` : ""}
+            Processing queue {queueRows.length ? `(${queueRows.length}${failedOnly ? " failed" : ""})` : ""}
           </h2>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             <button
