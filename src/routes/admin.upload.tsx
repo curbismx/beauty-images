@@ -122,7 +122,7 @@ function Upload() {
         const item = items[i];
         const match = file.name.match(FILENAME_RE);
         const detectedDigits = file.name.match(/^a(\d+)\./i)?.[1];
-        const detectedNumber = detectedDigits ? parseInt(detectedDigits, 10) : null;
+        const detectedNumber = detectedDigits?.length === 8 ? parseInt(detectedDigits, 10) : null;
         const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
         const uploadErrorRecord = async (message: string, existingPath?: string | null) => {
           let errorPath = existingPath ?? null;
