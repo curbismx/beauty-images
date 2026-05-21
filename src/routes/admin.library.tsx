@@ -106,7 +106,7 @@ function Library() {
       <div style={batchBar}>
         <div style={{ fontSize: 12, letterSpacing: "0.04em", textTransform: "uppercase" }}>
           {stats.data
-            ? `${stats.data.total} total · ${stats.data.keyworded} keyworded · ${stats.data.processing} processing · ${stats.data.failed} failed · ${stats.data.upload_errors} upload errors`
+            ? `${stats.data.total} total · ${stats.data.published} published on site · ${stats.data.keyworded} keyworded · ${stats.data.processing} processing · ${stats.data.failed} failed · ${stats.data.upload_errors} upload errors`
             : "—"}
         </div>
         <div style={{ display: "flex", gap: 8 }}>
