@@ -13,8 +13,12 @@ import {
   updateImage,
   retryImageProcessing,
   retryAllFailedImages,
+  listUploadErrors,
+  deleteUploadErrors,
+  resolveUploadError,
   type LibraryImage,
 } from "@/lib/images.functions";
+import { UploadErrorCard, uploadErrorGridStyle } from "@/components/UploadErrorCard";
 
 const stripExt = (name: string) => name.replace(/\.[^.]+$/, "");
 
@@ -44,6 +48,9 @@ function Library() {
   const runUnpublish = useServerFn(unpublishAll);
   const runDelete = useServerFn(deleteImages);
   const runRetryAll = useServerFn(retryAllFailedImages);
+  const fetchUploadErrors = useServerFn(listUploadErrors);
+  const removeUploadErrors = useServerFn(deleteUploadErrors);
+  const fixUploadError = useServerFn(resolveUploadError);
 
   const q = useQuery({
     queryKey: ["library-images", active, search],
@@ -52,6 +59,10 @@ function Library() {
   const stats = useQuery({
     queryKey: ["image-stats"],
     queryFn: () => fetchStats({}),
+  });
+  const uploadErrors = useQuery({
+    queryKey: ["upload-errors"],
+    queryFn: () => fetchUploadErrors({ data: { limit: 300 } }),
   });
 
   const invalidate = () => {
@@ -82,6 +93,23 @@ function Library() {
     mutationFn: () => runRetryAll({}),
     onSuccess: invalidate,
   });
+  const deleteUploadErrorMut = useMutation({
+    mutationFn: (id: string) => removeUploadErrors({ data: { ids: [id] } }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["upload-errors"] });
+      qc.invalidateQueries({ queryKey: ["image-stats"] });
+    },
+  });
+  const resolveUploadErrorMut = useMutation({
+    mutationFn: ({ id, image_number }: { id: string; image_number: number }) =>
+      fixUploadError({ data: { id, image_number } }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["upload-errors"] });
+      qc.invalidateQueries({ queryKey: ["library-images"] });
+      qc.invalidateQueries({ queryKey: ["image-stats"] });
+    },
+  });
+
 
   const rows = q.data ?? [];
   const allSelected = rows.length > 0 && rows.every((r) => selected.has(r.id));
@@ -221,6 +249,44 @@ function Library() {
           ))}
         </div>
       )}
+
+      <div style={{ marginTop: 32 }}>
+        <h2 className="bi-section-title" style={{ marginBottom: 12 }}>
+          Upload errors {uploadErrors.data?.length ? `(${uploadErrors.data.length})` : ""}
+        </h2>
+        {uploadErrors.isLoading ? (
+          <div className="bi-placeholder">Loading errors…</div>
+        ) : !uploadErrors.data?.length ? (
+          <div className="bi-placeholder">No upload errors</div>
+        ) : (
+          <div style={uploadErrorGridStyle}>
+            {uploadErrors.data.map((err) => (
+              <UploadErrorCard
+                key={err.id}
+                err={err}
+                deleting={deleteUploadErrorMut.isPending}
+                resolving={resolveUploadErrorMut.isPending}
+                onDelete={() => {
+                  if (confirm(`Delete error file ${err.filename}?`))
+                    deleteUploadErrorMut.mutate(err.id);
+                }}
+                onResolve={(image_number) =>
+                  resolveUploadErrorMut.mutate({ id: err.id, image_number })
+                }
+              />
+            ))}
+          </div>
+        )}
+        {deleteUploadErrorMut.data && (
+          <div style={notice}>Deleted {deleteUploadErrorMut.data.deleted} error file.</div>
+        )}
+        {resolveUploadErrorMut.data && (
+          <div style={notice}>
+            Moved #{String(resolveUploadErrorMut.data.image_number).padStart(8, "0")} into the
+            processing queue.
+          </div>
+        )}
+      </div>
     </>
   );
 }
