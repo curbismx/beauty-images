@@ -1009,18 +1009,26 @@ const PAGE_CSS = `
   padding: 40px 0 200px;
 }
 .curbism-root .search-pager {
-  display: flex; align-items: center; justify-content: center; gap: 24px;
+  display: flex; align-items: center; justify-content: flex-start; flex-wrap: wrap; gap: 8px;
   padding: 18px 0; margin: 0 0 8px;
   border-top: 1px solid #eee; border-bottom: 1px solid #eee;
-  font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase;
+  font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
 }
 .curbism-root .search-pager-btn {
-  background: #000; color: #fff; border: none; padding: 10px 18px;
+  background: #000; color: #fff; border: none; padding: 8px 14px;
   font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase;
   cursor: pointer; font-family: inherit;
 }
 .curbism-root .search-pager-btn:disabled { opacity: 0.25; cursor: not-allowed; }
-.curbism-root .search-pager-info { color: #555; }
+.curbism-root .search-pager-num {
+  background: transparent; color: #000; border: 1px solid #ddd;
+  padding: 8px 12px; min-width: 38px; font-size: 11px; letter-spacing: 0.15em;
+  cursor: pointer; font-family: inherit;
+}
+.curbism-root .search-pager-num:hover { border-color: #000; }
+.curbism-root .search-pager-num.is-active {
+  background: #000; color: #fff; border-color: #000;
+}
 .curbism-root .search-results-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
