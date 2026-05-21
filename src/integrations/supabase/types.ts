@@ -84,6 +84,7 @@ export type Database = {
           pricing_tier: string | null
           processing_attempts: number
           processing_error: string | null
+          processing_started_at: string | null
           public: boolean
           storage_path: string
           title: string | null
@@ -106,6 +107,7 @@ export type Database = {
           pricing_tier?: string | null
           processing_attempts?: number
           processing_error?: string | null
+          processing_started_at?: string | null
           public?: boolean
           storage_path: string
           title?: string | null
@@ -128,6 +130,7 @@ export type Database = {
           pricing_tier?: string | null
           processing_attempts?: number
           processing_error?: string | null
+          processing_started_at?: string | null
           public?: boolean
           storage_path?: string
           title?: string | null
