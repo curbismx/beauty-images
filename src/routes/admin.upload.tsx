@@ -9,6 +9,7 @@ import {
   getProcessingQueue,
   checkImageNumberExists,
   retryImageProcessing,
+  keywordPendingBatch,
   createUploadError,
   listUploadErrors,
   deleteUploadErrors,
@@ -56,7 +57,16 @@ function Upload() {
   const fetchUploadErrors = useServerFn(listUploadErrors);
   const removeUploadErrors = useServerFn(deleteUploadErrors);
   const fixUploadError = useServerFn(resolveUploadError);
+  const runKeyword = useServerFn(keywordPendingBatch);
   const runRetry = useServerFn(retryImageProcessing);
+
+  const keywordMut = useMutation({
+    mutationFn: () => runKeyword({ data: { limit: 50 } }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["processing-queue"] });
+      qc.invalidateQueries({ queryKey: ["image-stats"] });
+    },
+  });
 
   const uploadErrors = useQuery({
     queryKey: ["upload-errors"],
@@ -239,9 +249,18 @@ function Upload() {
             : "Loading stats…"}
         </div>
         <div style={{ fontSize: 10, color: "#666", letterSpacing: "0.04em", textTransform: "uppercase" }}>
-          Auto-processing runs every minute
+          Keywording is separate from publishing
         </div>
+        <button type="button" style={retryBtn} disabled={keywordMut.isPending} onClick={() => keywordMut.mutate()}>
+          {keywordMut.isPending ? "Keywording…" : "Keyword images"}
+        </button>
       </div>
+      {keywordMut.data && (
+        <div style={notice}>
+          Keyworded {keywordMut.data.processed} images{keywordMut.data.failed ? ` · ${keywordMut.data.failed} failed` : ""}.
+          {keywordMut.data.errors.length ? ` ${keywordMut.data.errors.join(" · ")}` : ""}
+        </div>
+      )}
 
       <div
         className="bi-drop"
