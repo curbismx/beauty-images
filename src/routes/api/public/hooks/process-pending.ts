@@ -32,6 +32,7 @@ function bytesToBase64(buf: Uint8Array): string {
 }
 
 async function resizeTo800Jpeg(bytes: Uint8Array): Promise<Uint8Array> {
+  const { PhotonImage, resize, SamplingFilter } = await import("@cf-wasm/photon/workerd");
   const img = PhotonImage.new_from_byteslice(bytes);
   const w = img.get_width();
   const h = img.get_height();
