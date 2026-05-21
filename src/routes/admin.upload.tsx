@@ -8,6 +8,7 @@ import {
   getImageStats,
   getProcessingQueue,
   retryImageProcessing,
+  retryAllFailedImages,
   listUploadErrors,
   deleteUploadErrors,
   resolveUploadError,
