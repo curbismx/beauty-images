@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
@@ -491,7 +491,22 @@ function Upload() {
             {queue.map((it) => (
               <div key={it.id} style={tileStyle}>
                 <div style={{ position: "relative", paddingBottom: "100%", background: "#f4f4f4" }}>
-                  <img src={it.previewUrl} alt={it.name} style={imgStyle} />
+                  <div
+                    style={{
+                      ...imgStyle,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      padding: 12,
+                      textAlign: "center",
+                      fontSize: 11,
+                      fontWeight: 800,
+                      color: "#666",
+                      wordBreak: "break-word",
+                    }}
+                  >
+                    {it.name}
+                  </div>
                   <span style={{ ...badgeStyle, background: statusColor(it.status) }}>
                     {it.status === "done" && it.imageNumber
                       ? `#${String(it.imageNumber).padStart(8, "0")}`
