@@ -142,6 +142,7 @@ function Upload() {
   // track counts on the full set so big batches don't blow up the DOM.
   const [queue, setQueue] = useState<QueueItem[]>([]);
   const [totals, setTotals] = useState({ done: 0, failed: 0, queued: 0, uploading: 0 });
+  const [dropMessage, setDropMessage] = useState<string | null>(null);
   const [isDragging, setDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const qc = useQueryClient();
@@ -356,7 +357,12 @@ function Upload() {
 
   const handleFiles = useCallback(
     (files: FileList | File[]) => {
-      const arr = Array.from(files);
+      const arr = Array.from(files).filter(isImageFile);
+      if (!arr.length) {
+        setDropMessage("No image files found — open the folder and select/drop the images inside it.");
+        return;
+      }
+      setDropMessage(null);
       const items: QueueItem[] = arr.map((f) => ({
         id: crypto.randomUUID(),
         file: f,
@@ -432,13 +438,19 @@ function Upload() {
         onDrop={(e) => {
           e.preventDefault();
           setDragging(false);
-          if (e.dataTransfer.files.length) handleFiles(e.dataTransfer.files);
+          void collectDroppedImageFiles(e.dataTransfer)
+            .then(({ files, ignored }) => {
+              if (ignored > 0) setDropMessage(`${ignored} non-image/folder item${ignored === 1 ? "" : "s"} ignored`);
+              handleFiles(files);
+            })
+            .catch((err) => setDropMessage((err as Error).message));
         }}
       >
         Drop images here or click to browse
         <div style={{ fontSize: 10, marginTop: 8, opacity: 0.7 }}>
           Filename format: A + 8 digits + extension (e.g. A00010001.JPG)
         </div>
+        {dropMessage && <div style={{ fontSize: 11, marginTop: 8, color: "#D75F68", fontWeight: 800 }}>{dropMessage}</div>}
         <input
           ref={inputRef}
           type="file"
