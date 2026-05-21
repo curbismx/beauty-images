@@ -297,22 +297,11 @@ function Upload() {
             : "Loading stats…"}
         </div>
         <div style={{ fontSize: 10, color: "#666", letterSpacing: "0.04em", textTransform: "uppercase" }}>
-          Keywording is separate from publishing
+          {stats.data && stats.data.processing > 0
+            ? `Keywording runs automatically · ~600/hour · ${stats.data.processing} left`
+            : "Keywording runs automatically in the background"}
         </div>
-        <button type="button" style={retryBtn} disabled={keywordRun.active} onClick={() => startKeywording()}>
-          {keywordRun.active
-            ? `Keywording… batch ${keywordRun.batches} · ${keywordRun.processed} done${keywordRun.failed ? ` · ${keywordRun.failed} failed` : ""}`
-            : "Keyword all images"}
-        </button>
       </div>
-      {(keywordRun.active || keywordRun.done) && (
-        <div style={keywordRun.lastError ? errBox : notice}>
-          {keywordRun.active
-            ? `Running batch ${keywordRun.batches} — ${keywordRun.processed} keyworded so far${keywordRun.failed ? ` · ${keywordRun.failed} failed` : ""}`
-            : `Finished — ${keywordRun.processed} keyworded across ${keywordRun.batches} batch${keywordRun.batches === 1 ? "" : "es"}${keywordRun.failed ? ` · ${keywordRun.failed} failed` : ""}.`}
-          {keywordRun.lastError ? ` Stopped: ${keywordRun.lastError}` : ""}
-        </div>
-      )}
 
       <div
         className="bi-drop"
