@@ -309,6 +309,39 @@ function Upload() {
     <>
       <PageHeader title="Upload" />
 
+      {failedCount > 0 && (
+        <div style={failedActionBar}>
+          <div>
+            <div style={{ fontSize: 16, fontWeight: 900 }}>{failedCount} failed image{failedCount === 1 ? "" : "s"}</div>
+            <div style={{ fontSize: 12, fontWeight: 700 }}>These are the images that timed out or failed during processing.</div>
+          </div>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <button
+              type="button"
+              style={failedActionButtonLight}
+              onClick={() => {
+                setFailedOnly(true);
+                window.setTimeout(() => document.getElementById("processing-queue")?.scrollIntoView({ behavior: "smooth", block: "start" }), 0);
+              }}
+            >
+              View failed images
+            </button>
+            <button
+              type="button"
+              style={failedActionButtonDark}
+              disabled={retryAllMut.isPending}
+              onClick={() => {
+                if (confirm(`Retry all ${failedCount} failed image${failedCount === 1 ? "" : "s"}?`)) {
+                  retryAllMut.mutate();
+                }
+              }}
+            >
+              {retryAllMut.isPending ? "Retrying…" : `Retry failed images (${failedCount})`}
+            </button>
+          </div>
+        </div>
+      )}
+
       <div
         style={{
           border: "1px solid #000",
@@ -398,7 +431,7 @@ function Upload() {
         />
       </div>
 
-      <div className="bi-section" style={{ marginTop: 32 }}>
+      <div id="processing-queue" className="bi-section" style={{ marginTop: 32, scrollMarginTop: 20 }}>
         <h2 className="bi-section-title">
           Upload errors {uploadErrors.data?.length ? `(${uploadErrors.data.length})` : ""}
         </h2>
