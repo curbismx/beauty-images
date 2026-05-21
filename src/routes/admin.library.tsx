@@ -78,6 +78,10 @@ function Library() {
       invalidate();
     },
   });
+  const retryAllMut = useMutation({
+    mutationFn: () => runRetryAll({}),
+    onSuccess: invalidate,
+  });
 
   const rows = q.data ?? [];
   const allSelected = rows.length > 0 && rows.every((r) => selected.has(r.id));
