@@ -117,7 +117,8 @@ function ImageEdit() {
 
   return (
     <>
-      <PageHeader title={`#${d.image_number} — ${d.filename}`} />
+      <PageHeader title={`#${String(d.image_number).padStart(8, "0")} — ${d.filename}`} />
+
 
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 16, gap: 8 }}>
         <Link to="/admin/library" className="bi-btn">← Library</Link>
