@@ -27,7 +27,7 @@ export const searchPublicImages = createServerFn({ method: "POST" })
     z
       .object({
         q: z.string().trim().min(1).max(120),
-        limit: z.number().int().min(1).max(2000).default(1000),
+        limit: z.number().int().min(1).max(50000).default(50000),
       })
       .parse,
   )
