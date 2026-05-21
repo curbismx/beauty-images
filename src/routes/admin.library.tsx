@@ -6,6 +6,7 @@ import { PageHeader } from "./admin";
 import {
   listImages,
   getImageStats,
+  keywordPendingBatch,
   publishAllReady,
   unpublishAll,
   deleteImages,
@@ -22,6 +23,7 @@ export const Route = createFileRoute("/admin/library")({
 const FILTERS = [
   { id: "all", label: "All" },
   { id: "pending", label: "Pending keywords" },
+  { id: "errors", label: "Errors" },
   { id: "ready", label: "Ready to publish" },
   { id: "published", label: "Published" },
 ] as const;
@@ -35,6 +37,7 @@ function Library() {
   const qc = useQueryClient();
   const fetchList = useServerFn(listImages);
   const fetchStats = useServerFn(getImageStats);
+  const runKeyword = useServerFn(keywordPendingBatch);
   const runPublish = useServerFn(publishAllReady);
   const runUnpublish = useServerFn(unpublishAll);
   const runDelete = useServerFn(deleteImages);
@@ -55,6 +58,10 @@ function Library() {
 
   const publishMut = useMutation({
     mutationFn: () => runPublish({}),
+    onSuccess: invalidate,
+  });
+  const keywordMut = useMutation({
+    mutationFn: () => runKeyword({ data: { limit: 50 } }),
     onSuccess: invalidate,
   });
   const unpublishMut = useMutation({
@@ -92,10 +99,17 @@ function Library() {
       <div style={batchBar}>
         <div style={{ fontSize: 12, letterSpacing: "0.04em", textTransform: "uppercase" }}>
           {stats.data
-            ? `${stats.data.total} total · ${stats.data.keyworded} keyworded · ${stats.data.processing} processing · ${stats.data.failed} failed`
+            ? `${stats.data.total} total · ${stats.data.keyworded} keyworded · ${stats.data.processing} processing · ${stats.data.failed} failed · ${stats.data.upload_errors} upload errors`
             : "—"}
         </div>
         <div style={{ display: "flex", gap: 8 }}>
+          <button
+            style={btnDark}
+            disabled={keywordMut.isPending}
+            onClick={() => keywordMut.mutate()}
+          >
+            {keywordMut.isPending ? "Keywording…" : "Keyword images"}
+          </button>
           <button
             style={btnDark}
             disabled={publishMut.isPending}
@@ -118,6 +132,12 @@ function Library() {
       </div>
       {publishMut.data && (
         <div style={notice}>Published {publishMut.data.published} images.</div>
+      )}
+      {keywordMut.data && (
+        <div style={notice}>
+          Keyworded {keywordMut.data.processed} images{keywordMut.data.failed ? ` · ${keywordMut.data.failed} failed` : ""}.
+          {keywordMut.data.errors.length ? ` ${keywordMut.data.errors.join(" · ")}` : ""}
+        </div>
       )}
       {unpublishMut.data && (
         <div style={notice}>Unpublished {unpublishMut.data.unpublished} images.</div>
