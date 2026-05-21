@@ -202,7 +202,8 @@ function Upload() {
           | null;
 
         if (!response.ok || !result) {
-          throw new Error(result?.message || `Upload request failed (${response.status})`);
+          const message = result && "message" in result ? result.message : null;
+          throw new Error(message || `Upload request failed (${response.status})`);
         }
         if (!result.ok) {
           updateItem(item.id, { status: "error", message: result.message || "Upload failed" });
