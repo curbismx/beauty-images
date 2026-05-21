@@ -32,6 +32,7 @@ import { Route as ApiPublicTrackRouteImport } from './routes/api/public/track'
 import { Route as ApiPublicDownloadRouteImport } from './routes/api/public/download'
 import { Route as AdminImageIdRouteImport } from './routes/admin.image.$id'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
+import { Route as ApiPublicHooksKeywordPendingRouteImport } from './routes/api/public/hooks/keyword-pending'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -149,6 +150,12 @@ const ApiPublicPaymentsWebhookRoute =
     path: '/api/public/payments/webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksKeywordPendingRoute =
+  ApiPublicHooksKeywordPendingRouteImport.update({
+    id: '/api/public/hooks/keyword-pending',
+    path: '/api/public/hooks/keyword-pending',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -173,6 +180,7 @@ export interface FileRoutesByFullPath {
   '/admin/image/$id': typeof AdminImageIdRoute
   '/api/public/download': typeof ApiPublicDownloadRoute
   '/api/public/track': typeof ApiPublicTrackRoute
+  '/api/public/hooks/keyword-pending': typeof ApiPublicHooksKeywordPendingRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -197,6 +205,7 @@ export interface FileRoutesByTo {
   '/admin/image/$id': typeof AdminImageIdRoute
   '/api/public/download': typeof ApiPublicDownloadRoute
   '/api/public/track': typeof ApiPublicTrackRoute
+  '/api/public/hooks/keyword-pending': typeof ApiPublicHooksKeywordPendingRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesById {
@@ -223,6 +232,7 @@ export interface FileRoutesById {
   '/admin/image/$id': typeof AdminImageIdRoute
   '/api/public/download': typeof ApiPublicDownloadRoute
   '/api/public/track': typeof ApiPublicTrackRoute
+  '/api/public/hooks/keyword-pending': typeof ApiPublicHooksKeywordPendingRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRouteTypes {
@@ -250,6 +260,7 @@ export interface FileRouteTypes {
     | '/admin/image/$id'
     | '/api/public/download'
     | '/api/public/track'
+    | '/api/public/hooks/keyword-pending'
     | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -274,6 +285,7 @@ export interface FileRouteTypes {
     | '/admin/image/$id'
     | '/api/public/download'
     | '/api/public/track'
+    | '/api/public/hooks/keyword-pending'
     | '/api/public/payments/webhook'
   id:
     | '__root__'
@@ -299,6 +311,7 @@ export interface FileRouteTypes {
     | '/admin/image/$id'
     | '/api/public/download'
     | '/api/public/track'
+    | '/api/public/hooks/keyword-pending'
     | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
 }
@@ -316,6 +329,7 @@ export interface RootRouteChildren {
   ImageIdRoute: typeof ImageIdRoute
   ApiPublicDownloadRoute: typeof ApiPublicDownloadRoute
   ApiPublicTrackRoute: typeof ApiPublicTrackRoute
+  ApiPublicHooksKeywordPendingRoute: typeof ApiPublicHooksKeywordPendingRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
 
@@ -482,6 +496,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/keyword-pending': {
+      id: '/api/public/hooks/keyword-pending'
+      path: '/api/public/hooks/keyword-pending'
+      fullPath: '/api/public/hooks/keyword-pending'
+      preLoaderRoute: typeof ApiPublicHooksKeywordPendingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -525,6 +546,7 @@ const rootRouteChildren: RootRouteChildren = {
   ImageIdRoute: ImageIdRoute,
   ApiPublicDownloadRoute: ApiPublicDownloadRoute,
   ApiPublicTrackRoute: ApiPublicTrackRoute,
+  ApiPublicHooksKeywordPendingRoute: ApiPublicHooksKeywordPendingRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
 export const routeTree = rootRouteImport
