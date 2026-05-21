@@ -463,8 +463,10 @@ export const keywordPendingBatch = createServerFn({ method: "POST" })
     const { supabase } = context;
     const { data: rows, error } = await supabase
       .from("images")
-      .select("id, image_number, filename, storage_path")
+      .select("id, image_number, filename, storage_path, preview_path, processing_attempts")
       .is("keyworded_at", null)
+      .not("preview_path", "is", null)
+      .is("processing_error", null)
       .order("image_number", { ascending: true })
       .limit(data.limit);
     if (error) throw new Error(error.message);
@@ -476,7 +478,7 @@ export const keywordPendingBatch = createServerFn({ method: "POST" })
 
     for (const row of rows) {
       try {
-        const dl = await supabase.storage.from("images-private").download(row.storage_path);
+        const dl = await supabase.storage.from("images-private").download(row.preview_path ?? row.storage_path);
         if (dl.error || !dl.data) throw new Error(dl.error?.message ?? "download failed");
         const buf = Buffer.from(await dl.data.arrayBuffer());
         const dataUrl = `data:${guessMime(row.filename)};base64,${buf.toString("base64")}`;
@@ -490,13 +492,23 @@ export const keywordPendingBatch = createServerFn({ method: "POST" })
             keywords: result.keywords,
             category: result.category,
             keyworded_at: new Date().toISOString(),
+            processing_attempts: 0,
+            processing_error: null,
           })
           .eq("id", row.id);
         if (upErr) throw new Error(upErr.message);
         processed += 1;
       } catch (e) {
         failed += 1;
-        errors.push(`#${row.image_number}: ${(e as Error).message}`);
+        const message = (e as Error).message;
+        errors.push(`#${row.image_number}: ${message}`);
+        await supabase
+          .from("images")
+          .update({
+            processing_attempts: (row.processing_attempts ?? 0) + 1,
+            processing_error: message.slice(0, 1000),
+          })
+          .eq("id", row.id);
       }
     }
 
