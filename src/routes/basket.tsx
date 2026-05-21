@@ -93,7 +93,20 @@ function BasketPage() {
       return;
     }
     fetchImages({ data: { ids: uniqueIds } })
-      .then((r) => alive && (setItems(r), setLoading(false)))
+      .then((r) => {
+        if (!alive) return;
+        // Prune basket entries whose image no longer exists / is unpublished.
+        const returned = new Set(r.map((x) => x.id));
+        const stale = uniqueIds.filter((id) => !returned.has(id));
+        if (stale.length > 0) {
+          const staleSet = new Set(stale);
+          basket
+            .filter((b) => staleSet.has(b.id))
+            .forEach((b) => removeFromBasket(b.id, b.tier));
+        }
+        setItems(r);
+        setLoading(false);
+      })
       .catch(() => alive && setLoading(false));
     return () => { alive = false; };
   }, [idsKey, fetchImages]);
