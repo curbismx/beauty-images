@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
-import { PhotonImage, resize, SamplingFilter } from "@cf-wasm/photon/edge-light";
 
 const MAX_ATTEMPTS = 3;
 const PREVIEW_BATCH = 25;
@@ -33,6 +32,7 @@ function bytesToBase64(buf: Uint8Array): string {
 }
 
 async function resizeTo800Jpeg(bytes: Uint8Array): Promise<Uint8Array> {
+  const { PhotonImage, resize, SamplingFilter } = await import("@cf-wasm/photon/edge-light");
   const img = PhotonImage.new_from_byteslice(bytes);
   const w = img.get_width();
   const h = img.get_height();
