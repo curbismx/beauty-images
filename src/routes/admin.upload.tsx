@@ -20,7 +20,6 @@ export const Route = createFileRoute("/admin/upload")({
 
 const FILENAME_RE = /^a(\d{8})\.[a-z0-9]+$/i;
 const IMAGE_FILE_RE = /\.(jpe?g|png|webp|gif)$/i;
-const PREVIEW_EDGE = 800;
 
 type WebkitEntry = {
   isFile: boolean;
@@ -90,43 +89,6 @@ async function collectDroppedImageFiles(dataTransfer: DataTransfer) {
 
 function extensionFor(filename: string) {
   return filename.split(".").pop()?.toLowerCase() || "jpg";
-}
-
-function loadBrowserImage(file: File): Promise<HTMLImageElement> {
-  return new Promise((resolve, reject) => {
-    const url = URL.createObjectURL(file);
-    const image = new Image();
-    image.onload = () => {
-      URL.revokeObjectURL(url);
-      resolve(image);
-    };
-    image.onerror = () => {
-      URL.revokeObjectURL(url);
-      reject(new Error("Could not read image for preview"));
-    };
-    image.src = url;
-  });
-}
-
-async function makePreviewBlob(file: File): Promise<Blob> {
-  const image = await loadBrowserImage(file);
-  const width = image.naturalWidth || image.width;
-  const height = image.naturalHeight || image.height;
-  if (!width || !height) throw new Error("Image has no readable dimensions");
-  const scale = Math.min(1, PREVIEW_EDGE / Math.max(width, height));
-  const canvas = document.createElement("canvas");
-  canvas.width = Math.max(1, Math.round(width * scale));
-  canvas.height = Math.max(1, Math.round(height * scale));
-  const ctx = canvas.getContext("2d");
-  if (!ctx) throw new Error("Could not create preview canvas");
-  ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-  return new Promise((resolve, reject) => {
-    canvas.toBlob(
-      (blob) => (blob ? resolve(blob) : reject(new Error("Could not create preview image"))),
-      "image/jpeg",
-      0.82,
-    );
-  });
 }
 
 type QueueItem = {
