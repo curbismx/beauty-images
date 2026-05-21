@@ -294,7 +294,7 @@ function Upload() {
                 <div style={{ position: "relative", paddingBottom: "100%", background: "#f4f4f4" }}>
                   <img src={it.previewUrl} alt={it.name} style={imgStyle} />
                   <span style={{ ...badgeStyle, background: statusColor(it.status) }}>
-                    {it.status === "done" && it.imageNumber ? `#${it.imageNumber}` : it.status.toUpperCase()}
+                    {it.status === "done" && it.imageNumber ? `#${String(it.imageNumber).padStart(8, "0")}` : it.status.toUpperCase()}
                   </span>
                 </div>
                 <div style={tileName} title={it.name}>
