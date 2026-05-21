@@ -257,6 +257,7 @@ export type LibraryImage = RecentImage & {
   availability: string;
   public: boolean;
   keywords: string[];
+  processing_error: string | null;
 };
 
 export const listImages = createServerFn({ method: "GET" })
@@ -265,7 +266,7 @@ export const listImages = createServerFn({ method: "GET" })
     z
       .object({
         filter: z
-          .enum(["all", "pending", "ready", "published", "unpublished"])
+          .enum(["all", "pending", "ready", "published", "unpublished", "errors"])
           .default("all"),
         search: z.string().trim().max(200).default(""),
         limit: z.number().int().min(1).max(500).default(200),
@@ -277,7 +278,7 @@ export const listImages = createServerFn({ method: "GET" })
     let q = supabase
       .from("images")
       .select(
-        "id, image_number, filename, title, caption, keyworded_at, created_at, storage_path, preview_path, category, availability, public, keywords",
+        "id, image_number, filename, title, caption, keyworded_at, created_at, storage_path, preview_path, category, availability, public, keywords, processing_error",
       )
       .order("image_number", { ascending: false })
       .limit(data.limit);
@@ -285,6 +286,7 @@ export const listImages = createServerFn({ method: "GET" })
     if (data.filter === "ready") q = q.not("keyworded_at", "is", null).eq("public", false);
     if (data.filter === "published") q = q.eq("public", true);
     if (data.filter === "unpublished") q = q.eq("public", false);
+    if (data.filter === "errors") q = q.not("processing_error", "is", null);
     if (data.search) {
       const s = data.search.replace(/[%,]/g, " ");
       q = q.or(`title.ilike.%${s}%,filename.ilike.%${s}%,category.ilike.%${s}%`);
@@ -307,6 +309,7 @@ export const listImages = createServerFn({ method: "GET" })
       availability: r.availability,
       public: r.public,
       keywords: (r.keywords ?? []) as string[],
+      processing_error: r.processing_error,
       signed_url: signed.data?.[i]?.signedUrl ?? null,
     })) as LibraryImage[];
   });
