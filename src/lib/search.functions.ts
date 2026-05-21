@@ -36,10 +36,12 @@ export const searchPublicImages = createServerFn({ method: "POST" })
     // Split on commas or spaces, trim, and filter empty terms
     const terms = term
       .split(/[, ]+/)
-      .map((t) => t.trim())
+      .map((t) => t.trim().toLowerCase())
       .filter(Boolean);
     if (terms.length === 0) return [];
 
+    // Fetch all matching rows using the first term as the broad filter
+    const primary = terms[1];
     const { data: rows, error } = await supabaseAdmin
       .from("images")
       .select("id, image_number, title, caption, keywords, preview_path")
@@ -47,13 +49,25 @@ export const searchPublicImages = createServerFn({ method: "POST" })
       .eq("featured", false)
       .not("preview_path", "is", null)
       .or(
-        `title.ilike.%${terms[1]}%,caption.ilike.%${terms[0]}%,keywords.cs.{${terms[0].toLowerCase()}}`,
+        `title.ilike.%${primary}%,caption.ilike.%${primary}%,keywords.cs.{${primary}}`,
       )
       .order("image_number", { ascending: false })
       .limit(data.limit);
     if (error) throw new Error(error.message);
 
-    const merged = (rows ?? []).filter((r) => !!r.preview_path);
+    // Client-side filter: every term must match at least one field
+    const merged = (rows ?? []).filter((r) => {
+      if (!r.preview_path) return false;
+      const title = (r.title ?? "").toLowerCase();
+      const caption = (r.caption ?? "").toLowerCase();
+      const kwords = ((r.keywords ?? []) as string[]).map((k) => k.toLowerCase());
+      return terms.every(
+        (t) =>
+          title.includes(t) ||
+          caption.includes(t) ||
+          kwords.some((k) => k.includes(t)),
+      );
+    });
     const paths = merged.map((r) => r.preview_path as string);
     const signed = paths.length
       ? await supabaseAdmin.storage
