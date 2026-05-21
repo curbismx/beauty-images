@@ -462,9 +462,17 @@ function Index() {
                     >
                       ← PREV
                     </button>
-                    <span className="search-pager-info">
-                      PAGE {safePage} / {totalPages} · {start + 1}–{start + pageItems.length} OF {results.length}
-                    </span>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                      <button
+                        key={p}
+                        type="button"
+                        className={`search-pager-num${p === safePage ? " is-active" : ""}`}
+                        onClick={() => goPage(p)}
+                        aria-current={p === safePage ? "page" : undefined}
+                      >
+                        {String(p).padStart(2, "0")}
+                      </button>
+                    ))}
                     <button
                       type="button"
                       className="search-pager-btn"
