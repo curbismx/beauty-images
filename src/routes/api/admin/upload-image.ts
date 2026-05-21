@@ -62,18 +62,19 @@ export const Route = createFileRoute("/api/admin/upload-image")({
         try {
           await requireAdmin(request);
 
-          const form = await request.formData();
-          const value = form.get("file");
-          if (!value || typeof value === "string" || typeof value.arrayBuffer !== "function") {
-            return json({ ok: false, message: "No image file was received" }, 400);
+          const rawFilename = request.headers.get("x-filename");
+          if (!rawFilename) {
+            return json({ ok: false, message: "Missing filename header" }, 400);
           }
-
-          const file = value as File;
-          const filename = cleanFilename(
-            typeof form.get("filename") === "string" ? String(form.get("filename")) : file.name,
-          );
+          const filename = cleanFilename(decodeURIComponent(rawFilename));
           const ext = extensionFor(filename);
-          const contentType = contentTypeFor(file, ext);
+          const headerType = request.headers.get("content-type") || "";
+          const fileLike = { type: headerType.startsWith("image/") ? headerType : "" } as File;
+          const contentType = contentTypeFor(fileLike, ext);
+
+          const buffer = await request.arrayBuffer();
+          const file = new File([buffer], filename, { type: contentType });
+
           const detectedDigits = filename.match(/^a(\d+)\./i)?.[1];
           const detectedNumber = detectedDigits?.length === 8 ? parseInt(detectedDigits, 10) : null;
 
