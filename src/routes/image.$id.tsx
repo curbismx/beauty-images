@@ -232,7 +232,7 @@ function ImageDetail() {
         {/* WHITE DETAILS SECTION below the black stage */}
         {img && imgReady && (
           <section className="img-details">
-            <div className="img-meta-num">#{String(img.image_number).padStart(5, "0")}</div>
+            <div className="img-meta-num">#{String(img.image_number).padStart(8, "0")}</div>
             {img.title && <h1 className="img-meta-title">{img.title}</h1>}
             {img.caption && <p className="img-meta-caption">{img.caption}</p>}
 
@@ -326,7 +326,7 @@ function renderSimCard(r: PublicSearchResult) {
         <div className="search-result-fallback" />
       )}
       <figcaption>
-        <div className="src-num">#{String(r.image_number).padStart(5, "0")}</div>
+        <div className="src-num">#{String(r.image_number).padStart(8, "0")}</div>
         {r.title && <div className="src-title">{r.title}</div>}
       </figcaption>
     </Link>
