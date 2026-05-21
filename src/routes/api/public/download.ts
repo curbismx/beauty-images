@@ -14,7 +14,7 @@ function getSupabase() {
 
 async function resizeJpeg(input: Uint8Array, maxEdge: number): Promise<Uint8Array> {
   // Dynamic import — @cf-wasm/photon ships a WASM module that must be loaded lazily.
-  const photon = await import("@cf-wasm/photon");
+  const photon = await import("@cf-wasm/photon/workerd");
   const img = photon.PhotonImage.new_from_byteslice(input);
   const w = img.get_width();
   const h = img.get_height();
