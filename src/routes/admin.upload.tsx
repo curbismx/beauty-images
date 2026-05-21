@@ -146,7 +146,6 @@ function Upload() {
     refetchInterval: 15_000,
   });
 
-  const [failedOnly, setFailedOnly] = useState(false);
 
   const deleteUploadErrorMut = useMutation({
     mutationFn: (id: string) => removeUploadErrors({ data: { ids: [id] } }),
