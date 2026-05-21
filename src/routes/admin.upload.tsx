@@ -12,8 +12,8 @@ import {
   listUploadErrors,
   deleteUploadErrors,
   resolveUploadError,
-  type UploadErrorItem,
 } from "@/lib/images.functions";
+import { UploadErrorCard, uploadErrorGridStyle } from "@/components/UploadErrorCard";
 
 export const Route = createFileRoute("/admin/upload")({
   component: Upload,
