@@ -93,6 +93,23 @@ function Library() {
     mutationFn: () => runRetryAll({}),
     onSuccess: invalidate,
   });
+  const deleteUploadErrorMut = useMutation({
+    mutationFn: (id: string) => removeUploadErrors({ data: { ids: [id] } }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["upload-errors"] });
+      qc.invalidateQueries({ queryKey: ["image-stats"] });
+    },
+  });
+  const resolveUploadErrorMut = useMutation({
+    mutationFn: ({ id, image_number }: { id: string; image_number: number }) =>
+      fixUploadError({ data: { id, image_number } }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["upload-errors"] });
+      qc.invalidateQueries({ queryKey: ["library-images"] });
+      qc.invalidateQueries({ queryKey: ["image-stats"] });
+    },
+  });
+
 
   const rows = q.data ?? [];
   const allSelected = rows.length > 0 && rows.every((r) => selected.has(r.id));
