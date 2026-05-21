@@ -198,7 +198,6 @@ async function processKeywords(supabase: ReturnType<typeof admin>) {
     .select("id, image_number, filename, preview_path, processing_attempts")
     .is("keyworded_at", null)
     .not("preview_path", "is", null)
-    .is("processing_error", null)
     .lt("processing_attempts", MAX_ATTEMPTS)
     .or(`processing_started_at.is.null,processing_started_at.lt.${staleCutoff}`)
     .order("image_number", { ascending: true })
