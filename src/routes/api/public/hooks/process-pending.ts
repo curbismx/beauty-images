@@ -100,7 +100,7 @@ async function markFailure(
     .from("images")
     .update({
       processing_attempts: nextAttempts,
-      processing_error: nextAttempts >= MAX_ATTEMPTS ? message.slice(0, 1000) : null,
+      processing_error: message.slice(0, 1000),
     })
     .eq("id", id);
 }
