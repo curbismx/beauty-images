@@ -102,13 +102,56 @@ function Upload() {
   const runKeyword = useServerFn(keywordPendingBatch);
   const runRetry = useServerFn(retryImageProcessing);
 
-  const keywordMut = useMutation({
-    mutationFn: () => runKeyword({ data: { limit: 50 } }),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["processing-queue"] });
-      qc.invalidateQueries({ queryKey: ["image-stats"] });
-    },
-  });
+  const [keywordRun, setKeywordRun] = useState<{
+    active: boolean;
+    processed: number;
+    failed: number;
+    batches: number;
+    lastError?: string;
+    done?: boolean;
+  }>({ active: false, processed: 0, failed: 0, batches: 0 });
+
+  const startKeywording = useCallback(async () => {
+    setKeywordRun({ active: true, processed: 0, failed: 0, batches: 0, done: false });
+    let totalProcessed = 0;
+    let totalFailed = 0;
+    let batches = 0;
+    try {
+      while (true) {
+        const res = await runKeyword({ data: { limit: 50 } });
+        batches += 1;
+        totalProcessed += res.processed;
+        totalFailed += res.failed;
+        setKeywordRun({
+          active: true,
+          processed: totalProcessed,
+          failed: totalFailed,
+          batches,
+          done: false,
+        });
+        qc.invalidateQueries({ queryKey: ["processing-queue"] });
+        qc.invalidateQueries({ queryKey: ["image-stats"] });
+        if (res.processed === 0 && res.failed === 0) break;
+      }
+      setKeywordRun({
+        active: false,
+        processed: totalProcessed,
+        failed: totalFailed,
+        batches,
+        done: true,
+      });
+    } catch (e) {
+      setKeywordRun({
+        active: false,
+        processed: totalProcessed,
+        failed: totalFailed,
+        batches,
+        done: true,
+        lastError: (e as Error).message,
+      });
+    }
+  }, [runKeyword, qc]);
+
 
   const uploadErrors = useQuery({
     queryKey: ["upload-errors"],
@@ -306,14 +349,18 @@ function Upload() {
         <div style={{ fontSize: 10, color: "#666", letterSpacing: "0.04em", textTransform: "uppercase" }}>
           Keywording is separate from publishing
         </div>
-        <button type="button" style={retryBtn} disabled={keywordMut.isPending} onClick={() => keywordMut.mutate()}>
-          {keywordMut.isPending ? "Keywording…" : "Keyword images"}
+        <button type="button" style={retryBtn} disabled={keywordRun.active} onClick={() => startKeywording()}>
+          {keywordRun.active
+            ? `Keywording… batch ${keywordRun.batches} · ${keywordRun.processed} done${keywordRun.failed ? ` · ${keywordRun.failed} failed` : ""}`
+            : "Keyword all images"}
         </button>
       </div>
-      {keywordMut.data && (
-        <div style={notice}>
-          Keyworded {keywordMut.data.processed} images{keywordMut.data.failed ? ` · ${keywordMut.data.failed} failed` : ""}.
-          {keywordMut.data.errors.length ? ` ${keywordMut.data.errors.join(" · ")}` : ""}
+      {(keywordRun.active || keywordRun.done) && (
+        <div style={keywordRun.lastError ? errBox : notice}>
+          {keywordRun.active
+            ? `Running batch ${keywordRun.batches} — ${keywordRun.processed} keyworded so far${keywordRun.failed ? ` · ${keywordRun.failed} failed` : ""}`
+            : `Finished — ${keywordRun.processed} keyworded across ${keywordRun.batches} batch${keywordRun.batches === 1 ? "" : "es"}${keywordRun.failed ? ` · ${keywordRun.failed} failed` : ""}.`}
+          {keywordRun.lastError ? ` Stopped: ${keywordRun.lastError}` : ""}
         </div>
       )}
 
