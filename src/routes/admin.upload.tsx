@@ -145,63 +145,14 @@ function Upload() {
       >
         <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: "0.04em", textTransform: "uppercase" }}>
           {stats.data
-            ? `${stats.data.pending} un-keyworded · ${stats.data.total} total`
+            ? `${(stats.data.total - stats.data.pending).toLocaleString()} keyworded · ${stats.data.pending.toLocaleString()} remaining · ${stats.data.total.toLocaleString()} total`
             : "Loading stats…"}
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          {batchMutation.data && (
-            <span style={{ fontSize: 11 }}>
-              Last run: {batchMutation.data.processed} done
-              {batchMutation.data.failed ? `, ${batchMutation.data.failed} failed` : ""}
-            </span>
-          )}
-          <button
-            type="button"
-            onClick={() => batchMutation.mutate()}
-            disabled={batchMutation.isPending || !stats.data?.pending}
-            style={{
-              background: "#000",
-              color: "#fff",
-              border: "1px solid #000",
-              padding: "10px 16px",
-              fontSize: 11,
-              fontWeight: 800,
-              letterSpacing: "0.04em",
-              textTransform: "uppercase",
-              cursor: batchMutation.isPending || !stats.data?.pending ? "not-allowed" : "pointer",
-              opacity: batchMutation.isPending || !stats.data?.pending ? 0.5 : 1,
-            }}
-          >
-            {batchMutation.isPending
-              ? "Sending…"
-              : `Keyword ${Math.min(stats.data?.pending ?? 0, 25)} now`}
-          </button>
-          <button
-            type="button"
-            onClick={runBackfill}
-            disabled={backfill.running}
-            title="Generate 600px previews for any images that don't have one"
-            style={{
-              background: "#fff",
-              color: "#000",
-              border: "1px solid #000",
-              padding: "10px 16px",
-              fontSize: 11,
-              fontWeight: 800,
-              letterSpacing: "0.04em",
-              textTransform: "uppercase",
-              cursor: backfill.running ? "not-allowed" : "pointer",
-              opacity: backfill.running ? 0.5 : 1,
-            }}
-          >
-            {backfill.running
-              ? `Previews: ${backfill.done}✓ ${backfill.failed ? backfill.failed + "✗ " : ""}…`
-              : backfill.message === "Done"
-                ? `Previews done: ${backfill.done}✓ ${backfill.failed}✗`
-                : "Generate 600px previews"}
-          </button>
+        <div style={{ fontSize: 10, color: "#666", letterSpacing: "0.04em", textTransform: "uppercase" }}>
+          Auto-keywording 1,500 / day in background
         </div>
       </div>
+
 
 
       <div
