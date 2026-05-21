@@ -1000,6 +1000,19 @@ const PAGE_CSS = `
   font-size: 11px; letter-spacing: 0.3em; color: #777; text-transform: uppercase;
   padding: 40px 0 200px;
 }
+.curbism-root .search-pager {
+  display: flex; align-items: center; justify-content: center; gap: 24px;
+  padding: 18px 0; margin: 0 0 8px;
+  border-top: 1px solid #eee; border-bottom: 1px solid #eee;
+  font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase;
+}
+.curbism-root .search-pager-btn {
+  background: #000; color: #fff; border: none; padding: 10px 18px;
+  font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase;
+  cursor: pointer; font-family: inherit;
+}
+.curbism-root .search-pager-btn:disabled { opacity: 0.25; cursor: not-allowed; }
+.curbism-root .search-pager-info { color: #555; }
 .curbism-root .search-results-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
