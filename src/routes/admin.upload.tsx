@@ -67,6 +67,7 @@ async function makePreviewBlob(file: File): Promise<Blob> {
 
 type QueueItem = {
   id: string;
+  file: File;
   name: string;
   previewUrl: string;
   status: "pending" | "uploading" | "done" | "error";
@@ -74,11 +75,22 @@ type QueueItem = {
   imageNumber?: number;
 };
 
+const MAX_CONCURRENT = 4;
+const VISIBLE_TILES = 100;
+
 function Upload() {
+  // Single shared queue across all drops. Keep the visible list capped, but
+  // track counts on the full set so big batches don't blow up the DOM.
   const [queue, setQueue] = useState<QueueItem[]>([]);
+  const [totals, setTotals] = useState({ done: 0, failed: 0, queued: 0, uploading: 0 });
   const [isDragging, setDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const qc = useQueryClient();
+
+  // Pipeline state — refs so we don't re-render on every queued file.
+  const pendingRef = useRef<QueueItem[]>([]);
+  const activeRef = useRef(0);
+  const runningRef = useRef(false);
 
   const fetchQueue = useServerFn(getProcessingQueue);
   const processing = useQuery({
@@ -100,8 +112,6 @@ function Upload() {
   const removeUploadErrors = useServerFn(deleteUploadErrors);
   const fixUploadError = useServerFn(resolveUploadError);
   const runRetry = useServerFn(retryImageProcessing);
-
-
 
   const uploadErrors = useQuery({
     queryKey: ["upload-errors"],
@@ -141,136 +151,177 @@ function Upload() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const updateItem = useCallback((id: string, patch: Partial<QueueItem>) => {
+    setQueue((q) => {
+      const idx = q.findIndex((it) => it.id === id);
+      if (idx === -1) return q;
+      const next = q.slice();
+      next[idx] = { ...next[idx], ...patch };
+      return next;
+    });
+  }, []);
+
+  const processOne = useCallback(
+    async (item: QueueItem): Promise<boolean> => {
+      const file = item.file;
+      const match = file.name.match(FILENAME_RE);
+      const detectedDigits = file.name.match(/^a(\d+)\./i)?.[1];
+      const detectedNumber = detectedDigits?.length === 8 ? parseInt(detectedDigits, 10) : null;
+      const ext = extensionFor(file.name);
+      const uploadErrorRecord = async (message: string, existingPath?: string | null) => {
+        let errorPath = existingPath ?? null;
+        if (!errorPath) {
+          const uid = crypto.randomUUID();
+          errorPath = `upload-errors/${uid}.${ext}`;
+          const up = await supabase.storage
+            .from("images-private")
+            .upload(errorPath, file, { contentType: file.type || "image/jpeg", upsert: false });
+          if (up.error) throw new Error(`${message}; also failed to store error file: ${up.error.message}`);
+        }
+        await saveUploadError({
+          data: {
+            filename: file.name,
+            storage_path: errorPath,
+            error_message: message,
+            detected_image_number: detectedNumber,
+          },
+        });
+        return errorPath;
+      };
+      if (!match) {
+        const message = detectedDigits && detectedDigits.length !== 8
+          ? `Invalid filename — found ${detectedDigits.length} digits after A, must be exactly 8`
+          : `Invalid filename — must be A + 8 digits + extension`;
+        try {
+          await uploadErrorRecord(message);
+        } catch (e) {
+          updateItem(item.id, { status: "error", message: (e as Error).message });
+          return false;
+        }
+        updateItem(item.id, { status: "error", message });
+        return false;
+      }
+      const parsedNumber = parseInt(match[1], 10);
+      updateItem(item.id, { status: "uploading" });
+      let uploadedPath: string | null = null;
+      let previewUploadedPath: string | null = null;
+      try {
+        const dup = await checkNumber({ data: { image_number: parsedNumber } });
+        if (dup.exists) {
+          const message = `Duplicate number — #${String(parsedNumber).padStart(8, "0")} already exists`;
+          await uploadErrorRecord(message);
+          throw new Error(message);
+        }
+
+        const uid = crypto.randomUUID();
+        const storagePath = `${uid}.${ext}`;
+        const up = await supabase.storage
+          .from("images-private")
+          .upload(storagePath, file, { contentType: file.type || "image/jpeg", upsert: false });
+        if (up.error) throw new Error(up.error.message);
+        uploadedPath = storagePath;
+
+        const imageId = crypto.randomUUID();
+        const previewPath = `previews/${imageId}.jpg`;
+        const previewBlob = await makePreviewBlob(file);
+        const previewUp = await supabase.storage
+          .from("images-private")
+          .upload(previewPath, previewBlob, { contentType: "image/jpeg", upsert: false });
+        if (previewUp.error) throw new Error(`Preview upload failed: ${previewUp.error.message}`);
+        previewUploadedPath = previewPath;
+
+        const ins = await supabase
+          .from("images")
+          .insert({
+            id: imageId,
+            filename: file.name,
+            storage_path: storagePath,
+            image_number: parsedNumber,
+            preview_path: previewPath,
+          })
+          .select("image_number")
+          .single();
+        if (ins.error) throw new Error(ins.error.message);
+        updateItem(item.id, { status: "done", imageNumber: ins.data.image_number as number });
+        return true;
+      } catch (e) {
+        if (previewUploadedPath) await supabase.storage.from("images-private").remove([previewUploadedPath]);
+        if (!String((e as Error).message).startsWith("Duplicate number")) {
+          try {
+            await uploadErrorRecord((e as Error).message, uploadedPath);
+          } catch {
+            // Keep the visible session error even if the permanent error record could not be saved.
+          }
+        }
+        updateItem(item.id, { status: "error", message: (e as Error).message });
+        return false;
+      }
+    },
+    [checkNumber, saveUploadError, updateItem],
+  );
+
+  const drainPipeline = useCallback(async () => {
+    if (runningRef.current) return;
+    runningRef.current = true;
+    try {
+      while (pendingRef.current.length > 0 || activeRef.current > 0) {
+        while (activeRef.current < MAX_CONCURRENT && pendingRef.current.length > 0) {
+          const next = pendingRef.current.shift()!;
+          activeRef.current += 1;
+          setTotals((t) => ({ ...t, queued: pendingRef.current.length, uploading: activeRef.current }));
+          processOne(next)
+            .then((ok) => {
+              setTotals((t) => ({
+                ...t,
+                done: t.done + (ok ? 1 : 0),
+                failed: t.failed + (ok ? 0 : 1),
+              }));
+            })
+            .finally(() => {
+              activeRef.current -= 1;
+              setTotals((t) => ({ ...t, queued: pendingRef.current.length, uploading: activeRef.current }));
+              // Free memory after the tile has a chance to show its final state.
+              setTimeout(() => URL.revokeObjectURL(next.previewUrl), 2000);
+            });
+        }
+        // Yield so React can render and newly-dropped files can join the pipeline.
+        await new Promise((r) => setTimeout(r, 80));
+      }
+    } finally {
+      runningRef.current = false;
+      qc.invalidateQueries({ queryKey: ["processing-queue"] });
+      qc.invalidateQueries({ queryKey: ["image-stats"] });
+      qc.invalidateQueries({ queryKey: ["upload-errors"] });
+    }
+  }, [processOne, qc]);
+
   const handleFiles = useCallback(
-    async (files: FileList | File[]) => {
+    (files: FileList | File[]) => {
       const arr = Array.from(files);
       const items: QueueItem[] = arr.map((f) => ({
         id: crypto.randomUUID(),
+        file: f,
         name: f.name,
         previewUrl: URL.createObjectURL(f),
         status: "pending",
       }));
-      setQueue((q) => [...items, ...q]);
-
-      for (let i = 0; i < arr.length; i++) {
-        const file = arr[i];
-        const item = items[i];
-        const match = file.name.match(FILENAME_RE);
-        const detectedDigits = file.name.match(/^a(\d+)\./i)?.[1];
-        const detectedNumber = detectedDigits?.length === 8 ? parseInt(detectedDigits, 10) : null;
-        const ext = extensionFor(file.name);
-        const uploadErrorRecord = async (message: string, existingPath?: string | null) => {
-          let errorPath = existingPath ?? null;
-          if (!errorPath) {
-            const uid = crypto.randomUUID();
-            errorPath = `upload-errors/${uid}.${ext}`;
-            const up = await supabase.storage
-              .from("images-private")
-              .upload(errorPath, file, { contentType: file.type || "image/jpeg", upsert: false });
-            if (up.error) throw new Error(`${message}; also failed to store error file: ${up.error.message}`);
+      // Cap the visible queue so the DOM stays small on huge batches.
+      // The upload itself still references the File object via pendingRef.
+      setQueue((q) => {
+        const merged = [...items, ...q];
+        if (merged.length > VISIBLE_TILES) {
+          for (let i = VISIBLE_TILES; i < merged.length; i++) {
+            URL.revokeObjectURL(merged[i].previewUrl);
           }
-          await saveUploadError({
-            data: {
-              filename: file.name,
-              storage_path: errorPath,
-              error_message: message,
-              detected_image_number: detectedNumber,
-            },
-          });
-          return errorPath;
-        };
-        if (!match) {
-          const message = detectedDigits && detectedDigits.length !== 8
-            ? `Invalid filename — found ${detectedDigits.length} digits after A, must be exactly 8`
-            : `Invalid filename — must be A + 8 digits + extension`;
-          try {
-            await uploadErrorRecord(message);
-          } catch (e) {
-            setQueue((q) =>
-              q.map((it) =>
-                it.id === item.id ? { ...it, status: "error", message: (e as Error).message } : it,
-              ),
-            );
-            continue;
-          }
-          setQueue((q) =>
-            q.map((it) =>
-              it.id === item.id
-                ? { ...it, status: "error", message }
-                : it,
-            ),
-          );
-          continue;
+          return merged.slice(0, VISIBLE_TILES);
         }
-        const parsedNumber = parseInt(match[1], 10);
-        setQueue((q) => q.map((it) => (it.id === item.id ? { ...it, status: "uploading" } : it)));
-        let uploadedPath: string | null = null;
-        let previewUploadedPath: string | null = null;
-        try {
-          const dup = await checkNumber({ data: { image_number: parsedNumber } });
-          if (dup.exists) {
-            const message = `Duplicate number — #${String(parsedNumber).padStart(8, "0")} already exists`;
-            await uploadErrorRecord(message);
-            throw new Error(message);
-          }
-
-          const uid = crypto.randomUUID();
-          const storagePath = `${uid}.${ext}`;
-          const up = await supabase.storage
-            .from("images-private")
-            .upload(storagePath, file, { contentType: file.type || "image/jpeg", upsert: false });
-          if (up.error) throw new Error(up.error.message);
-          uploadedPath = storagePath;
-
-          const imageId = crypto.randomUUID();
-          const previewPath = `previews/${imageId}.jpg`;
-          const previewBlob = await makePreviewBlob(file);
-          const previewUp = await supabase.storage
-            .from("images-private")
-            .upload(previewPath, previewBlob, { contentType: "image/jpeg", upsert: false });
-          if (previewUp.error) throw new Error(`Preview upload failed: ${previewUp.error.message}`);
-          previewUploadedPath = previewPath;
-
-          const ins = await supabase
-            .from("images")
-            .insert({
-              id: imageId,
-              filename: file.name,
-              storage_path: storagePath,
-              image_number: parsedNumber,
-              preview_path: previewPath,
-            })
-            .select("image_number")
-            .single();
-          if (ins.error) throw new Error(ins.error.message);
-          setQueue((q) =>
-            q.map((it) =>
-              it.id === item.id
-                ? { ...it, status: "done", imageNumber: ins.data.image_number as number }
-                : it,
-            ),
-          );
-        } catch (e) {
-          if (previewUploadedPath) await supabase.storage.from("images-private").remove([previewUploadedPath]);
-          if (!String((e as Error).message).startsWith("Duplicate number")) {
-            try {
-              await uploadErrorRecord((e as Error).message, uploadedPath);
-            } catch {
-              // Keep the visible session error even if the permanent error record could not be saved.
-            }
-          }
-          setQueue((q) =>
-            q.map((it) =>
-              it.id === item.id ? { ...it, status: "error", message: (e as Error).message } : it,
-            ),
-          );
-        }
-      }
-      qc.invalidateQueries({ queryKey: ["processing-queue"] });
-      qc.invalidateQueries({ queryKey: ["image-stats"] });
-      qc.invalidateQueries({ queryKey: ["upload-errors"] });
+        return merged;
+      });
+      pendingRef.current.push(...items);
+      setTotals((t) => ({ ...t, queued: pendingRef.current.length }));
+      void drainPipeline();
     },
-    [qc, checkNumber, saveUploadError],
+    [drainPipeline],
   );
 
   const queueRows = processing.data ?? [];
@@ -297,10 +348,13 @@ function Upload() {
             : "Loading stats…"}
         </div>
         <div style={{ fontSize: 10, color: "#666", letterSpacing: "0.04em", textTransform: "uppercase" }}>
-          {stats.data && stats.data.processing > 0
-            ? `Keywording runs automatically · ~600/hour · ${stats.data.processing} left`
-            : "Keywording runs automatically in the background"}
+          {totals.queued > 0 || totals.uploading > 0
+            ? `Uploading · ${totals.uploading} in flight · ${totals.queued} queued · ${totals.done} done · ${totals.failed} failed`
+            : stats.data && stats.data.processing > 0
+              ? `Keywording runs automatically · ~600/hour · ${stats.data.processing} left`
+              : "Keywording runs automatically in the background"}
         </div>
+
       </div>
 
       <div
@@ -370,11 +424,15 @@ function Upload() {
         {resolveUploadErrorMut.error && <div style={errBox}>{(resolveUploadErrorMut.error as Error).message}</div>}
       </div>
 
-      {queue.length > 0 && (
+      {(queue.length > 0 || totals.uploading > 0 || totals.queued > 0) && (
         <div className="bi-section" style={{ marginTop: 32 }}>
-          <h2 className="bi-section-title">This session ({queue.length})</h2>
+          <h2 className="bi-section-title">
+            This session · {totals.done} done · {totals.failed} failed · {totals.uploading} uploading · {totals.queued} queued
+            {queue.length >= VISIBLE_TILES ? ` (showing latest ${VISIBLE_TILES})` : ""}
+          </h2>
           <div style={gridStyle}>
             {queue.map((it) => (
+
               <div key={it.id} style={tileStyle}>
                 <div style={{ position: "relative", paddingBottom: "100%", background: "#f4f4f4" }}>
                   <img src={it.previewUrl} alt={it.name} style={imgStyle} />
