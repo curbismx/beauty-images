@@ -24,12 +24,10 @@ export type PublicImageDetail = {
 
 export const searchPublicImages = createServerFn({ method: "POST" })
   .inputValidator(
-    z
-      .object({
-        q: z.string().trim().min(1).max(120),
-        limit: z.number().int().min(1).max(50000).default(50000),
-      })
-      .parse,
+    z.object({
+      q: z.string().trim().min(1).max(120),
+      limit: z.number().int().min(1).max(50000).default(50000),
+    }).parse,
   )
   .handler(async ({ data }): Promise<PublicSearchResult[]> => {
     const DB_PAGE_SIZE = 1000;
@@ -60,9 +58,7 @@ export const searchPublicImages = createServerFn({ method: "POST" })
         .eq("public", true)
         .eq("featured", false)
         .not("preview_path", "is", null)
-        .or(
-          `title.ilike.%${primary}%,caption.ilike.%${primary}%,keywords.cs.{${primary}}`,
-        )
+        .or(`title.ilike.%${primary}%,caption.ilike.%${primary}%,keywords.cs.{${primary}}`)
         .order("image_number", { ascending: false })
         .range(from, from + DB_PAGE_SIZE - 1);
       if (error) throw new Error(error.message);
@@ -75,10 +71,7 @@ export const searchPublicImages = createServerFn({ method: "POST" })
           const caption = (r.caption ?? "").toLowerCase();
           const kwords = ((r.keywords ?? []) as string[]).map((k) => k.toLowerCase());
           return terms.every(
-            (t) =>
-              title.includes(t) ||
-              caption.includes(t) ||
-              kwords.some((k) => k.includes(t)),
+            (t) => title.includes(t) || caption.includes(t) || kwords.some((k) => k.includes(t)),
           );
         }),
       );
@@ -135,9 +128,7 @@ export const getPublicImage = createServerFn({ method: "POST" })
   });
 
 export const getPublicImagesByIds = createServerFn({ method: "POST" })
-  .inputValidator(
-    z.object({ ids: z.array(z.string().uuid()).max(200) }).parse,
-  )
+  .inputValidator(z.object({ ids: z.array(z.string().uuid()).max(200) }).parse)
   .handler(async ({ data }): Promise<PublicSearchResult[]> => {
     if (data.ids.length === 0) return [];
     const { data: rows, error } = await supabaseAdmin
@@ -156,9 +147,7 @@ export const getPublicImagesByIds = createServerFn({ method: "POST" })
 
     const paths = ordered.map((r) => r.preview_path as string);
     const signed = paths.length
-      ? await supabaseAdmin.storage
-          .from("images-private")
-          .createSignedUrls(paths, 3600)
+      ? await supabaseAdmin.storage.from("images-private").createSignedUrls(paths, 3600)
       : { data: [] as Array<{ signedUrl: string | null }> };
 
     return ordered.map((r, i) => ({
@@ -200,9 +189,7 @@ export const getSimilarShootImages = createServerFn({ method: "POST" })
     if (merged.length === 0) return [];
 
     const paths = merged.map((r) => r.preview_path as string);
-    const signed = await supabaseAdmin.storage
-      .from("images-private")
-      .createSignedUrls(paths, 3600);
+    const signed = await supabaseAdmin.storage.from("images-private").createSignedUrls(paths, 3600);
 
     return merged.map((r, i) => ({
       id: r.id,
@@ -213,6 +200,3 @@ export const getSimilarShootImages = createServerFn({ method: "POST" })
       signed_url: signed.data?.[i]?.signedUrl ?? null,
     }));
   });
-
-
-
