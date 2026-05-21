@@ -117,21 +117,22 @@ function ImageEdit() {
 
   return (
     <>
-      <PageHeader title={`#${d.image_number} — ${d.filename}`} />
+      <PageHeader title={`#${String(d.image_number).padStart(8, "0")} — ${d.filename}`} />
+
 
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 16, gap: 8 }}>
         <Link to="/admin/library" className="bi-btn">← Library</Link>
         <div style={{ display: "flex", gap: 8 }}>
           {prev ? (
             <Link to="/admin/image/$id" params={{ id: prev.id }} className="bi-btn">
-              ← #{prev.image_number}
+              ← #{String(prev.image_number).padStart(8, "0")}
             </Link>
           ) : (
             <button className="bi-btn" disabled>← Prev</button>
           )}
           {next ? (
             <Link to="/admin/image/$id" params={{ id: next.id }} className="bi-btn">
-              #{next.image_number} →
+              #{String(next.image_number).padStart(8, "0")} →
             </Link>
           ) : (
             <button className="bi-btn" disabled>Next →</button>

@@ -78,7 +78,7 @@ export const Route = createFileRoute("/api/public/download")({
           return new Response("Image missing", { status: 404 });
         }
 
-        const filename = `BEAUTYIMAGES_${String(image.image_number).padStart(5, "0")}_${TIER_CODE[tier] ?? "M"}.jpg`;
+        const filename = `BEAUTYIMAGES_${String(image.image_number).padStart(8, "0")}_${TIER_CODE[tier] ?? "M"}.jpg`;
         const cachePath = `${imageId}/${tier}.jpg`;
 
         // Try cache first.

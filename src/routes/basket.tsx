@@ -122,7 +122,7 @@ function BasketPage() {
         <span className="src-tier">{TIER_LABEL[b.tier] ?? b.tier.charAt(0).toUpperCase()}</span>
         <figcaption>
           <div className="src-num">
-            {r ? `#${String(r.image_number).padStart(5, "0")}` : "—"}
+            {r ? `#${String(r.image_number).padStart(8, "0")}` : "—"}
             <span className="src-tier-name"> · {TIER_NAME[b.tier] ?? b.tier}</span>
           </div>
           <div className="src-row">

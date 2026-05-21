@@ -39,7 +39,7 @@ function renderResultCard(r: PublicSearchResult, onClick: () => void) {
         <div className="search-result-fallback" />
       )}
       <figcaption>
-        <div className="src-num">#{String(r.image_number).padStart(5, "0")}</div>
+        <div className="src-num">#{String(r.image_number).padStart(8, "0")}</div>
         {r.title && <div className="src-title">{r.title}</div>}
       </figcaption>
     </Link>

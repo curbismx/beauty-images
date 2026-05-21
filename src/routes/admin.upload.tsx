@@ -119,6 +119,13 @@ function Upload() {
           const uid = crypto.randomUUID();
           const storagePath = `${uid}.${ext}`;
           const previewPath = `previews/${uid}.jpg`;
+
+          // Derive image_number from filename: strip non-digits (e.g. "a00010001.jpg" -> 10010001)
+          const digits = file.name.replace(/\.[^.]+$/, "").replace(/\D/g, "");
+          const parsedNumber = digits ? parseInt(digits, 10) : NaN;
+          if (!digits || !Number.isFinite(parsedNumber)) {
+            throw new Error(`Filename "${file.name}" has no numeric image number`);
+          }
           const up = await supabase.storage
             .from("images-private")
             .upload(storagePath, file, { contentType: file.type, upsert: false });
@@ -142,6 +149,7 @@ function Upload() {
               filename: file.name,
               storage_path: storagePath,
               preview_path: savedPreviewPath,
+              image_number: parsedNumber,
             })
             .select("image_number")
             .single();
@@ -286,7 +294,7 @@ function Upload() {
                 <div style={{ position: "relative", paddingBottom: "100%", background: "#f4f4f4" }}>
                   <img src={it.previewUrl} alt={it.name} style={imgStyle} />
                   <span style={{ ...badgeStyle, background: statusColor(it.status) }}>
-                    {it.status === "done" && it.imageNumber ? `#${it.imageNumber}` : it.status.toUpperCase()}
+                    {it.status === "done" && it.imageNumber ? `#${String(it.imageNumber).padStart(8, "0")}` : it.status.toUpperCase()}
                   </span>
                 </div>
                 <div style={tileName} title={it.name}>
@@ -324,7 +332,7 @@ function Upload() {
                       NO PREVIEW
                     </div>
                   )}
-                  <span style={{ ...badgeStyle, background: "#000" }}>#{r.image_number}</span>
+                  <span style={{ ...badgeStyle, background: "#000" }}>#{String(r.image_number).padStart(8, "0")}</span>
                   {!r.keyworded_at && (
                     <span style={{ ...badgeStyle, background: "#D75F68", left: "auto", right: 8 }}>
                       PENDING
