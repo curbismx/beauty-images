@@ -4,7 +4,6 @@ import { createClient } from "@supabase/supabase-js";
 const MAX_ATTEMPTS = 3;
 const PREVIEW_BATCH = 25;
 const KEYWORD_BATCH = 25;
-const PREVIEW_EDGE = 800;
 
 const KEYWORD_PROMPT = `You are a professional stock-photo keyworder. Analyze the image and return strict JSON with this exact shape:
 {
@@ -29,23 +28,6 @@ function bytesToBase64(buf: Uint8Array): string {
     );
   }
   return btoa(bin);
-}
-
-async function resizeTo800Jpeg(bytes: Uint8Array): Promise<Uint8Array> {
-  const { PhotonImage, resize, SamplingFilter } = await import("@cf-wasm/photon/workerd");
-  const img = PhotonImage.new_from_byteslice(bytes);
-  const w = img.get_width();
-  const h = img.get_height();
-  const longest = Math.max(w, h);
-  let out = img;
-  if (longest > PREVIEW_EDGE) {
-    const scale = PREVIEW_EDGE / longest;
-    out = resize(img, Math.max(1, Math.round(w * scale)), Math.max(1, Math.round(h * scale)), SamplingFilter.Lanczos3);
-    img.free();
-  }
-  const bytesOut = out.get_bytes_jpeg(82);
-  out.free();
-  return bytesOut;
 }
 
 async function keywordOne(dataUrl: string) {
@@ -155,11 +137,10 @@ async function processPreviews(supabase: ReturnType<typeof admin>) {
         const dl = await supabase.storage.from("images-private").download(row.storage_path);
         if (dl.error || !dl.data) throw new Error(dl.error?.message ?? "download failed");
         const inBytes = new Uint8Array(await dl.data.arrayBuffer());
-        const outBytes = await resizeTo800Jpeg(inBytes);
         const previewPath = `previews/${row.id}.jpg`;
         const up = await supabase.storage
           .from("images-private")
-          .upload(previewPath, outBytes, { contentType: "image/jpeg", upsert: true });
+          .upload(previewPath, inBytes, { contentType: "image/jpeg", upsert: true });
         if (up.error) throw new Error(up.error.message);
         const { error: upErr } = await supabase
           .from("images")

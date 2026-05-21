@@ -22,6 +22,48 @@ export const Route = createFileRoute("/admin/upload")({
 });
 
 const FILENAME_RE = /^a(\d{8})\.[a-z0-9]+$/i;
+const PREVIEW_EDGE = 800;
+
+function extensionFor(filename: string) {
+  return filename.split(".").pop()?.toLowerCase() || "jpg";
+}
+
+function loadBrowserImage(file: File): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const image = new Image();
+    image.onload = () => {
+      URL.revokeObjectURL(url);
+      resolve(image);
+    };
+    image.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("Could not read image for preview"));
+    };
+    image.src = url;
+  });
+}
+
+async function makePreviewBlob(file: File): Promise<Blob> {
+  const image = await loadBrowserImage(file);
+  const width = image.naturalWidth || image.width;
+  const height = image.naturalHeight || image.height;
+  if (!width || !height) throw new Error("Image has no readable dimensions");
+  const scale = Math.min(1, PREVIEW_EDGE / Math.max(width, height));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.max(1, Math.round(width * scale));
+  canvas.height = Math.max(1, Math.round(height * scale));
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Could not create preview canvas");
+  ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => (blob ? resolve(blob) : reject(new Error("Could not create preview image"))),
+      "image/jpeg",
+      0.82,
+    );
+  });
+}
 
 type QueueItem = {
   id: string;
@@ -123,7 +165,7 @@ function Upload() {
         const match = file.name.match(FILENAME_RE);
         const detectedDigits = file.name.match(/^a(\d+)\./i)?.[1];
         const detectedNumber = detectedDigits?.length === 8 ? parseInt(detectedDigits, 10) : null;
-        const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
+        const ext = extensionFor(file.name);
         const uploadErrorRecord = async (message: string, existingPath?: string | null) => {
           let errorPath = existingPath ?? null;
           if (!errorPath) {
@@ -170,6 +212,7 @@ function Upload() {
         const parsedNumber = parseInt(match[1], 10);
         setQueue((q) => q.map((it) => (it.id === item.id ? { ...it, status: "uploading" } : it)));
         let uploadedPath: string | null = null;
+        let previewUploadedPath: string | null = null;
         try {
           const dup = await checkNumber({ data: { image_number: parsedNumber } });
           if (dup.exists) {
@@ -186,12 +229,23 @@ function Upload() {
           if (up.error) throw new Error(up.error.message);
           uploadedPath = storagePath;
 
+          const imageId = crypto.randomUUID();
+          const previewPath = `previews/${imageId}.jpg`;
+          const previewBlob = await makePreviewBlob(file);
+          const previewUp = await supabase.storage
+            .from("images-private")
+            .upload(previewPath, previewBlob, { contentType: "image/jpeg", upsert: false });
+          if (previewUp.error) throw new Error(`Preview upload failed: ${previewUp.error.message}`);
+          previewUploadedPath = previewPath;
+
           const ins = await supabase
             .from("images")
             .insert({
+              id: imageId,
               filename: file.name,
               storage_path: storagePath,
               image_number: parsedNumber,
+              preview_path: previewPath,
             })
             .select("image_number")
             .single();
@@ -204,6 +258,7 @@ function Upload() {
             ),
           );
         } catch (e) {
+          if (previewUploadedPath) await supabase.storage.from("images-private").remove([previewUploadedPath]);
           if (!String((e as Error).message).startsWith("Duplicate number")) {
             try {
               await uploadErrorRecord((e as Error).message, uploadedPath);
