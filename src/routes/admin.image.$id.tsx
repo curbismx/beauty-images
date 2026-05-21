@@ -125,7 +125,7 @@ function ImageEdit() {
         <div style={{ display: "flex", gap: 8 }}>
           {prev ? (
             <Link to="/admin/image/$id" params={{ id: prev.id }} className="bi-btn">
-              ← #{prev.image_number}
+              ← #{String(prev.image_number).padStart(8, "0")}
             </Link>
           ) : (
             <button className="bi-btn" disabled>← Prev</button>
