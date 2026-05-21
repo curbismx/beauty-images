@@ -381,7 +381,29 @@ function EditableRow({
           </>
         ) : (
           <>
-            {row.processing_error && <div style={errorPanel}>Error: {row.processing_error}</div>}
+            {row.processing_error && (
+              <div style={errorPanel}>
+                <div style={{ marginBottom: 8 }}>Error: {row.processing_error}</div>
+                <button
+                  type="button"
+                  onClick={() => retryMut.mutate()}
+                  disabled={retryMut.isPending}
+                  style={{
+                    background: "#fff",
+                    color: "#000",
+                    border: "1px solid #000",
+                    padding: "6px 12px",
+                    fontSize: 11,
+                    fontWeight: 800,
+                    letterSpacing: "0.06em",
+                    textTransform: "uppercase",
+                    cursor: "pointer",
+                  }}
+                >
+                  {retryMut.isPending ? "Retrying…" : retryMut.isSuccess ? "✓ Queued" : "Retry"}
+                </button>
+              </div>
+            )}
             <div style={titleStyle}>{row.title ?? stripExt(row.filename)}</div>
             {row.caption && <div style={captionStyle}>{row.caption}</div>}
             {displayKeywords.length > 0 && (
