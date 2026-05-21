@@ -113,6 +113,8 @@ function Index() {
   const [submittedQuery, setSubmittedQuery] = useState(restoreState?.q ?? "");
   const [results, setResults] = useState<PublicSearchResult[]>(restoreState?.results ?? []);
   const [searching, setSearching] = useState(false);
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE_RESULTS = 100;
   const [viewMode, setViewMode] = useViewMode();
   const masonry = viewMode === "masonry";
   const cols = useMasonryCols();
@@ -157,6 +159,7 @@ function Index() {
     if (!q) return;
     setSubmittedQuery(q);
     setSearching(true);
+    setPage(1);
     try {
       const r = await runSearch({ data: { q, limit: 1000 } });
       setResults(r);
@@ -436,20 +439,63 @@ function Index() {
               {!searching && submittedQuery && results.length === 0 && (
                 <div className="search-results-status">NO MATCHES — TRY ANOTHER TERM</div>
               )}
-              {results.length > 0 && !masonry && (
-                <div className="search-results-grid">
-                  {results.map((r) => renderResultCard(r, saveSearchState))}
-                </div>
-              )}
-              {results.length > 0 && masonry && (
-                <div className="search-results-masonry">
-                  {Array.from({ length: cols }, (_, ci) => (
-                    <div className="masonry-col" key={ci}>
-                      {results.filter((_, i) => i % cols === ci).map((r) => renderResultCard(r, saveSearchState))}
-                    </div>
-                  ))}
-                </div>
-              )}
+              {(() => {
+                if (results.length === 0) return null;
+                const totalPages = Math.max(1, Math.ceil(results.length / PAGE_SIZE_RESULTS));
+                const safePage = Math.min(page, totalPages);
+                const start = (safePage - 1) * PAGE_SIZE_RESULTS;
+                const pageItems = results.slice(start, start + PAGE_SIZE_RESULTS);
+                const goPage = (p: number) => {
+                  const next = Math.max(1, Math.min(totalPages, p));
+                  setPage(next);
+                  requestAnimationFrame(() => {
+                    resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  });
+                };
+                const Pager = (
+                  <div className="search-pager">
+                    <button
+                      type="button"
+                      className="search-pager-btn"
+                      disabled={safePage <= 1}
+                      onClick={() => goPage(safePage - 1)}
+                    >
+                      ← PREV
+                    </button>
+                    <span className="search-pager-info">
+                      PAGE {safePage} / {totalPages} · {start + 1}–{start + pageItems.length} OF {results.length}
+                    </span>
+                    <button
+                      type="button"
+                      className="search-pager-btn"
+                      disabled={safePage >= totalPages}
+                      onClick={() => goPage(safePage + 1)}
+                    >
+                      NEXT →
+                    </button>
+                  </div>
+                );
+                return (
+                  <>
+                    {totalPages > 1 && Pager}
+                    {!masonry && (
+                      <div className="search-results-grid">
+                        {pageItems.map((r) => renderResultCard(r, saveSearchState))}
+                      </div>
+                    )}
+                    {masonry && (
+                      <div className="search-results-masonry">
+                        {Array.from({ length: cols }, (_, ci) => (
+                          <div className="masonry-col" key={ci}>
+                            {pageItems.filter((_, i) => i % cols === ci).map((r) => renderResultCard(r, saveSearchState))}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {totalPages > 1 && Pager}
+                  </>
+                );
+              })()}
             </div>
           )}
         </div>
@@ -954,6 +1000,19 @@ const PAGE_CSS = `
   font-size: 11px; letter-spacing: 0.3em; color: #777; text-transform: uppercase;
   padding: 40px 0 200px;
 }
+.curbism-root .search-pager {
+  display: flex; align-items: center; justify-content: center; gap: 24px;
+  padding: 18px 0; margin: 0 0 8px;
+  border-top: 1px solid #eee; border-bottom: 1px solid #eee;
+  font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase;
+}
+.curbism-root .search-pager-btn {
+  background: #000; color: #fff; border: none; padding: 10px 18px;
+  font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase;
+  cursor: pointer; font-family: inherit;
+}
+.curbism-root .search-pager-btn:disabled { opacity: 0.25; cursor: not-allowed; }
+.curbism-root .search-pager-info { color: #555; }
 .curbism-root .search-results-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
