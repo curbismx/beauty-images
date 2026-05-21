@@ -7,9 +7,7 @@ import { PageHeader } from "./admin";
 import {
   getImageStats,
   getProcessingQueue,
-  checkImageNumberExists,
   retryImageProcessing,
-  createUploadError,
   listUploadErrors,
   deleteUploadErrors,
   resolveUploadError,
@@ -22,7 +20,6 @@ export const Route = createFileRoute("/admin/upload")({
 
 const FILENAME_RE = /^a(\d{8})\.[a-z0-9]+$/i;
 const IMAGE_FILE_RE = /\.(jpe?g|png|webp|gif)$/i;
-const PREVIEW_EDGE = 800;
 
 type WebkitEntry = {
   isFile: boolean;
@@ -94,43 +91,6 @@ function extensionFor(filename: string) {
   return filename.split(".").pop()?.toLowerCase() || "jpg";
 }
 
-function loadBrowserImage(file: File): Promise<HTMLImageElement> {
-  return new Promise((resolve, reject) => {
-    const url = URL.createObjectURL(file);
-    const image = new Image();
-    image.onload = () => {
-      URL.revokeObjectURL(url);
-      resolve(image);
-    };
-    image.onerror = () => {
-      URL.revokeObjectURL(url);
-      reject(new Error("Could not read image for preview"));
-    };
-    image.src = url;
-  });
-}
-
-async function makePreviewBlob(file: File): Promise<Blob> {
-  const image = await loadBrowserImage(file);
-  const width = image.naturalWidth || image.width;
-  const height = image.naturalHeight || image.height;
-  if (!width || !height) throw new Error("Image has no readable dimensions");
-  const scale = Math.min(1, PREVIEW_EDGE / Math.max(width, height));
-  const canvas = document.createElement("canvas");
-  canvas.width = Math.max(1, Math.round(width * scale));
-  canvas.height = Math.max(1, Math.round(height * scale));
-  const ctx = canvas.getContext("2d");
-  if (!ctx) throw new Error("Could not create preview canvas");
-  ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-  return new Promise((resolve, reject) => {
-    canvas.toBlob(
-      (blob) => (blob ? resolve(blob) : reject(new Error("Could not create preview image"))),
-      "image/jpeg",
-      0.82,
-    );
-  });
-}
-
 type QueueItem = {
   id: string;
   file: File;
@@ -173,8 +133,6 @@ function Upload() {
     refetchInterval: 15_000,
   });
 
-  const checkNumber = useServerFn(checkImageNumberExists);
-  const saveUploadError = useServerFn(createUploadError);
   const fetchUploadErrors = useServerFn(listUploadErrors);
   const removeUploadErrors = useServerFn(deleteUploadErrors);
   const fixUploadError = useServerFn(resolveUploadError);
@@ -246,14 +204,14 @@ function Upload() {
           if (up.error)
             throw new Error(`${message}; also failed to store error file: ${up.error.message}`);
         }
-        await saveUploadError({
-          data: {
-            filename: file.name,
-            storage_path: errorPath,
-            error_message: message,
-            detected_image_number: detectedNumber,
-          },
+        const { error } = await supabase.from("upload_errors").insert({
+          filename: file.name,
+          storage_path: errorPath,
+          error_message: message,
+          detected_image_number: detectedNumber,
         });
+        if (error)
+          throw new Error(`${message}; also failed to save error record: ${error.message}`);
         return errorPath;
       };
       if (!match) {
@@ -273,10 +231,13 @@ function Upload() {
       const parsedNumber = parseInt(match[1], 10);
       updateItem(item.id, { status: "uploading" });
       let uploadedPath: string | null = null;
-      let previewUploadedPath: string | null = null;
       try {
-        const dup = await checkNumber({ data: { image_number: parsedNumber } });
-        if (dup.exists) {
+        const { count, error: dupErr } = await supabase
+          .from("images")
+          .select("id", { count: "exact", head: true })
+          .eq("image_number", parsedNumber);
+        if (dupErr) throw new Error(`Number check failed: ${dupErr.message}`);
+        if ((count ?? 0) > 0) {
           const message = `Duplicate number — #${String(parsedNumber).padStart(8, "0")} already exists`;
           await uploadErrorRecord(message);
           throw new Error(message);
@@ -291,13 +252,6 @@ function Upload() {
         uploadedPath = storagePath;
 
         const imageId = crypto.randomUUID();
-        const previewPath = `previews/${imageId}.jpg`;
-        const previewBlob = await makePreviewBlob(file);
-        const previewUp = await supabase.storage
-          .from("images-private")
-          .upload(previewPath, previewBlob, { contentType: "image/jpeg", upsert: false });
-        if (previewUp.error) throw new Error(`Preview upload failed: ${previewUp.error.message}`);
-        previewUploadedPath = previewPath;
 
         const ins = await supabase
           .from("images")
@@ -306,7 +260,6 @@ function Upload() {
             filename: file.name,
             storage_path: storagePath,
             image_number: parsedNumber,
-            preview_path: previewPath,
           })
           .select("image_number")
           .single();
@@ -314,8 +267,6 @@ function Upload() {
         updateItem(item.id, { status: "done", imageNumber: ins.data.image_number as number });
         return true;
       } catch (e) {
-        if (previewUploadedPath)
-          await supabase.storage.from("images-private").remove([previewUploadedPath]);
         if (!String((e as Error).message).startsWith("Duplicate number")) {
           try {
             await uploadErrorRecord((e as Error).message, uploadedPath);
@@ -327,7 +278,7 @@ function Upload() {
         return false;
       }
     },
-    [checkNumber, saveUploadError, updateItem],
+    [updateItem],
   );
 
   const drainPipeline = useCallback(async () => {
