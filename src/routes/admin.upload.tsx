@@ -102,13 +102,56 @@ function Upload() {
   const runKeyword = useServerFn(keywordPendingBatch);
   const runRetry = useServerFn(retryImageProcessing);
 
-  const keywordMut = useMutation({
-    mutationFn: () => runKeyword({ data: { limit: 50 } }),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["processing-queue"] });
-      qc.invalidateQueries({ queryKey: ["image-stats"] });
-    },
-  });
+  const [keywordRun, setKeywordRun] = useState<{
+    active: boolean;
+    processed: number;
+    failed: number;
+    batches: number;
+    lastError?: string;
+    done?: boolean;
+  }>({ active: false, processed: 0, failed: 0, batches: 0 });
+
+  const startKeywording = useCallback(async () => {
+    setKeywordRun({ active: true, processed: 0, failed: 0, batches: 0, done: false });
+    let totalProcessed = 0;
+    let totalFailed = 0;
+    let batches = 0;
+    try {
+      while (true) {
+        const res = await runKeyword({ data: { limit: 50 } });
+        batches += 1;
+        totalProcessed += res.processed;
+        totalFailed += res.failed;
+        setKeywordRun({
+          active: true,
+          processed: totalProcessed,
+          failed: totalFailed,
+          batches,
+          done: false,
+        });
+        qc.invalidateQueries({ queryKey: ["processing-queue"] });
+        qc.invalidateQueries({ queryKey: ["image-stats"] });
+        if (res.processed === 0 && res.failed === 0) break;
+      }
+      setKeywordRun({
+        active: false,
+        processed: totalProcessed,
+        failed: totalFailed,
+        batches,
+        done: true,
+      });
+    } catch (e) {
+      setKeywordRun({
+        active: false,
+        processed: totalProcessed,
+        failed: totalFailed,
+        batches,
+        done: true,
+        lastError: (e as Error).message,
+      });
+    }
+  }, [runKeyword, qc]);
+
 
   const uploadErrors = useQuery({
     queryKey: ["upload-errors"],
