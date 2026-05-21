@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
@@ -95,7 +95,6 @@ type QueueItem = {
   id: string;
   file: File;
   name: string;
-  previewUrl: string;
   status: "pending" | "uploading" | "done" | "error";
   message?: string;
   imageNumber?: number;
@@ -168,13 +167,6 @@ function Upload() {
       qc.invalidateQueries({ queryKey: ["image-stats"] });
     },
   });
-
-  useEffect(() => {
-    return () => {
-      queue.forEach((it) => URL.revokeObjectURL(it.previewUrl));
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const updateItem = useCallback((id: string, patch: Partial<QueueItem>) => {
     setQueue((q) => {
@@ -309,8 +301,6 @@ function Upload() {
                 queued: pendingRef.current.length,
                 uploading: activeRef.current,
               }));
-              // Free memory after the tile has a chance to show its final state.
-              setTimeout(() => URL.revokeObjectURL(next.previewUrl), 2000);
             });
         }
         // Yield so React can render and newly-dropped files can join the pipeline.
@@ -338,19 +328,13 @@ function Upload() {
         id: crypto.randomUUID(),
         file: f,
         name: f.name,
-        previewUrl: URL.createObjectURL(f),
         status: "pending",
       }));
       // Cap the visible queue so the DOM stays small on huge batches.
       // The upload itself still references the File object via pendingRef.
       setQueue((q) => {
         const merged = [...items, ...q];
-        if (merged.length > VISIBLE_TILES) {
-          for (let i = VISIBLE_TILES; i < merged.length; i++) {
-            URL.revokeObjectURL(merged[i].previewUrl);
-          }
-          return merged.slice(0, VISIBLE_TILES);
-        }
+        if (merged.length > VISIBLE_TILES) return merged.slice(0, VISIBLE_TILES);
         return merged;
       });
       pendingRef.current.push(...items);
@@ -507,7 +491,22 @@ function Upload() {
             {queue.map((it) => (
               <div key={it.id} style={tileStyle}>
                 <div style={{ position: "relative", paddingBottom: "100%", background: "#f4f4f4" }}>
-                  <img src={it.previewUrl} alt={it.name} style={imgStyle} />
+                  <div
+                    style={{
+                      ...imgStyle,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      padding: 12,
+                      textAlign: "center",
+                      fontSize: 11,
+                      fontWeight: 800,
+                      color: "#666",
+                      wordBreak: "break-word",
+                    }}
+                  >
+                    {it.name}
+                  </div>
                   <span style={{ ...badgeStyle, background: statusColor(it.status) }}>
                     {it.status === "done" && it.imageNumber
                       ? `#${String(it.imageNumber).padStart(8, "0")}`
