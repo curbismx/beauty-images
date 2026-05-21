@@ -165,7 +165,7 @@ function Upload() {
         const match = file.name.match(FILENAME_RE);
         const detectedDigits = file.name.match(/^a(\d+)\./i)?.[1];
         const detectedNumber = detectedDigits?.length === 8 ? parseInt(detectedDigits, 10) : null;
-        const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
+        const ext = extensionFor(file.name);
         const uploadErrorRecord = async (message: string, existingPath?: string | null) => {
           let errorPath = existingPath ?? null;
           if (!errorPath) {
@@ -228,12 +228,22 @@ function Upload() {
           if (up.error) throw new Error(up.error.message);
           uploadedPath = storagePath;
 
+          const imageId = crypto.randomUUID();
+          const previewPath = `previews/${imageId}.jpg`;
+          const previewBlob = await makePreviewBlob(file);
+          const previewUp = await supabase.storage
+            .from("images-private")
+            .upload(previewPath, previewBlob, { contentType: "image/jpeg", upsert: false });
+          if (previewUp.error) throw new Error(`Preview upload failed: ${previewUp.error.message}`);
+
           const ins = await supabase
             .from("images")
             .insert({
+              id: imageId,
               filename: file.name,
               storage_path: storagePath,
               image_number: parsedNumber,
+              preview_path: previewPath,
             })
             .select("image_number")
             .single();
