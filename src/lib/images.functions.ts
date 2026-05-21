@@ -14,7 +14,7 @@ export const getImageStats = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const { supabase } = context;
     const db = supabase as any;
-    const [{ count: total }, { count: pending }, { count: failed }, { count: uploadErrors }] = await Promise.all([
+    const [{ count: total }, { count: pending }, { count: failed }, { count: uploadErrors }, { count: published }] = await Promise.all([
       supabase.from("images").select("id", { count: "exact", head: true }),
       supabase
         .from("images")
@@ -25,6 +25,10 @@ export const getImageStats = createServerFn({ method: "GET" })
         .select("id", { count: "exact", head: true })
         .not("processing_error", "is", null),
       db.from("upload_errors").select("id", { count: "exact", head: true }),
+      supabase
+        .from("images")
+        .select("id", { count: "exact", head: true })
+        .eq("public", true),
     ]);
     const totalN = total ?? 0;
     const pendingN = pending ?? 0;
@@ -37,6 +41,7 @@ export const getImageStats = createServerFn({ method: "GET" })
       processing: Math.max(0, pendingN - failedN),
       failed: failedN + uploadErrorsN,
       upload_errors: uploadErrorsN,
+      published: published ?? 0,
     };
   });
 
