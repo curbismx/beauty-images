@@ -13,7 +13,8 @@ export const getImageStats = createServerFn({ method: "GET" })
   .middleware([requireAdmin])
   .handler(async ({ context }) => {
     const { supabase } = context;
-    const [{ count: total }, { count: pending }, { count: failed }] = await Promise.all([
+    const db = supabase as any;
+    const [{ count: total }, { count: pending }, { count: failed }, { count: uploadErrors }] = await Promise.all([
       supabase.from("images").select("id", { count: "exact", head: true }),
       supabase
         .from("images")
@@ -23,16 +24,19 @@ export const getImageStats = createServerFn({ method: "GET" })
         .from("images")
         .select("id", { count: "exact", head: true })
         .not("processing_error", "is", null),
+      db.from("upload_errors").select("id", { count: "exact", head: true }),
     ]);
     const totalN = total ?? 0;
     const pendingN = pending ?? 0;
     const failedN = failed ?? 0;
+    const uploadErrorsN = uploadErrors ?? 0;
     return {
       total: totalN,
       pending: pendingN,
       keyworded: totalN - pendingN,
       processing: Math.max(0, pendingN - failedN),
-      failed: failedN,
+      failed: failedN + uploadErrorsN,
+      upload_errors: uploadErrorsN,
     };
   });
 
@@ -101,6 +105,114 @@ export const getProcessingQueue = createServerFn({ method: "GET" })
     })) as PendingQueueItem[];
   });
 
+export type UploadErrorItem = {
+  id: string;
+  filename: string;
+  storage_path: string | null;
+  error_message: string;
+  detected_image_number: number | null;
+  created_at: string;
+  signed_url: string | null;
+};
+
+export const createUploadError = createServerFn({ method: "POST" })
+  .middleware([requireAdmin])
+  .inputValidator(
+    z.object({
+      filename: z.string().min(1).max(500),
+      storage_path: z.string().min(1).max(500).nullable().optional(),
+      error_message: z.string().min(1).max(1000),
+      detected_image_number: z.number().int().min(0).max(999999999999).nullable().optional(),
+    }).parse,
+  )
+  .handler(async ({ data, context }) => {
+    const db = context.supabase as any;
+    const { error } = await db.from("upload_errors").insert({
+      filename: data.filename,
+      storage_path: data.storage_path ?? null,
+      error_message: data.error_message,
+      detected_image_number: data.detected_image_number ?? null,
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true as const };
+  });
+
+export const listUploadErrors = createServerFn({ method: "GET" })
+  .middleware([requireAdmin])
+  .inputValidator(z.object({ limit: z.number().int().min(1).max(500).default(200) }).parse)
+  .handler(async ({ data, context }) => {
+    const db = context.supabase as any;
+    const { data: rows, error } = await db
+      .from("upload_errors")
+      .select("id, filename, storage_path, error_message, detected_image_number, created_at")
+      .order("created_at", { ascending: false })
+      .limit(data.limit);
+    if (error) throw new Error(error.message);
+    const paths = (rows ?? []).map((r: any) => r.storage_path).filter(Boolean) as string[];
+    const signed = paths.length
+      ? await context.supabase.storage.from("images-private").createSignedUrls(paths, 3600)
+      : { data: [] as Array<{ signedUrl: string | null }> };
+    const signedMap = new Map<string, string | null>();
+    paths.forEach((p, i) => signedMap.set(p, signed.data?.[i]?.signedUrl ?? null));
+    return (rows ?? []).map((r: any) => ({
+      id: r.id,
+      filename: r.filename,
+      storage_path: r.storage_path,
+      error_message: r.error_message,
+      detected_image_number: r.detected_image_number,
+      created_at: r.created_at,
+      signed_url: r.storage_path ? signedMap.get(r.storage_path) ?? null : null,
+    })) as UploadErrorItem[];
+  });
+
+export const deleteUploadErrors = createServerFn({ method: "POST" })
+  .middleware([requireAdmin])
+  .inputValidator(z.object({ ids: z.array(z.string().uuid()).min(1).max(500) }).parse)
+  .handler(async ({ data, context }) => {
+    const db = context.supabase as any;
+    const { data: rows, error: selErr } = await db
+      .from("upload_errors")
+      .select("id, storage_path")
+      .in("id", data.ids);
+    if (selErr) throw new Error(selErr.message);
+    const paths = (rows ?? []).map((r: any) => r.storage_path).filter(Boolean) as string[];
+    if (paths.length) await context.supabase.storage.from("images-private").remove(paths);
+    const { error } = await db.from("upload_errors").delete().in("id", data.ids);
+    if (error) throw new Error(error.message);
+    return { deleted: rows?.length ?? 0 };
+  });
+
+export const resolveUploadError = createServerFn({ method: "POST" })
+  .middleware([requireAdmin])
+  .inputValidator(z.object({ id: z.string().uuid(), image_number: z.number().int().min(1).max(99999999) }).parse)
+  .handler(async ({ data, context }) => {
+    const db = context.supabase as any;
+    const { data: row, error: rowErr } = await db
+      .from("upload_errors")
+      .select("id, filename, storage_path")
+      .eq("id", data.id)
+      .single();
+    if (rowErr) throw new Error(rowErr.message);
+    if (!row.storage_path) throw new Error("No uploaded file is saved for this error — delete it and re-upload the image.");
+    const { count, error: dupErr } = await context.supabase
+      .from("images")
+      .select("id", { count: "exact", head: true })
+      .eq("image_number", data.image_number);
+    if (dupErr) throw new Error(dupErr.message);
+    if ((count ?? 0) > 0) throw new Error(`#${String(data.image_number).padStart(8, "0")} already exists`);
+    const ext = String(row.filename).split(".").pop()?.toLowerCase() || "jpg";
+    const correctedFilename = `A${String(data.image_number).padStart(8, "0")}.${ext}`;
+    const { error: insErr } = await context.supabase.from("images").insert({
+      filename: correctedFilename,
+      storage_path: row.storage_path,
+      image_number: data.image_number,
+    });
+    if (insErr) throw new Error(insErr.message);
+    const { error: delErr } = await db.from("upload_errors").delete().eq("id", data.id);
+    if (delErr) throw new Error(delErr.message);
+    return { ok: true as const, image_number: data.image_number };
+  });
+
 
 export type RecentImage = {
   id: string;
@@ -145,6 +257,7 @@ export type LibraryImage = RecentImage & {
   availability: string;
   public: boolean;
   keywords: string[];
+  processing_error: string | null;
 };
 
 export const listImages = createServerFn({ method: "GET" })
@@ -153,7 +266,7 @@ export const listImages = createServerFn({ method: "GET" })
     z
       .object({
         filter: z
-          .enum(["all", "pending", "ready", "published", "unpublished"])
+          .enum(["all", "pending", "ready", "published", "unpublished", "errors"])
           .default("all"),
         search: z.string().trim().max(200).default(""),
         limit: z.number().int().min(1).max(500).default(200),
@@ -165,7 +278,7 @@ export const listImages = createServerFn({ method: "GET" })
     let q = supabase
       .from("images")
       .select(
-        "id, image_number, filename, title, caption, keyworded_at, created_at, storage_path, preview_path, category, availability, public, keywords",
+        "id, image_number, filename, title, caption, keyworded_at, created_at, storage_path, preview_path, category, availability, public, keywords, processing_error",
       )
       .order("image_number", { ascending: false })
       .limit(data.limit);
@@ -173,6 +286,7 @@ export const listImages = createServerFn({ method: "GET" })
     if (data.filter === "ready") q = q.not("keyworded_at", "is", null).eq("public", false);
     if (data.filter === "published") q = q.eq("public", true);
     if (data.filter === "unpublished") q = q.eq("public", false);
+    if (data.filter === "errors") q = q.not("processing_error", "is", null);
     if (data.search) {
       const s = data.search.replace(/[%,]/g, " ");
       q = q.or(`title.ilike.%${s}%,filename.ilike.%${s}%,category.ilike.%${s}%`);
@@ -195,6 +309,7 @@ export const listImages = createServerFn({ method: "GET" })
       availability: r.availability,
       public: r.public,
       keywords: (r.keywords ?? []) as string[],
+      processing_error: r.processing_error,
       signed_url: signed.data?.[i]?.signedUrl ?? null,
     })) as LibraryImage[];
   });
@@ -348,8 +463,10 @@ export const keywordPendingBatch = createServerFn({ method: "POST" })
     const { supabase } = context;
     const { data: rows, error } = await supabase
       .from("images")
-      .select("id, image_number, filename, storage_path")
+      .select("id, image_number, filename, storage_path, preview_path, processing_attempts")
       .is("keyworded_at", null)
+      .not("preview_path", "is", null)
+      .is("processing_error", null)
       .order("image_number", { ascending: true })
       .limit(data.limit);
     if (error) throw new Error(error.message);
@@ -361,7 +478,7 @@ export const keywordPendingBatch = createServerFn({ method: "POST" })
 
     for (const row of rows) {
       try {
-        const dl = await supabase.storage.from("images-private").download(row.storage_path);
+        const dl = await supabase.storage.from("images-private").download(row.preview_path ?? row.storage_path);
         if (dl.error || !dl.data) throw new Error(dl.error?.message ?? "download failed");
         const buf = Buffer.from(await dl.data.arrayBuffer());
         const dataUrl = `data:${guessMime(row.filename)};base64,${buf.toString("base64")}`;
@@ -375,13 +492,23 @@ export const keywordPendingBatch = createServerFn({ method: "POST" })
             keywords: result.keywords,
             category: result.category,
             keyworded_at: new Date().toISOString(),
+            processing_attempts: 0,
+            processing_error: null,
           })
           .eq("id", row.id);
         if (upErr) throw new Error(upErr.message);
         processed += 1;
       } catch (e) {
         failed += 1;
-        errors.push(`#${row.image_number}: ${(e as Error).message}`);
+        const message = (e as Error).message;
+        errors.push(`#${row.image_number}: ${message}`);
+        await supabase
+          .from("images")
+          .update({
+            processing_attempts: (row.processing_attempts ?? 0) + 1,
+            processing_error: message.slice(0, 1000),
+          })
+          .eq("id", row.id);
       }
     }
 

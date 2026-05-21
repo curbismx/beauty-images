@@ -9,6 +9,12 @@ import {
   getProcessingQueue,
   checkImageNumberExists,
   retryImageProcessing,
+  keywordPendingBatch,
+  createUploadError,
+  listUploadErrors,
+  deleteUploadErrors,
+  resolveUploadError,
+  type UploadErrorItem,
 } from "@/lib/images.functions";
 
 export const Route = createFileRoute("/admin/upload")({
@@ -47,7 +53,44 @@ function Upload() {
   });
 
   const checkNumber = useServerFn(checkImageNumberExists);
+  const saveUploadError = useServerFn(createUploadError);
+  const fetchUploadErrors = useServerFn(listUploadErrors);
+  const removeUploadErrors = useServerFn(deleteUploadErrors);
+  const fixUploadError = useServerFn(resolveUploadError);
+  const runKeyword = useServerFn(keywordPendingBatch);
   const runRetry = useServerFn(retryImageProcessing);
+
+  const keywordMut = useMutation({
+    mutationFn: () => runKeyword({ data: { limit: 50 } }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["processing-queue"] });
+      qc.invalidateQueries({ queryKey: ["image-stats"] });
+    },
+  });
+
+  const uploadErrors = useQuery({
+    queryKey: ["upload-errors"],
+    queryFn: () => fetchUploadErrors({ data: { limit: 300 } }),
+    refetchInterval: 15_000,
+  });
+
+  const deleteUploadErrorMut = useMutation({
+    mutationFn: (id: string) => removeUploadErrors({ data: { ids: [id] } }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["upload-errors"] });
+      qc.invalidateQueries({ queryKey: ["image-stats"] });
+    },
+  });
+
+  const resolveUploadErrorMut = useMutation({
+    mutationFn: ({ id, image_number }: { id: string; image_number: number }) =>
+      fixUploadError({ data: { id, image_number } }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["upload-errors"] });
+      qc.invalidateQueries({ queryKey: ["processing-queue"] });
+      qc.invalidateQueries({ queryKey: ["image-stats"] });
+    },
+  });
   const retryMut = useMutation({
     mutationFn: (id: string) => runRetry({ data: { id } }),
     onSuccess: () => {
@@ -78,11 +121,47 @@ function Upload() {
         const file = arr[i];
         const item = items[i];
         const match = file.name.match(FILENAME_RE);
+        const detectedDigits = file.name.match(/^a(\d+)\./i)?.[1];
+        const detectedNumber = detectedDigits?.length === 8 ? parseInt(detectedDigits, 10) : null;
+        const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
+        const uploadErrorRecord = async (message: string, existingPath?: string | null) => {
+          let errorPath = existingPath ?? null;
+          if (!errorPath) {
+            const uid = crypto.randomUUID();
+            errorPath = `upload-errors/${uid}.${ext}`;
+            const up = await supabase.storage
+              .from("images-private")
+              .upload(errorPath, file, { contentType: file.type || "image/jpeg", upsert: false });
+            if (up.error) throw new Error(`${message}; also failed to store error file: ${up.error.message}`);
+          }
+          await saveUploadError({
+            data: {
+              filename: file.name,
+              storage_path: errorPath,
+              error_message: message,
+              detected_image_number: detectedNumber,
+            },
+          });
+          return errorPath;
+        };
         if (!match) {
+          const message = detectedDigits && detectedDigits.length !== 8
+            ? `Invalid filename — found ${detectedDigits.length} digits after A, must be exactly 8`
+            : `Invalid filename — must be A + 8 digits + extension`;
+          try {
+            await uploadErrorRecord(message);
+          } catch (e) {
+            setQueue((q) =>
+              q.map((it) =>
+                it.id === item.id ? { ...it, status: "error", message: (e as Error).message } : it,
+              ),
+            );
+            continue;
+          }
           setQueue((q) =>
             q.map((it) =>
               it.id === item.id
-                ? { ...it, status: "error", message: `Invalid filename — must be A + 8 digits + extension` }
+                ? { ...it, status: "error", message }
                 : it,
             ),
           );
@@ -90,17 +169,22 @@ function Upload() {
         }
         const parsedNumber = parseInt(match[1], 10);
         setQueue((q) => q.map((it) => (it.id === item.id ? { ...it, status: "uploading" } : it)));
+        let uploadedPath: string | null = null;
         try {
           const dup = await checkNumber({ data: { image_number: parsedNumber } });
-          if (dup.exists) throw new Error(`Duplicate number — #${String(parsedNumber).padStart(8, "0")} already exists`);
+          if (dup.exists) {
+            const message = `Duplicate number — #${String(parsedNumber).padStart(8, "0")} already exists`;
+            await uploadErrorRecord(message);
+            throw new Error(message);
+          }
 
-          const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
           const uid = crypto.randomUUID();
           const storagePath = `${uid}.${ext}`;
           const up = await supabase.storage
             .from("images-private")
             .upload(storagePath, file, { contentType: file.type || "image/jpeg", upsert: false });
           if (up.error) throw new Error(up.error.message);
+          uploadedPath = storagePath;
 
           const ins = await supabase
             .from("images")
@@ -120,6 +204,13 @@ function Upload() {
             ),
           );
         } catch (e) {
+          if (!String((e as Error).message).startsWith("Duplicate number")) {
+            try {
+              await uploadErrorRecord((e as Error).message, uploadedPath);
+            } catch {
+              // Keep the visible session error even if the permanent error record could not be saved.
+            }
+          }
           setQueue((q) =>
             q.map((it) =>
               it.id === item.id ? { ...it, status: "error", message: (e as Error).message } : it,
@@ -129,8 +220,9 @@ function Upload() {
       }
       qc.invalidateQueries({ queryKey: ["processing-queue"] });
       qc.invalidateQueries({ queryKey: ["image-stats"] });
+      qc.invalidateQueries({ queryKey: ["upload-errors"] });
     },
-    [qc, checkNumber],
+    [qc, checkNumber, saveUploadError],
   );
 
   const queueRows = processing.data ?? [];
@@ -153,13 +245,22 @@ function Upload() {
       >
         <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: "0.04em", textTransform: "uppercase" }}>
           {stats.data
-            ? `${stats.data.keyworded.toLocaleString()} keyworded · ${stats.data.processing.toLocaleString()} processing · ${stats.data.failed.toLocaleString()} failed · ${stats.data.total.toLocaleString()} total`
+            ? `${stats.data.keyworded.toLocaleString()} keyworded · ${stats.data.processing.toLocaleString()} processing · ${stats.data.failed.toLocaleString()} failed · ${stats.data.upload_errors.toLocaleString()} upload errors · ${stats.data.total.toLocaleString()} total`
             : "Loading stats…"}
         </div>
         <div style={{ fontSize: 10, color: "#666", letterSpacing: "0.04em", textTransform: "uppercase" }}>
-          Auto-processing runs every minute
+          Keywording is separate from publishing
         </div>
+        <button type="button" style={retryBtn} disabled={keywordMut.isPending} onClick={() => keywordMut.mutate()}>
+          {keywordMut.isPending ? "Keywording…" : "Keyword images"}
+        </button>
       </div>
+      {keywordMut.data && (
+        <div style={notice}>
+          Keyworded {keywordMut.data.processed} images{keywordMut.data.failed ? ` · ${keywordMut.data.failed} failed` : ""}.
+          {keywordMut.data.errors.length ? ` ${keywordMut.data.errors.join(" · ")}` : ""}
+        </div>
+      )}
 
       <div
         className="bi-drop"
@@ -195,6 +296,37 @@ function Upload() {
             e.target.value = "";
           }}
         />
+      </div>
+
+      <div className="bi-section" style={{ marginTop: 32 }}>
+        <h2 className="bi-section-title">
+          Upload errors {uploadErrors.data?.length ? `(${uploadErrors.data.length})` : ""}
+        </h2>
+        {uploadErrors.isLoading ? (
+          <div className="bi-placeholder">Loading errors…</div>
+        ) : !uploadErrors.data?.length ? (
+          <div className="bi-placeholder">No upload errors</div>
+        ) : (
+          <div style={gridStyle}>
+            {uploadErrors.data.map((err) => (
+              <UploadErrorCard
+                key={err.id}
+                err={err}
+                deleting={deleteUploadErrorMut.isPending}
+                resolving={resolveUploadErrorMut.isPending}
+                onDelete={() => {
+                  if (confirm(`Delete error file ${err.filename}?`)) deleteUploadErrorMut.mutate(err.id);
+                }}
+                onResolve={(image_number) => resolveUploadErrorMut.mutate({ id: err.id, image_number })}
+              />
+            ))}
+          </div>
+        )}
+        {deleteUploadErrorMut.data && <div style={notice}>Deleted {deleteUploadErrorMut.data.deleted} error file.</div>}
+        {resolveUploadErrorMut.data && (
+          <div style={notice}>Moved #{String(resolveUploadErrorMut.data.image_number).padStart(8, "0")} into the processing queue.</div>
+        )}
+        {resolveUploadErrorMut.error && <div style={errBox}>{(resolveUploadErrorMut.error as Error).message}</div>}
       </div>
 
       {queue.length > 0 && (
@@ -278,6 +410,66 @@ function statusColor(s: QueueItem["status"]) {
   return "#aaa";
 }
 
+function UploadErrorCard({
+  err,
+  deleting,
+  resolving,
+  onDelete,
+  onResolve,
+}: {
+  err: UploadErrorItem;
+  deleting: boolean;
+  resolving: boolean;
+  onDelete: () => void;
+  onResolve: (image_number: number) => void;
+}) {
+  const [numberText, setNumberText] = useState(
+    err.detected_image_number ? String(err.detected_image_number).padStart(8, "0").slice(-8) : "",
+  );
+  const parsed = /^\d{8}$/.test(numberText) ? parseInt(numberText, 10) : null;
+  return (
+    <div style={tileStyle}>
+      <div style={{ position: "relative", paddingBottom: "100%", background: "#f4f4f4" }}>
+        {err.signed_url ? (
+          <img src={err.signed_url} alt={err.filename} style={imgStyle} loading="lazy" />
+        ) : (
+          <div style={{ ...imgStyle, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, color: "#888" }}>
+            NO FILE SAVED
+          </div>
+        )}
+        <span style={{ ...badgeStyle, background: "#D75F68" }}>ERROR</span>
+      </div>
+      <div style={tileName} title={err.filename}>{err.filename}</div>
+      <div style={errStyle}>{err.error_message}</div>
+      {err.storage_path && (
+        <div style={{ padding: 10, borderTop: "1px solid #000" }}>
+          <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 6 }}>
+            Correct 8-digit number
+          </div>
+          <input
+            value={numberText}
+            maxLength={8}
+            onChange={(e) => setNumberText(e.target.value.replace(/\D/g, "").slice(0, 8))}
+            placeholder="00010001"
+            style={{ width: "100%", border: "1px solid #000", padding: "8px 10px", fontSize: 12, fontWeight: 800 }}
+          />
+          <button
+            type="button"
+            style={{ ...retryBtn, marginTop: 8 }}
+            disabled={!parsed || resolving}
+            onClick={() => parsed && onResolve(parsed)}
+          >
+            {resolving ? "…" : "Save corrected number"}
+          </button>
+        </div>
+      )}
+      <button type="button" style={{ ...retryBtn, background: "#a32020" }} disabled={deleting} onClick={onDelete}>
+        {deleting ? "…" : "Delete error"}
+      </button>
+    </div>
+  );
+}
+
 const gridStyle: React.CSSProperties = {
   display: "grid",
   gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))",
@@ -317,6 +509,18 @@ const errStyle: React.CSSProperties = {
   fontSize: 11,
   color: "#D75F68",
   borderTop: "1px solid #D75F68",
+};
+const notice: React.CSSProperties = {
+  padding: "8px 12px",
+  background: "#f4f4f4",
+  border: "1px solid #000",
+  marginTop: 12,
+  fontSize: 12,
+};
+const errBox: React.CSSProperties = {
+  ...notice,
+  color: "#D75F68",
+  borderColor: "#D75F68",
 };
 const retryBtn: React.CSSProperties = {
   width: "100%",

@@ -6,6 +6,7 @@ import { PageHeader } from "./admin";
 import {
   listImages,
   getImageStats,
+  keywordPendingBatch,
   publishAllReady,
   unpublishAll,
   deleteImages,
@@ -22,6 +23,7 @@ export const Route = createFileRoute("/admin/library")({
 const FILTERS = [
   { id: "all", label: "All" },
   { id: "pending", label: "Pending keywords" },
+  { id: "errors", label: "Errors" },
   { id: "ready", label: "Ready to publish" },
   { id: "published", label: "Published" },
 ] as const;
@@ -35,6 +37,7 @@ function Library() {
   const qc = useQueryClient();
   const fetchList = useServerFn(listImages);
   const fetchStats = useServerFn(getImageStats);
+  const runKeyword = useServerFn(keywordPendingBatch);
   const runPublish = useServerFn(publishAllReady);
   const runUnpublish = useServerFn(unpublishAll);
   const runDelete = useServerFn(deleteImages);
@@ -55,6 +58,10 @@ function Library() {
 
   const publishMut = useMutation({
     mutationFn: () => runPublish({}),
+    onSuccess: invalidate,
+  });
+  const keywordMut = useMutation({
+    mutationFn: () => runKeyword({ data: { limit: 50 } }),
     onSuccess: invalidate,
   });
   const unpublishMut = useMutation({
@@ -92,10 +99,17 @@ function Library() {
       <div style={batchBar}>
         <div style={{ fontSize: 12, letterSpacing: "0.04em", textTransform: "uppercase" }}>
           {stats.data
-            ? `${stats.data.total} total · ${stats.data.keyworded} keyworded · ${stats.data.processing} processing · ${stats.data.failed} failed`
+            ? `${stats.data.total} total · ${stats.data.keyworded} keyworded · ${stats.data.processing} processing · ${stats.data.failed} failed · ${stats.data.upload_errors} upload errors`
             : "—"}
         </div>
         <div style={{ display: "flex", gap: 8 }}>
+          <button
+            style={btnDark}
+            disabled={keywordMut.isPending}
+            onClick={() => keywordMut.mutate()}
+          >
+            {keywordMut.isPending ? "Keywording…" : "Keyword images"}
+          </button>
           <button
             style={btnDark}
             disabled={publishMut.isPending}
@@ -118,6 +132,12 @@ function Library() {
       </div>
       {publishMut.data && (
         <div style={notice}>Published {publishMut.data.published} images.</div>
+      )}
+      {keywordMut.data && (
+        <div style={notice}>
+          Keyworded {keywordMut.data.processed} images{keywordMut.data.failed ? ` · ${keywordMut.data.failed} failed` : ""}.
+          {keywordMut.data.errors.length ? ` ${keywordMut.data.errors.join(" · ")}` : ""}
+        </div>
       )}
       {unpublishMut.data && (
         <div style={notice}>Unpublished {unpublishMut.data.unpublished} images.</div>
@@ -270,7 +290,8 @@ function EditableRow({
       <div style={contentCol}>
         <div style={topRow}>
           <span style={numBadge}>{String(row.image_number).padStart(8, "0")}</span>
-          {!row.keyworded_at && <span style={{ ...statusBadge, background: "#D75F68" }}>PENDING</span>}
+          {row.processing_error && <span style={{ ...statusBadge, background: "#a32020" }}>ERROR</span>}
+          {!row.processing_error && !row.keyworded_at && <span style={{ ...statusBadge, background: "#D75F68" }}>PENDING</span>}
           {row.keyworded_at && row.public && <span style={{ ...statusBadge, background: "#D75F68" }}>PUBLISHED</span>}
           {row.keyworded_at && !row.public && <span style={{ ...statusBadge, background: "#888" }}>READY</span>}
           {row.category && <span style={catBadge}>{row.category}</span>}
@@ -329,6 +350,7 @@ function EditableRow({
           </>
         ) : (
           <>
+            {row.processing_error && <div style={errorPanel}>Error: {row.processing_error}</div>}
             <div style={titleStyle}>{row.title ?? stripExt(row.filename)}</div>
             {row.caption && <div style={captionStyle}>{row.caption}</div>}
             {displayKeywords.length > 0 && (
@@ -445,6 +467,14 @@ const captionStyle: React.CSSProperties = {
   fontSize: 14,
   lineHeight: 1.55,
   color: "#222",
+};
+const errorPanel: React.CSSProperties = {
+  border: "1px solid #D75F68",
+  color: "#D75F68",
+  padding: "10px 12px",
+  fontSize: 12,
+  fontWeight: 800,
+  letterSpacing: "0.02em",
 };
 const kwWrap: React.CSSProperties = {
   display: "flex",
