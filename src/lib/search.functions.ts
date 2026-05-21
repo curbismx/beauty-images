@@ -41,7 +41,7 @@ export const searchPublicImages = createServerFn({ method: "POST" })
     if (terms.length === 0) return [];
 
     // Fetch all matching rows using the first term as the broad filter
-    const primary = terms[1];
+    const primary = terms[0];
     const { data: rows, error } = await supabaseAdmin
       .from("images")
       .select("id, image_number, title, caption, keywords, preview_path")
