@@ -30,6 +30,7 @@ import { Route as AdminFeaturedRouteImport } from './routes/admin.featured'
 import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
 import { Route as ApiPublicTrackRouteImport } from './routes/api/public/track'
 import { Route as ApiPublicDownloadRouteImport } from './routes/api/public/download'
+import { Route as ApiAdminUploadImageRouteImport } from './routes/api/admin/upload-image'
 import { Route as AdminImageIdRouteImport } from './routes/admin.image.$id'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as ApiPublicHooksProcessPendingRouteImport } from './routes/api/public/hooks/process-pending'
@@ -140,6 +141,11 @@ const ApiPublicDownloadRoute = ApiPublicDownloadRouteImport.update({
   path: '/api/public/download',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAdminUploadImageRoute = ApiAdminUploadImageRouteImport.update({
+  id: '/api/admin/upload-image',
+  path: '/api/admin/upload-image',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminImageIdRoute = AdminImageIdRouteImport.update({
   id: '/image/$id',
   path: '/image/$id',
@@ -185,6 +191,7 @@ export interface FileRoutesByFullPath {
   '/image/$id': typeof ImageIdRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/image/$id': typeof AdminImageIdRoute
+  '/api/admin/upload-image': typeof ApiAdminUploadImageRoute
   '/api/public/download': typeof ApiPublicDownloadRoute
   '/api/public/track': typeof ApiPublicTrackRoute
   '/api/public/hooks/keyword-pending': typeof ApiPublicHooksKeywordPendingRoute
@@ -211,6 +218,7 @@ export interface FileRoutesByTo {
   '/image/$id': typeof ImageIdRoute
   '/admin': typeof AdminIndexRoute
   '/admin/image/$id': typeof AdminImageIdRoute
+  '/api/admin/upload-image': typeof ApiAdminUploadImageRoute
   '/api/public/download': typeof ApiPublicDownloadRoute
   '/api/public/track': typeof ApiPublicTrackRoute
   '/api/public/hooks/keyword-pending': typeof ApiPublicHooksKeywordPendingRoute
@@ -239,6 +247,7 @@ export interface FileRoutesById {
   '/image/$id': typeof ImageIdRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/image/$id': typeof AdminImageIdRoute
+  '/api/admin/upload-image': typeof ApiAdminUploadImageRoute
   '/api/public/download': typeof ApiPublicDownloadRoute
   '/api/public/track': typeof ApiPublicTrackRoute
   '/api/public/hooks/keyword-pending': typeof ApiPublicHooksKeywordPendingRoute
@@ -268,6 +277,7 @@ export interface FileRouteTypes {
     | '/image/$id'
     | '/admin/'
     | '/admin/image/$id'
+    | '/api/admin/upload-image'
     | '/api/public/download'
     | '/api/public/track'
     | '/api/public/hooks/keyword-pending'
@@ -294,6 +304,7 @@ export interface FileRouteTypes {
     | '/image/$id'
     | '/admin'
     | '/admin/image/$id'
+    | '/api/admin/upload-image'
     | '/api/public/download'
     | '/api/public/track'
     | '/api/public/hooks/keyword-pending'
@@ -321,6 +332,7 @@ export interface FileRouteTypes {
     | '/image/$id'
     | '/admin/'
     | '/admin/image/$id'
+    | '/api/admin/upload-image'
     | '/api/public/download'
     | '/api/public/track'
     | '/api/public/hooks/keyword-pending'
@@ -340,6 +352,7 @@ export interface RootRouteChildren {
   SignupRoute: typeof SignupRoute
   CheckoutReturnRoute: typeof CheckoutReturnRoute
   ImageIdRoute: typeof ImageIdRoute
+  ApiAdminUploadImageRoute: typeof ApiAdminUploadImageRoute
   ApiPublicDownloadRoute: typeof ApiPublicDownloadRoute
   ApiPublicTrackRoute: typeof ApiPublicTrackRoute
   ApiPublicHooksKeywordPendingRoute: typeof ApiPublicHooksKeywordPendingRoute
@@ -496,6 +509,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicDownloadRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/admin/upload-image': {
+      id: '/api/admin/upload-image'
+      path: '/api/admin/upload-image'
+      fullPath: '/api/admin/upload-image'
+      preLoaderRoute: typeof ApiAdminUploadImageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/image/$id': {
       id: '/admin/image/$id'
       path: '/image/$id'
@@ -565,6 +585,7 @@ const rootRouteChildren: RootRouteChildren = {
   SignupRoute: SignupRoute,
   CheckoutReturnRoute: CheckoutReturnRoute,
   ImageIdRoute: ImageIdRoute,
+  ApiAdminUploadImageRoute: ApiAdminUploadImageRoute,
   ApiPublicDownloadRoute: ApiPublicDownloadRoute,
   ApiPublicTrackRoute: ApiPublicTrackRoute,
   ApiPublicHooksKeywordPendingRoute: ApiPublicHooksKeywordPendingRoute,

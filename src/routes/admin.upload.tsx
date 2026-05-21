@@ -181,91 +181,37 @@ function Upload() {
   const processOne = useCallback(
     async (item: QueueItem): Promise<boolean> => {
       const file = item.file;
-      const match = file.name.match(FILENAME_RE);
-      const detectedDigits = file.name.match(/^a(\d+)\./i)?.[1];
-      const detectedNumber = detectedDigits?.length === 8 ? parseInt(detectedDigits, 10) : null;
-      const ext = extensionFor(file.name);
-      const uploadErrorRecord = async (message: string, existingPath?: string | null) => {
-        let errorPath = existingPath ?? null;
-        if (!errorPath) {
-          const uid = crypto.randomUUID();
-          errorPath = `upload-errors/${uid}.${ext}`;
-          const up = await supabase.storage
-            .from("images-private")
-            .upload(errorPath, file, { contentType: file.type || "image/jpeg", upsert: false });
-          if (up.error)
-            throw new Error(`${message}; also failed to store error file: ${up.error.message}`);
-        }
-        const { error } = await supabase.from("upload_errors").insert({
-          filename: file.name,
-          storage_path: errorPath,
-          error_message: message,
-          detected_image_number: detectedNumber,
+      updateItem(item.id, { status: "uploading" });
+      try {
+        const { data } = await supabase.auth.getSession();
+        const token = data.session?.access_token;
+        if (!token) throw new Error("Please log in again before uploading");
+
+        const body = new FormData();
+        body.append("file", file, file.name);
+        body.append("filename", file.name);
+
+        const response = await fetch("/api/admin/upload-image", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+          body,
         });
-        if (error)
-          throw new Error(`${message}; also failed to save error record: ${error.message}`);
-        return errorPath;
-      };
-      if (!match) {
-        const message =
-          detectedDigits && detectedDigits.length !== 8
-            ? `Invalid filename — found ${detectedDigits.length} digits after A, must be exactly 8`
-            : `Invalid filename — must be A + 8 digits + extension`;
-        try {
-          await uploadErrorRecord(message);
-        } catch (e) {
-          updateItem(item.id, { status: "error", message: (e as Error).message });
+        const result = (await response.json().catch(() => null)) as
+          | { ok: true; imageNumber: number }
+          | { ok: false; message?: string }
+          | null;
+
+        if (!response.ok || !result) {
+          throw new Error(result?.message || `Upload request failed (${response.status})`);
+        }
+        if (!result.ok) {
+          updateItem(item.id, { status: "error", message: result.message || "Upload failed" });
           return false;
         }
-        updateItem(item.id, { status: "error", message });
-        return false;
-      }
-      const parsedNumber = parseInt(match[1], 10);
-      updateItem(item.id, { status: "uploading" });
-      let uploadedPath: string | null = null;
-      try {
-        const { count, error: dupErr } = await supabase
-          .from("images")
-          .select("id", { count: "exact", head: true })
-          .eq("image_number", parsedNumber);
-        if (dupErr) throw new Error(`Number check failed: ${dupErr.message}`);
-        if ((count ?? 0) > 0) {
-          const message = `Duplicate number — #${String(parsedNumber).padStart(8, "0")} already exists`;
-          await uploadErrorRecord(message);
-          throw new Error(message);
-        }
 
-        const uid = crypto.randomUUID();
-        const storagePath = `${uid}.${ext}`;
-        const up = await supabase.storage
-          .from("images-private")
-          .upload(storagePath, file, { contentType: file.type || "image/jpeg", upsert: false });
-        if (up.error) throw new Error(up.error.message);
-        uploadedPath = storagePath;
-
-        const imageId = crypto.randomUUID();
-
-        const ins = await supabase
-          .from("images")
-          .insert({
-            id: imageId,
-            filename: file.name,
-            storage_path: storagePath,
-            image_number: parsedNumber,
-          })
-          .select("image_number")
-          .single();
-        if (ins.error) throw new Error(ins.error.message);
-        updateItem(item.id, { status: "done", imageNumber: ins.data.image_number as number });
+        updateItem(item.id, { status: "done", imageNumber: result.imageNumber });
         return true;
       } catch (e) {
-        if (!String((e as Error).message).startsWith("Duplicate number")) {
-          try {
-            await uploadErrorRecord((e as Error).message, uploadedPath);
-          } catch {
-            // Keep the visible session error even if the permanent error record could not be saved.
-          }
-        }
         updateItem(item.id, { status: "error", message: (e as Error).message });
         return false;
       }
