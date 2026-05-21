@@ -83,10 +83,10 @@ function Upload() {
             .upload(storagePath, file, { contentType: file.type, upsert: false });
           if (up.error) throw new Error(up.error.message);
 
-          // Build 600px preview (longest edge) and upload alongside the original
+          // Build 800px preview (longest edge) and upload alongside the original
           let savedPreviewPath: string | null = null;
           try {
-            const previewBlob = await resizeImageToBlob(file, 600, 0.82);
+            const previewBlob = await resizeImageToBlob(file, 800, 0.82);
             const upPrev = await supabase.storage
               .from("images-private")
               .upload(previewPath, previewBlob, { contentType: "image/jpeg", upsert: false });
