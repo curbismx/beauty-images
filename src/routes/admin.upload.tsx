@@ -9,7 +9,7 @@ import {
   getProcessingQueue,
   checkImageNumberExists,
   retryImageProcessing,
-  keywordPendingBatch as _keywordPendingBatch,
+  
   createUploadError,
   listUploadErrors,
   deleteUploadErrors,
