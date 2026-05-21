@@ -24,14 +24,14 @@ export type PublicImageDetail = {
 
 export const searchPublicImages = createServerFn({ method: "POST" })
   .inputValidator(
-    z
-      .object({
-        q: z.string().trim().min(1).max(120),
-        limit: z.number().int().min(1).max(50000).default(50000),
-      })
-      .parse,
+    z.object({
+      q: z.string().trim().min(1).max(120),
+      limit: z.number().int().min(1).max(50000).default(50000),
+    }).parse,
   )
   .handler(async ({ data }): Promise<PublicSearchResult[]> => {
+    const DB_PAGE_SIZE = 1000;
+    const SIGNED_URL_BATCH_SIZE = 500;
     const term = data.q.trim();
     // Split on commas or spaces, trim, and filter empty terms
     const terms = term
@@ -42,46 +42,60 @@ export const searchPublicImages = createServerFn({ method: "POST" })
 
     // Fetch all matching rows using the first term as the broad filter
     const primary = terms[0];
-    const { data: rows, error } = await supabaseAdmin
-      .from("images")
-      .select("id, image_number, title, caption, keywords, preview_path")
-      .eq("public", true)
-      .eq("featured", false)
-      .not("preview_path", "is", null)
-      .or(
-        `title.ilike.%${primary}%,caption.ilike.%${primary}%,keywords.cs.{${primary}}`,
-      )
-      .order("image_number", { ascending: false })
-      .limit(data.limit);
-    if (error) throw new Error(error.message);
+    const merged: Array<{
+      id: string;
+      image_number: number;
+      title: string | null;
+      caption: string | null;
+      keywords: string[] | null;
+      preview_path: string | null;
+    }> = [];
 
-    // Client-side filter: every term must match at least one field
-    const merged = (rows ?? []).filter((r) => {
-      if (!r.preview_path) return false;
-      const title = (r.title ?? "").toLowerCase();
-      const caption = (r.caption ?? "").toLowerCase();
-      const kwords = ((r.keywords ?? []) as string[]).map((k) => k.toLowerCase());
-      return terms.every(
-        (t) =>
-          title.includes(t) ||
-          caption.includes(t) ||
-          kwords.some((k) => k.includes(t)),
+    for (let from = 0; merged.length < data.limit; from += DB_PAGE_SIZE) {
+      const { data: rows, error } = await supabaseAdmin
+        .from("images")
+        .select("id, image_number, title, caption, keywords, preview_path")
+        .eq("public", true)
+        .eq("featured", false)
+        .not("preview_path", "is", null)
+        .or(`title.ilike.%${primary}%,caption.ilike.%${primary}%,keywords.cs.{${primary}}`)
+        .order("image_number", { ascending: false })
+        .range(from, from + DB_PAGE_SIZE - 1);
+      if (error) throw new Error(error.message);
+
+      const pageRows = rows ?? [];
+      merged.push(
+        ...pageRows.filter((r) => {
+          if (!r.preview_path) return false;
+          const title = (r.title ?? "").toLowerCase();
+          const caption = (r.caption ?? "").toLowerCase();
+          const kwords = ((r.keywords ?? []) as string[]).map((k) => k.toLowerCase());
+          return terms.every(
+            (t) => title.includes(t) || caption.includes(t) || kwords.some((k) => k.includes(t)),
+          );
+        }),
       );
-    });
-    const paths = merged.map((r) => r.preview_path as string);
-    const signed = paths.length
-      ? await supabaseAdmin.storage
-          .from("images-private")
-          .createSignedUrls(paths, 3600)
-      : { data: [] as Array<{ signedUrl: string | null }> };
 
-    return merged.map((r, i) => ({
+      if (pageRows.length < DB_PAGE_SIZE) break;
+    }
+
+    const limited = merged.slice(0, data.limit);
+    const paths = limited.map((r) => r.preview_path as string);
+    const signedUrls: Array<{ signedUrl: string | null }> = [];
+    for (let i = 0; i < paths.length; i += SIGNED_URL_BATCH_SIZE) {
+      const signed = await supabaseAdmin.storage
+        .from("images-private")
+        .createSignedUrls(paths.slice(i, i + SIGNED_URL_BATCH_SIZE), 3600);
+      signedUrls.push(...(signed.data ?? []));
+    }
+
+    return limited.map((r, i) => ({
       id: r.id,
       image_number: r.image_number as number,
       title: r.title,
       caption: r.caption,
       keywords: (r.keywords ?? []) as string[],
-      signed_url: signed.data?.[i]?.signedUrl ?? null,
+      signed_url: signedUrls[i]?.signedUrl ?? null,
     }));
   });
 
@@ -114,9 +128,7 @@ export const getPublicImage = createServerFn({ method: "POST" })
   });
 
 export const getPublicImagesByIds = createServerFn({ method: "POST" })
-  .inputValidator(
-    z.object({ ids: z.array(z.string().uuid()).max(200) }).parse,
-  )
+  .inputValidator(z.object({ ids: z.array(z.string().uuid()).max(200) }).parse)
   .handler(async ({ data }): Promise<PublicSearchResult[]> => {
     if (data.ids.length === 0) return [];
     const { data: rows, error } = await supabaseAdmin
@@ -135,9 +147,7 @@ export const getPublicImagesByIds = createServerFn({ method: "POST" })
 
     const paths = ordered.map((r) => r.preview_path as string);
     const signed = paths.length
-      ? await supabaseAdmin.storage
-          .from("images-private")
-          .createSignedUrls(paths, 3600)
+      ? await supabaseAdmin.storage.from("images-private").createSignedUrls(paths, 3600)
       : { data: [] as Array<{ signedUrl: string | null }> };
 
     return ordered.map((r, i) => ({
@@ -179,9 +189,7 @@ export const getSimilarShootImages = createServerFn({ method: "POST" })
     if (merged.length === 0) return [];
 
     const paths = merged.map((r) => r.preview_path as string);
-    const signed = await supabaseAdmin.storage
-      .from("images-private")
-      .createSignedUrls(paths, 3600);
+    const signed = await supabaseAdmin.storage.from("images-private").createSignedUrls(paths, 3600);
 
     return merged.map((r, i) => ({
       id: r.id,
@@ -192,6 +200,3 @@ export const getSimilarShootImages = createServerFn({ method: "POST" })
       signed_url: signed.data?.[i]?.signedUrl ?? null,
     }));
   });
-
-
-
