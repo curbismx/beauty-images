@@ -468,6 +468,14 @@ const captionStyle: React.CSSProperties = {
   lineHeight: 1.55,
   color: "#222",
 };
+const errorPanel: React.CSSProperties = {
+  border: "1px solid #D75F68",
+  color: "#D75F68",
+  padding: "10px 12px",
+  fontSize: 12,
+  fontWeight: 800,
+  letterSpacing: "0.02em",
+};
 const kwWrap: React.CSSProperties = {
   display: "flex",
   flexWrap: "wrap",
