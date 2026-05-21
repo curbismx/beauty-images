@@ -779,11 +779,17 @@ const failedActionBar: React.CSSProperties = {
   flexWrap: "wrap",
 };
 const failedActionButtonDark: React.CSSProperties = {
-  ...retryBtn,
   width: "auto",
+  background: "#000",
+  color: "#fff",
   border: "1px solid #000",
   borderTop: "1px solid #000",
   padding: "10px 14px",
+  fontSize: 11,
+  fontWeight: 800,
+  letterSpacing: "0.06em",
+  textTransform: "uppercase",
+  cursor: "pointer",
 };
 const failedActionButtonLight: React.CSSProperties = {
   ...failedActionButtonDark,
