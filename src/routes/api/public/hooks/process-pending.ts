@@ -193,17 +193,23 @@ function guessMime(filename: string): string {
 }
 
 async function processKeywords(supabase: ReturnType<typeof admin>) {
-  const { data: rows, error } = await supabase
+  const staleCutoff = new Date(Date.now() - CLAIM_TTL_MS).toISOString();
+  const { data: candidates, error } = await supabase
     .from("images")
     .select("id, image_number, filename, preview_path, processing_attempts")
     .is("keyworded_at", null)
     .not("preview_path", "is", null)
     .is("processing_error", null)
     .lt("processing_attempts", MAX_ATTEMPTS)
+    .or(`processing_started_at.is.null,processing_started_at.lt.${staleCutoff}`)
     .order("image_number", { ascending: true })
     .limit(KEYWORD_BATCH);
   if (error) throw new Error(error.message);
-  if (!rows?.length) return { processed: 0, failed: 0 };
+  if (!candidates?.length) return { processed: 0, failed: 0 };
+
+  const claimed = await claimRows(supabase, candidates.map((r) => r.id));
+  const rows = candidates.filter((r) => claimed.has(r.id));
+  if (!rows.length) return { processed: 0, failed: 0 };
 
   let processed = 0;
   let failed = 0;
@@ -225,6 +231,7 @@ async function processKeywords(supabase: ReturnType<typeof admin>) {
             keyworded_at: new Date().toISOString(),
             processing_attempts: 0,
             processing_error: null,
+            processing_started_at: null,
           })
           .eq("id", row.id);
         if (upErr) throw new Error(upErr.message);
@@ -232,6 +239,7 @@ async function processKeywords(supabase: ReturnType<typeof admin>) {
       } catch (e) {
         failed += 1;
         await markFailure(supabase, row.id, row.processing_attempts ?? 0, e);
+        await releaseRow(supabase, row.id);
         console.error("keyword failed", row.id, e);
       }
     }),
@@ -239,10 +247,25 @@ async function processKeywords(supabase: ReturnType<typeof admin>) {
   return { processed, failed };
 }
 
+function timingSafeEqualStr(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let mismatch = 0;
+  for (let i = 0; i < a.length; i++) mismatch |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return mismatch === 0;
+}
+
 export const Route = createFileRoute("/api/public/hooks/process-pending")({
   server: {
     handlers: {
-      POST: async () => {
+      POST: async ({ request }) => {
+        const expected = process.env.CRON_SECRET;
+        if (!expected) {
+          return Response.json({ ok: false, error: "CRON_SECRET not configured" }, { status: 500 });
+        }
+        const provided = request.headers.get("x-cron-secret") ?? "";
+        if (!timingSafeEqualStr(provided, expected)) {
+          return new Response("Unauthorized", { status: 401 });
+        }
         const supabase = admin();
         try {
           const previews = await processPreviews(supabase);
@@ -255,3 +278,4 @@ export const Route = createFileRoute("/api/public/hooks/process-pending")({
     },
   },
 });
+
