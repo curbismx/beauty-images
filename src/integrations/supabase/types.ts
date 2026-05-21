@@ -82,6 +82,8 @@ export type Database = {
           model_release_pdf_path: string | null
           preview_path: string | null
           pricing_tier: string | null
+          processing_attempts: number
+          processing_error: string | null
           public: boolean
           storage_path: string
           title: string | null
@@ -95,13 +97,15 @@ export type Database = {
           featured?: boolean
           filename: string
           id?: string
-          image_number?: number
+          image_number: number
           keyworded_at?: string | null
           keywords?: string[]
           model_release?: boolean
           model_release_pdf_path?: string | null
           preview_path?: string | null
           pricing_tier?: string | null
+          processing_attempts?: number
+          processing_error?: string | null
           public?: boolean
           storage_path: string
           title?: string | null
@@ -122,6 +126,8 @@ export type Database = {
           model_release_pdf_path?: string | null
           preview_path?: string | null
           pricing_tier?: string | null
+          processing_attempts?: number
+          processing_error?: string | null
           public?: boolean
           storage_path?: string
           title?: string | null
