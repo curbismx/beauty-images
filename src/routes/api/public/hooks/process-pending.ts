@@ -4,7 +4,6 @@ import { createClient } from "@supabase/supabase-js";
 const MAX_ATTEMPTS = 3;
 const PREVIEW_BATCH = 25;
 const KEYWORD_BATCH = 25;
-const PREVIEW_EDGE = 800;
 
 const KEYWORD_PROMPT = `You are a professional stock-photo keyworder. Analyze the image and return strict JSON with this exact shape:
 {
@@ -29,23 +28,6 @@ function bytesToBase64(buf: Uint8Array): string {
     );
   }
   return btoa(bin);
-}
-
-async function resizeTo800Jpeg(bytes: Uint8Array): Promise<Uint8Array> {
-  const { PhotonImage, resize, SamplingFilter } = await import("@cf-wasm/photon/workerd");
-  const img = PhotonImage.new_from_byteslice(bytes);
-  const w = img.get_width();
-  const h = img.get_height();
-  const longest = Math.max(w, h);
-  let out = img;
-  if (longest > PREVIEW_EDGE) {
-    const scale = PREVIEW_EDGE / longest;
-    out = resize(img, Math.max(1, Math.round(w * scale)), Math.max(1, Math.round(h * scale)), SamplingFilter.Lanczos3);
-    img.free();
-  }
-  const bytesOut = out.get_bytes_jpeg(82);
-  out.free();
-  return bytesOut;
 }
 
 async function keywordOne(dataUrl: string) {
