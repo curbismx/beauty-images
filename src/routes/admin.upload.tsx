@@ -440,7 +440,7 @@ function Upload() {
         ) : !uploadErrors.data?.length ? (
           <div className="bi-placeholder">No upload errors</div>
         ) : (
-          <div style={gridStyle}>
+          <div style={uploadErrorGridStyle}>
             {uploadErrors.data.map((err) => (
               <UploadErrorCard
                 key={err.id}
