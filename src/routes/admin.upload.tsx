@@ -766,6 +766,30 @@ const notice: React.CSSProperties = {
   marginTop: 12,
   fontSize: 12,
 };
+const failedActionBar: React.CSSProperties = {
+  border: "2px solid #D75F68",
+  background: "#fff5f6",
+  color: "#000",
+  padding: 16,
+  marginBottom: 16,
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  gap: 12,
+  flexWrap: "wrap",
+};
+const failedActionButtonDark: React.CSSProperties = {
+  ...retryBtn,
+  width: "auto",
+  border: "1px solid #000",
+  borderTop: "1px solid #000",
+  padding: "10px 14px",
+};
+const failedActionButtonLight: React.CSSProperties = {
+  ...failedActionButtonDark,
+  background: "#fff",
+  color: "#000",
+};
 const errBox: React.CSSProperties = {
   ...notice,
   color: "#D75F68",
