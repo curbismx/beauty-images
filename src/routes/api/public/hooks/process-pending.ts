@@ -136,7 +136,6 @@ async function processPreviews(supabase: ReturnType<typeof admin>) {
     .from("images")
     .select("id, storage_path, processing_attempts")
     .is("preview_path", null)
-    .is("processing_error", null)
     .lt("processing_attempts", MAX_ATTEMPTS)
     .or(`processing_started_at.is.null,processing_started_at.lt.${staleCutoff}`)
     .order("image_number", { ascending: true })
