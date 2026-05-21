@@ -206,7 +206,7 @@ function Index() {
     let alive = true;
     const q = restoreState.q.trim();
     setSearching(true);
-    runSearch({ data: { q, limit: 1000 } })
+    runSearch({ data: { q, limit: 50000 } })
       .then((r) => {
         if (!alive) return;
         setResults(r);
