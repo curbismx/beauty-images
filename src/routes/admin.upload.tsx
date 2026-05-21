@@ -332,7 +332,7 @@ function Upload() {
                       NO PREVIEW
                     </div>
                   )}
-                  <span style={{ ...badgeStyle, background: "#000" }}>#{r.image_number}</span>
+                  <span style={{ ...badgeStyle, background: "#000" }}>#{String(r.image_number).padStart(8, "0")}</span>
                   {!r.keyworded_at && (
                     <span style={{ ...badgeStyle, background: "#D75F68", left: "auto", right: 8 }}>
                       PENDING
