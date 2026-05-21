@@ -212,6 +212,7 @@ function Upload() {
         const parsedNumber = parseInt(match[1], 10);
         setQueue((q) => q.map((it) => (it.id === item.id ? { ...it, status: "uploading" } : it)));
         let uploadedPath: string | null = null;
+        let previewUploadedPath: string | null = null;
         try {
           const dup = await checkNumber({ data: { image_number: parsedNumber } });
           if (dup.exists) {
@@ -235,6 +236,7 @@ function Upload() {
             .from("images-private")
             .upload(previewPath, previewBlob, { contentType: "image/jpeg", upsert: false });
           if (previewUp.error) throw new Error(`Preview upload failed: ${previewUp.error.message}`);
+          previewUploadedPath = previewPath;
 
           const ins = await supabase
             .from("images")
@@ -256,6 +258,7 @@ function Upload() {
             ),
           );
         } catch (e) {
+          if (previewUploadedPath) await supabase.storage.from("images-private").remove([previewUploadedPath]);
           if (!String((e as Error).message).startsWith("Duplicate number")) {
             try {
               await uploadErrorRecord((e as Error).message, uploadedPath);
