@@ -135,8 +135,24 @@ function Library() {
           >
             {unpublishMut.isPending ? "…" : "Unpublish all"}
           </button>
+          <button
+            style={btnDark}
+            disabled={!stats.data?.failed || retryAllMut.isPending}
+            onClick={() => {
+              const n = stats.data?.failed ?? 0;
+              if (!n) return;
+              if (confirm(`Retry all ${n} failed image${n === 1 ? "" : "s"}?`)) retryAllMut.mutate();
+            }}
+          >
+            {retryAllMut.isPending
+              ? "Retrying…"
+              : `Retry all failed${stats.data?.failed ? ` (${stats.data.failed})` : ""}`}
+          </button>
         </div>
       </div>
+      {retryAllMut.data && (
+        <div style={notice}>Queued {retryAllMut.data.retried} failed image{retryAllMut.data.retried === 1 ? "" : "s"} for retry.</div>
+      )}
       {publishMut.data && (
         <div style={notice}>Published {publishMut.data.published} images.</div>
       )}
