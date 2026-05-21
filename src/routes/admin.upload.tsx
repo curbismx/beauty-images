@@ -348,10 +348,13 @@ function Upload() {
             : "Loading stats…"}
         </div>
         <div style={{ fontSize: 10, color: "#666", letterSpacing: "0.04em", textTransform: "uppercase" }}>
-          {stats.data && stats.data.processing > 0
-            ? `Keywording runs automatically · ~600/hour · ${stats.data.processing} left`
-            : "Keywording runs automatically in the background"}
+          {totals.queued > 0 || totals.uploading > 0
+            ? `Uploading · ${totals.uploading} in flight · ${totals.queued} queued · ${totals.done} done · ${totals.failed} failed`
+            : stats.data && stats.data.processing > 0
+              ? `Keywording runs automatically · ~600/hour · ${stats.data.processing} left`
+              : "Keywording runs automatically in the background"}
         </div>
+
       </div>
 
       <div
