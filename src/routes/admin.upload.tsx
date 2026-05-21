@@ -491,6 +491,18 @@ const errStyle: React.CSSProperties = {
   color: "#D75F68",
   borderTop: "1px solid #D75F68",
 };
+const notice: React.CSSProperties = {
+  padding: "8px 12px",
+  background: "#f4f4f4",
+  border: "1px solid #000",
+  marginTop: 12,
+  fontSize: 12,
+};
+const errBox: React.CSSProperties = {
+  ...notice,
+  color: "#D75F68",
+  borderColor: "#D75F68",
+};
 const retryBtn: React.CSSProperties = {
   width: "100%",
   padding: "8px 10px",
