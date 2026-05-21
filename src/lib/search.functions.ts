@@ -38,6 +38,7 @@ export const searchPublicImages = createServerFn({ method: "POST" })
       .from("images")
       .select("id, image_number, title, caption, keywords, preview_path")
       .eq("public", true)
+      .eq("featured", false)
       .not("preview_path", "is", null)
       .or(
         `title.ilike.%${escaped}%,caption.ilike.%${escaped}%,keywords.cs.{${term.toLowerCase()}}`,
@@ -72,6 +73,7 @@ export const getPublicImage = createServerFn({ method: "POST" })
       .select("id, image_number, title, caption, keywords, category, pricing_tier, preview_path")
       .eq("id", data.id)
       .eq("public", true)
+      .eq("featured", false)
       .not("preview_path", "is", null)
       .maybeSingle();
     if (error) throw new Error(error.message);
@@ -102,6 +104,7 @@ export const getPublicImagesByIds = createServerFn({ method: "POST" })
       .select("id, image_number, title, caption, keywords, preview_path")
       .in("id", data.ids)
       .eq("public", true)
+      .eq("featured", false)
       .not("preview_path", "is", null);
     if (error) throw new Error(error.message);
 
@@ -147,6 +150,7 @@ export const getSimilarShootImages = createServerFn({ method: "POST" })
       .lte("image_number", max)
       .neq("id", data.excludeId)
       .eq("public", true)
+      .eq("featured", false)
       .not("preview_path", "is", null)
       .order("image_number", { ascending: true })
       .limit(60);
