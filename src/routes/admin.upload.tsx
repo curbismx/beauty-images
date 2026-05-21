@@ -137,12 +137,15 @@ function Upload() {
   const removeUploadErrors = useServerFn(deleteUploadErrors);
   const fixUploadError = useServerFn(resolveUploadError);
   const runRetry = useServerFn(retryImageProcessing);
+  const runRetryAll = useServerFn(retryAllFailedImages);
 
   const uploadErrors = useQuery({
     queryKey: ["upload-errors"],
     queryFn: () => fetchUploadErrors({ data: { limit: 300 } }),
     refetchInterval: 15_000,
   });
+
+  const [failedOnly, setFailedOnly] = useState(false);
 
   const deleteUploadErrorMut = useMutation({
     mutationFn: (id: string) => removeUploadErrors({ data: { ids: [id] } }),
