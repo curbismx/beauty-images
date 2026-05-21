@@ -67,13 +67,15 @@ export const Route = createFileRoute("/api/public/hooks/keyword-pending")({
           process.env.SUPABASE_SERVICE_ROLE_KEY!,
         );
 
-        // Process up to 5 images per invocation. Combined with a 5-minute cron
-        // schedule that yields ~1,440 keywords / 24h, just under the 1,500/day cap.
-        const BATCH = 5;
+        // Process up to 10 images per invocation, cron runs every minute.
+        // Skip rows that already errored or don't yet have a preview.
+        const BATCH = 10;
         const { data: rows, error } = await supabase
           .from("images")
-          .select("id, image_number, filename, storage_path")
+          .select("id, image_number, filename, storage_path, preview_path")
           .is("keyworded_at", null)
+          .is("processing_error", null)
+          .not("preview_path", "is", null)
           .order("image_number", { ascending: true })
           .limit(BATCH);
         if (error) {
