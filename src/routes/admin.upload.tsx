@@ -22,7 +22,66 @@ export const Route = createFileRoute("/admin/upload")({
 });
 
 const FILENAME_RE = /^a(\d{8})\.[a-z0-9]+$/i;
+const IMAGE_FILE_RE = /\.(jpe?g|png|webp|gif)$/i;
 const PREVIEW_EDGE = 800;
+
+type WebkitEntry = {
+  isFile: boolean;
+  isDirectory: boolean;
+  name: string;
+  file?: (success: (file: File) => void, error?: (err: unknown) => void) => void;
+  createReader?: () => {
+    readEntries: (success: (entries: WebkitEntry[]) => void, error?: (err: unknown) => void) => void;
+  };
+};
+
+type DataTransferItemWithEntry = DataTransferItem & {
+  webkitGetAsEntry?: () => WebkitEntry | null;
+};
+
+function isImageFile(file: File) {
+  return file.type.startsWith("image/") || IMAGE_FILE_RE.test(file.name);
+}
+
+async function filesFromEntry(entry: WebkitEntry): Promise<File[]> {
+  if (entry.isFile && entry.file) {
+    const file = await new Promise<File>((resolve, reject) => {
+      entry.file?.(resolve, (err) => reject(err instanceof Error ? err : new Error("Could not read dropped file")));
+    });
+    return isImageFile(file) ? [file] : [];
+  }
+
+  if (!entry.isDirectory || !entry.createReader) return [];
+  const reader = entry.createReader();
+  const entries: WebkitEntry[] = [];
+  await new Promise<void>((resolve, reject) => {
+    const readNext = () => {
+      reader.readEntries((batch) => {
+        if (batch.length === 0) {
+          resolve();
+          return;
+        }
+        entries.push(...batch);
+        readNext();
+      }, (err) => reject(err instanceof Error ? err : new Error("Could not read dropped folder")));
+    };
+    readNext();
+  });
+
+  const files: File[] = [];
+  for (const child of entries) files.push(...(await filesFromEntry(child)));
+  return files;
+}
+
+async function collectDroppedImageFiles(dataTransfer: DataTransfer) {
+  const items = Array.from(dataTransfer.items ?? []) as DataTransferItemWithEntry[];
+  const entries = items.map((item) => item.webkitGetAsEntry?.()).filter(Boolean) as WebkitEntry[];
+  const files = entries.length
+    ? (await Promise.all(entries.map(filesFromEntry))).flat()
+    : Array.from(dataTransfer.files).filter(isImageFile);
+  const rawCount = entries.length || dataTransfer.files.length;
+  return { files, ignored: Math.max(0, rawCount - files.length) };
+}
 
 function extensionFor(filename: string) {
   return filename.split(".").pop()?.toLowerCase() || "jpg";
