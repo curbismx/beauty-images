@@ -171,6 +171,13 @@ function Upload() {
       qc.invalidateQueries({ queryKey: ["image-stats"] });
     },
   });
+  const retryAllMut = useMutation({
+    mutationFn: () => runRetryAll({}),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["processing-queue"] });
+      qc.invalidateQueries({ queryKey: ["image-stats"] });
+    },
+  });
 
   const updateItem = useCallback((id: string, patch: Partial<QueueItem>) => {
     setQueue((q) => {
