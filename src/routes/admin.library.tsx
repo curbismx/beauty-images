@@ -43,6 +43,7 @@ function Library() {
   const runPublish = useServerFn(publishAllReady);
   const runUnpublish = useServerFn(unpublishAll);
   const runDelete = useServerFn(deleteImages);
+  const runRetryAll = useServerFn(retryAllFailedImages);
 
   const q = useQuery({
     queryKey: ["library-images", active, search],
