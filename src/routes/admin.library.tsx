@@ -64,10 +64,6 @@ function Library() {
     queryKey: ["upload-errors"],
     queryFn: () => fetchUploadErrors({ data: { limit: 300 } }),
   });
-  const stats = useQuery({
-    queryKey: ["image-stats"],
-    queryFn: () => fetchStats({}),
-  });
 
   const invalidate = () => {
     qc.invalidateQueries({ queryKey: ["library-images"] });
