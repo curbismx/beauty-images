@@ -234,7 +234,7 @@ function Upload() {
       >
         <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: "0.04em", textTransform: "uppercase" }}>
           {stats.data
-            ? `${stats.data.keyworded.toLocaleString()} keyworded · ${stats.data.processing.toLocaleString()} processing · ${stats.data.failed.toLocaleString()} failed · ${stats.data.total.toLocaleString()} total`
+            ? `${stats.data.keyworded.toLocaleString()} keyworded · ${stats.data.processing.toLocaleString()} processing · ${stats.data.failed.toLocaleString()} failed · ${stats.data.upload_errors.toLocaleString()} upload errors · ${stats.data.total.toLocaleString()} total`
             : "Loading stats…"}
         </div>
         <div style={{ fontSize: 10, color: "#666", letterSpacing: "0.04em", textTransform: "uppercase" }}>
@@ -276,6 +276,37 @@ function Upload() {
             e.target.value = "";
           }}
         />
+      </div>
+
+      <div className="bi-section" style={{ marginTop: 32 }}>
+        <h2 className="bi-section-title">
+          Upload errors {uploadErrors.data?.length ? `(${uploadErrors.data.length})` : ""}
+        </h2>
+        {uploadErrors.isLoading ? (
+          <div className="bi-placeholder">Loading errors…</div>
+        ) : !uploadErrors.data?.length ? (
+          <div className="bi-placeholder">No upload errors</div>
+        ) : (
+          <div style={gridStyle}>
+            {uploadErrors.data.map((err) => (
+              <UploadErrorCard
+                key={err.id}
+                err={err}
+                deleting={deleteUploadErrorMut.isPending}
+                resolving={resolveUploadErrorMut.isPending}
+                onDelete={() => {
+                  if (confirm(`Delete error file ${err.filename}?`)) deleteUploadErrorMut.mutate(err.id);
+                }}
+                onResolve={(image_number) => resolveUploadErrorMut.mutate({ id: err.id, image_number })}
+              />
+            ))}
+          </div>
+        )}
+        {deleteUploadErrorMut.data && <div style={notice}>Deleted {deleteUploadErrorMut.data.deleted} error file.</div>}
+        {resolveUploadErrorMut.data && (
+          <div style={notice}>Moved #{String(resolveUploadErrorMut.data.image_number).padStart(8, "0")} into the processing queue.</div>
+        )}
+        {resolveUploadErrorMut.error && <div style={errBox}>{(resolveUploadErrorMut.error as Error).message}</div>}
       </div>
 
       {queue.length > 0 && (
