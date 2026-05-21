@@ -158,7 +158,7 @@ function Index() {
     setSubmittedQuery(q);
     setSearching(true);
     try {
-      const r = await runSearch({ data: { q, limit: 60 } });
+      const r = await runSearch({ data: { q, limit: 1000 } });
       setResults(r);
       if (typeof restoreY === "number") {
         requestAnimationFrame(() => {
@@ -203,7 +203,7 @@ function Index() {
     let alive = true;
     const q = restoreState.q.trim();
     setSearching(true);
-    runSearch({ data: { q, limit: 60 } })
+    runSearch({ data: { q, limit: 1000 } })
       .then((r) => {
         if (!alive) return;
         setResults(r);
