@@ -1,0 +1,1 @@
+update images set processing_attempts=0, processing_error=null, processing_started_at=null where featured=false;
