@@ -33,7 +33,13 @@ export const searchPublicImages = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }): Promise<PublicSearchResult[]> => {
     const term = data.q.trim();
-    const escaped = term.replace(/[%,]/g, " ");
+    // Split on commas or spaces, trim, and filter empty terms
+    const terms = term
+      .split(/[, ]+/)
+      .map((t) => t.trim())
+      .filter(Boolean);
+    if (terms.length === 0) return [];
+
     const { data: rows, error } = await supabaseAdmin
       .from("images")
       .select("id, image_number, title, caption, keywords, preview_path")
@@ -41,7 +47,7 @@ export const searchPublicImages = createServerFn({ method: "POST" })
       .eq("featured", false)
       .not("preview_path", "is", null)
       .or(
-        `title.ilike.%${escaped}%,caption.ilike.%${escaped}%,keywords.cs.{${term.toLowerCase()}}`,
+        `title.ilike.%${terms[1]}%,caption.ilike.%${terms[0]}%,keywords.cs.{${terms[0].toLowerCase()}}`,
       )
       .order("image_number", { ascending: false })
       .limit(data.limit);
