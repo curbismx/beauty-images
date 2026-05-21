@@ -11,6 +11,8 @@ import {
   unpublishAll,
   deleteImages,
   updateImage,
+  retryImageProcessing,
+  retryAllFailedImages,
   type LibraryImage,
 } from "@/lib/images.functions";
 
