@@ -290,7 +290,8 @@ function EditableRow({
       <div style={contentCol}>
         <div style={topRow}>
           <span style={numBadge}>{String(row.image_number).padStart(8, "0")}</span>
-          {!row.keyworded_at && <span style={{ ...statusBadge, background: "#D75F68" }}>PENDING</span>}
+          {row.processing_error && <span style={{ ...statusBadge, background: "#a32020" }}>ERROR</span>}
+          {!row.processing_error && !row.keyworded_at && <span style={{ ...statusBadge, background: "#D75F68" }}>PENDING</span>}
           {row.keyworded_at && row.public && <span style={{ ...statusBadge, background: "#D75F68" }}>PUBLISHED</span>}
           {row.keyworded_at && !row.public && <span style={{ ...statusBadge, background: "#888" }}>READY</span>}
           {row.category && <span style={catBadge}>{row.category}</span>}
@@ -349,6 +350,7 @@ function EditableRow({
           </>
         ) : (
           <>
+            {row.processing_error && <div style={errorPanel}>Error: {row.processing_error}</div>}
             <div style={titleStyle}>{row.title ?? stripExt(row.filename)}</div>
             {row.caption && <div style={captionStyle}>{row.caption}</div>}
             {displayKeywords.length > 0 && (
