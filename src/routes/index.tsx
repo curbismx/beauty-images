@@ -159,6 +159,7 @@ function Index() {
     if (!q) return;
     setSubmittedQuery(q);
     setSearching(true);
+    setPage(1);
     try {
       const r = await runSearch({ data: { q, limit: 1000 } });
       setResults(r);
