@@ -9,7 +9,6 @@ import {
   getProcessingQueue,
   checkImageNumberExists,
   retryImageProcessing,
-  
   createUploadError,
   listUploadErrors,
   deleteUploadErrors,
@@ -31,7 +30,10 @@ type WebkitEntry = {
   name: string;
   file?: (success: (file: File) => void, error?: (err: unknown) => void) => void;
   createReader?: () => {
-    readEntries: (success: (entries: WebkitEntry[]) => void, error?: (err: unknown) => void) => void;
+    readEntries: (
+      success: (entries: WebkitEntry[]) => void,
+      error?: (err: unknown) => void,
+    ) => void;
   };
 };
 
@@ -46,7 +48,9 @@ function isImageFile(file: File) {
 async function filesFromEntry(entry: WebkitEntry): Promise<File[]> {
   if (entry.isFile && entry.file) {
     const file = await new Promise<File>((resolve, reject) => {
-      entry.file?.(resolve, (err) => reject(err instanceof Error ? err : new Error("Could not read dropped file")));
+      entry.file?.(resolve, (err) =>
+        reject(err instanceof Error ? err : new Error("Could not read dropped file")),
+      );
     });
     return isImageFile(file) ? [file] : [];
   }
@@ -56,14 +60,17 @@ async function filesFromEntry(entry: WebkitEntry): Promise<File[]> {
   const entries: WebkitEntry[] = [];
   await new Promise<void>((resolve, reject) => {
     const readNext = () => {
-      reader.readEntries((batch) => {
-        if (batch.length === 0) {
-          resolve();
-          return;
-        }
-        entries.push(...batch);
-        readNext();
-      }, (err) => reject(err instanceof Error ? err : new Error("Could not read dropped folder")));
+      reader.readEntries(
+        (batch) => {
+          if (batch.length === 0) {
+            resolve();
+            return;
+          }
+          entries.push(...batch);
+          readNext();
+        },
+        (err) => reject(err instanceof Error ? err : new Error("Could not read dropped folder")),
+      );
     };
     readNext();
   });
@@ -236,7 +243,8 @@ function Upload() {
           const up = await supabase.storage
             .from("images-private")
             .upload(errorPath, file, { contentType: file.type || "image/jpeg", upsert: false });
-          if (up.error) throw new Error(`${message}; also failed to store error file: ${up.error.message}`);
+          if (up.error)
+            throw new Error(`${message}; also failed to store error file: ${up.error.message}`);
         }
         await saveUploadError({
           data: {
@@ -249,9 +257,10 @@ function Upload() {
         return errorPath;
       };
       if (!match) {
-        const message = detectedDigits && detectedDigits.length !== 8
-          ? `Invalid filename — found ${detectedDigits.length} digits after A, must be exactly 8`
-          : `Invalid filename — must be A + 8 digits + extension`;
+        const message =
+          detectedDigits && detectedDigits.length !== 8
+            ? `Invalid filename — found ${detectedDigits.length} digits after A, must be exactly 8`
+            : `Invalid filename — must be A + 8 digits + extension`;
         try {
           await uploadErrorRecord(message);
         } catch (e) {
@@ -305,7 +314,8 @@ function Upload() {
         updateItem(item.id, { status: "done", imageNumber: ins.data.image_number as number });
         return true;
       } catch (e) {
-        if (previewUploadedPath) await supabase.storage.from("images-private").remove([previewUploadedPath]);
+        if (previewUploadedPath)
+          await supabase.storage.from("images-private").remove([previewUploadedPath]);
         if (!String((e as Error).message).startsWith("Duplicate number")) {
           try {
             await uploadErrorRecord((e as Error).message, uploadedPath);
@@ -328,7 +338,11 @@ function Upload() {
         while (activeRef.current < MAX_CONCURRENT && pendingRef.current.length > 0) {
           const next = pendingRef.current.shift()!;
           activeRef.current += 1;
-          setTotals((t) => ({ ...t, queued: pendingRef.current.length, uploading: activeRef.current }));
+          setTotals((t) => ({
+            ...t,
+            queued: pendingRef.current.length,
+            uploading: activeRef.current,
+          }));
           processOne(next)
             .then((ok) => {
               setTotals((t) => ({
@@ -339,7 +353,11 @@ function Upload() {
             })
             .finally(() => {
               activeRef.current -= 1;
-              setTotals((t) => ({ ...t, queued: pendingRef.current.length, uploading: activeRef.current }));
+              setTotals((t) => ({
+                ...t,
+                queued: pendingRef.current.length,
+                uploading: activeRef.current,
+              }));
               // Free memory after the tile has a chance to show its final state.
               setTimeout(() => URL.revokeObjectURL(next.previewUrl), 2000);
             });
@@ -359,7 +377,9 @@ function Upload() {
     (files: FileList | File[]) => {
       const arr = Array.from(files).filter(isImageFile);
       if (!arr.length) {
-        setDropMessage("No image files found — open the folder and select/drop the images inside it.");
+        setDropMessage(
+          "No image files found — open the folder and select/drop the images inside it.",
+        );
         return;
       }
       setDropMessage(null);
@@ -407,19 +427,32 @@ function Upload() {
           flexWrap: "wrap",
         }}
       >
-        <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: "0.04em", textTransform: "uppercase" }}>
+        <div
+          style={{
+            fontSize: 12,
+            fontWeight: 800,
+            letterSpacing: "0.04em",
+            textTransform: "uppercase",
+          }}
+        >
           {stats.data
             ? `${stats.data.keyworded.toLocaleString()} keyworded · ${stats.data.processing.toLocaleString()} processing · ${stats.data.failed.toLocaleString()} failed · ${stats.data.upload_errors.toLocaleString()} upload errors · ${stats.data.total.toLocaleString()} total`
             : "Loading stats…"}
         </div>
-        <div style={{ fontSize: 10, color: "#666", letterSpacing: "0.04em", textTransform: "uppercase" }}>
+        <div
+          style={{
+            fontSize: 10,
+            color: "#666",
+            letterSpacing: "0.04em",
+            textTransform: "uppercase",
+          }}
+        >
           {totals.queued > 0 || totals.uploading > 0
             ? `Uploading · ${totals.uploading} in flight · ${totals.queued} queued · ${totals.done} done · ${totals.failed} failed`
             : stats.data && stats.data.processing > 0
               ? `Keywording runs automatically · ~600/hour · ${stats.data.processing} left`
               : "Keywording runs automatically in the background"}
         </div>
-
       </div>
 
       <div
@@ -440,7 +473,10 @@ function Upload() {
           setDragging(false);
           void collectDroppedImageFiles(e.dataTransfer)
             .then(({ files, ignored }) => {
-              if (ignored > 0) setDropMessage(`${ignored} non-image/folder item${ignored === 1 ? "" : "s"} ignored`);
+              if (ignored > 0)
+                setDropMessage(
+                  `${ignored} non-image/folder item${ignored === 1 ? "" : "s"} ignored`,
+                );
               handleFiles(files);
             })
             .catch((err) => setDropMessage((err as Error).message));
@@ -450,7 +486,11 @@ function Upload() {
         <div style={{ fontSize: 10, marginTop: 8, opacity: 0.7 }}>
           Filename format: A + 8 digits + extension (e.g. A00010001.JPG)
         </div>
-        {dropMessage && <div style={{ fontSize: 11, marginTop: 8, color: "#D75F68", fontWeight: 800 }}>{dropMessage}</div>}
+        {dropMessage && (
+          <div style={{ fontSize: 11, marginTop: 8, color: "#D75F68", fontWeight: 800 }}>
+            {dropMessage}
+          </div>
+        )}
         <input
           ref={inputRef}
           type="file"
@@ -481,34 +521,46 @@ function Upload() {
                 deleting={deleteUploadErrorMut.isPending}
                 resolving={resolveUploadErrorMut.isPending}
                 onDelete={() => {
-                  if (confirm(`Delete error file ${err.filename}?`)) deleteUploadErrorMut.mutate(err.id);
+                  if (confirm(`Delete error file ${err.filename}?`))
+                    deleteUploadErrorMut.mutate(err.id);
                 }}
-                onResolve={(image_number) => resolveUploadErrorMut.mutate({ id: err.id, image_number })}
+                onResolve={(image_number) =>
+                  resolveUploadErrorMut.mutate({ id: err.id, image_number })
+                }
               />
             ))}
           </div>
         )}
-        {deleteUploadErrorMut.data && <div style={notice}>Deleted {deleteUploadErrorMut.data.deleted} error file.</div>}
-        {resolveUploadErrorMut.data && (
-          <div style={notice}>Moved #{String(resolveUploadErrorMut.data.image_number).padStart(8, "0")} into the processing queue.</div>
+        {deleteUploadErrorMut.data && (
+          <div style={notice}>Deleted {deleteUploadErrorMut.data.deleted} error file.</div>
         )}
-        {resolveUploadErrorMut.error && <div style={errBox}>{(resolveUploadErrorMut.error as Error).message}</div>}
+        {resolveUploadErrorMut.data && (
+          <div style={notice}>
+            Moved #{String(resolveUploadErrorMut.data.image_number).padStart(8, "0")} into the
+            processing queue.
+          </div>
+        )}
+        {resolveUploadErrorMut.error && (
+          <div style={errBox}>{(resolveUploadErrorMut.error as Error).message}</div>
+        )}
       </div>
 
       {(queue.length > 0 || totals.uploading > 0 || totals.queued > 0) && (
         <div className="bi-section" style={{ marginTop: 32 }}>
           <h2 className="bi-section-title">
-            This session · {totals.done} done · {totals.failed} failed · {totals.uploading} uploading · {totals.queued} queued
+            This session · {totals.done} done · {totals.failed} failed · {totals.uploading}{" "}
+            uploading · {totals.queued} queued
             {queue.length >= VISIBLE_TILES ? ` (showing latest ${VISIBLE_TILES})` : ""}
           </h2>
           <div style={gridStyle}>
             {queue.map((it) => (
-
               <div key={it.id} style={tileStyle}>
                 <div style={{ position: "relative", paddingBottom: "100%", background: "#f4f4f4" }}>
                   <img src={it.previewUrl} alt={it.name} style={imgStyle} />
                   <span style={{ ...badgeStyle, background: statusColor(it.status) }}>
-                    {it.status === "done" && it.imageNumber ? `#${String(it.imageNumber).padStart(8, "0")}` : it.status.toUpperCase()}
+                    {it.status === "done" && it.imageNumber
+                      ? `#${String(it.imageNumber).padStart(8, "0")}`
+                      : it.status.toUpperCase()}
                   </span>
                 </div>
                 <div style={tileName} title={it.name}>
@@ -536,20 +588,42 @@ function Upload() {
               const stage = !r.preview_path ? "WAITING PREVIEW" : "WAITING KEYWORDS";
               return (
                 <div key={r.id} style={tileStyle}>
-                  <div style={{ position: "relative", paddingBottom: "100%", background: "#f4f4f4" }}>
+                  <div
+                    style={{ position: "relative", paddingBottom: "100%", background: "#f4f4f4" }}
+                  >
                     {r.signed_url ? (
                       <img src={r.signed_url} alt={r.filename} style={imgStyle} loading="lazy" />
                     ) : (
-                      <div style={{ ...imgStyle, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, color: "#888" }}>
+                      <div
+                        style={{
+                          ...imgStyle,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontSize: 11,
+                          color: "#888",
+                        }}
+                      >
                         NO PREVIEW YET
                       </div>
                     )}
-                    <span style={{ ...badgeStyle, background: "#000" }}>#{String(r.image_number).padStart(8, "0")}</span>
-                    <span style={{ ...badgeStyle, background: failed ? "#D75F68" : "#666", left: "auto", right: 8 }}>
+                    <span style={{ ...badgeStyle, background: "#000" }}>
+                      #{String(r.image_number).padStart(8, "0")}
+                    </span>
+                    <span
+                      style={{
+                        ...badgeStyle,
+                        background: failed ? "#D75F68" : "#666",
+                        left: "auto",
+                        right: 8,
+                      }}
+                    >
                       {failed ? "FAILED" : stage}
                     </span>
                   </div>
-                  <div style={tileName} title={r.filename}>{r.filename}</div>
+                  <div style={tileName} title={r.filename}>
+                    {r.filename}
+                  </div>
                   {failed && (
                     <>
                       <div style={errStyle}>{r.processing_error}</div>
@@ -603,17 +677,36 @@ function UploadErrorCard({
         {err.signed_url ? (
           <img src={err.signed_url} alt={err.filename} style={imgStyle} loading="lazy" />
         ) : (
-          <div style={{ ...imgStyle, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, color: "#888" }}>
+          <div
+            style={{
+              ...imgStyle,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 11,
+              color: "#888",
+            }}
+          >
             NO FILE SAVED
           </div>
         )}
         <span style={{ ...badgeStyle, background: "#D75F68" }}>ERROR</span>
       </div>
-      <div style={tileName} title={err.filename}>{err.filename}</div>
+      <div style={tileName} title={err.filename}>
+        {err.filename}
+      </div>
       <div style={errStyle}>{err.error_message}</div>
       {err.storage_path && (
         <div style={{ padding: 10, borderTop: "1px solid #000" }}>
-          <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 6 }}>
+          <div
+            style={{
+              fontSize: 10,
+              fontWeight: 800,
+              letterSpacing: "0.06em",
+              textTransform: "uppercase",
+              marginBottom: 6,
+            }}
+          >
             Correct 8-digit number
           </div>
           <input
@@ -621,7 +714,13 @@ function UploadErrorCard({
             maxLength={8}
             onChange={(e) => setNumberText(e.target.value.replace(/\D/g, "").slice(0, 8))}
             placeholder="00010001"
-            style={{ width: "100%", border: "1px solid #000", padding: "8px 10px", fontSize: 12, fontWeight: 800 }}
+            style={{
+              width: "100%",
+              border: "1px solid #000",
+              padding: "8px 10px",
+              fontSize: 12,
+              fontWeight: 800,
+            }}
           />
           <button
             type="button"
@@ -633,7 +732,12 @@ function UploadErrorCard({
           </button>
         </div>
       )}
-      <button type="button" style={{ ...retryBtn, background: "#a32020" }} disabled={deleting} onClick={onDelete}>
+      <button
+        type="button"
+        style={{ ...retryBtn, background: "#a32020" }}
+        disabled={deleting}
+        onClick={onDelete}
+      >
         {deleting ? "…" : "Delete error"}
       </button>
     </div>
