@@ -302,9 +302,8 @@ function Upload() {
     [drainPipeline],
   );
 
-  const allQueueRows = processing.data ?? [];
-  const failedCount = allQueueRows.filter((r) => !!r.processing_error).length;
-  const queueRows = failedOnly ? allQueueRows.filter((r) => !!r.processing_error) : allQueueRows;
+  const queueRows = processing.data ?? [];
+  const failedCount = stats.data?.failed ?? queueRows.filter((r) => !!r.processing_error).length;
 
   return (
     <>
