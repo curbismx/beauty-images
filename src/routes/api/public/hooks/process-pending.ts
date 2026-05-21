@@ -137,11 +137,10 @@ async function processPreviews(supabase: ReturnType<typeof admin>) {
         const dl = await supabase.storage.from("images-private").download(row.storage_path);
         if (dl.error || !dl.data) throw new Error(dl.error?.message ?? "download failed");
         const inBytes = new Uint8Array(await dl.data.arrayBuffer());
-        const outBytes = await resizeTo800Jpeg(inBytes);
         const previewPath = `previews/${row.id}.jpg`;
         const up = await supabase.storage
           .from("images-private")
-          .upload(previewPath, outBytes, { contentType: "image/jpeg", upsert: true });
+          .upload(previewPath, inBytes, { contentType: "image/jpeg", upsert: true });
         if (up.error) throw new Error(up.error.message);
         const { error: upErr } = await supabase
           .from("images")
