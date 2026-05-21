@@ -257,6 +257,36 @@ export type Database = {
         }
         Relationships: []
       }
+      upload_errors: {
+        Row: {
+          created_at: string
+          detected_image_number: number | null
+          error_message: string
+          filename: string
+          id: string
+          storage_path: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          detected_image_number?: number | null
+          error_message: string
+          filename: string
+          id?: string
+          storage_path?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          detected_image_number?: number | null
+          error_message?: string
+          filename?: string
+          id?: string
+          storage_path?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
