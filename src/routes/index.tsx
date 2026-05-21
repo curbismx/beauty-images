@@ -113,6 +113,8 @@ function Index() {
   const [submittedQuery, setSubmittedQuery] = useState(restoreState?.q ?? "");
   const [results, setResults] = useState<PublicSearchResult[]>(restoreState?.results ?? []);
   const [searching, setSearching] = useState(false);
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE_RESULTS = 100;
   const [viewMode, setViewMode] = useViewMode();
   const masonry = viewMode === "masonry";
   const cols = useMasonryCols();
