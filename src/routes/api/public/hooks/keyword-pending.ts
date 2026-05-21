@@ -89,7 +89,7 @@ export const Route = createFileRoute("/api/public/hooks/keyword-pending")({
 
         for (const row of rows) {
           try {
-            const dl = await supabase.storage.from("images-private").download(row.storage_path);
+            const dl = await supabase.storage.from("images-private").download(row.preview_path ?? row.storage_path);
             if (dl.error || !dl.data) throw new Error(dl.error?.message ?? "download failed");
             const buf = new Uint8Array(await dl.data.arrayBuffer());
             let bin = "";
