@@ -34,62 +34,13 @@ function Upload() {
   });
 
   const fetchStats = useServerFn(getImageStats);
-  const stats = useQuery({ queryKey: ["image-stats"], queryFn: () => fetchStats() });
-
-  const runBatch = useServerFn(keywordPendingBatch);
-  const batchMutation = useMutation({
-    mutationFn: () => runBatch({ data: { limit: 25 } }),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["recent-images"] });
-      qc.invalidateQueries({ queryKey: ["image-stats"] });
-    },
+  const stats = useQuery({
+    queryKey: ["image-stats"],
+    queryFn: () => fetchStats(),
+    refetchInterval: 30_000,
   });
 
-  const fetchMissing = useServerFn(listImagesMissingPreview);
-  const savePreview = useServerFn(setImagePreviewPath);
-  const [backfill, setBackfill] = useState<{
-    running: boolean;
-    done: number;
-    failed: number;
-    remaining: number | null;
-    message?: string;
-  }>({ running: false, done: 0, failed: 0, remaining: null });
 
-  const runBackfill = useCallback(async () => {
-    setBackfill({ running: true, done: 0, failed: 0, remaining: null, message: "Starting…" });
-    let done = 0;
-    let failed = 0;
-    // Loop in batches until no more rows are missing previews.
-    // We work in batches of 10 to keep memory and signed-URL counts modest.
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
-      const rows = await fetchMissing({ data: { limit: 10 } });
-      if (!rows.length) break;
-      setBackfill((s) => ({ ...s, remaining: rows.length, message: `Processing ${rows.length}…` }));
-      for (const r of rows) {
-        try {
-          if (!r.signed_url) throw new Error("no signed url");
-          const resp = await fetch(r.signed_url);
-          if (!resp.ok) throw new Error(`download ${resp.status}`);
-          const orig = await resp.blob();
-          const previewBlob = await resizeImageToBlob(orig, 600, 0.82);
-          const previewPath = `previews/${r.id}.jpg`;
-          const up = await supabase.storage
-            .from("images-private")
-            .upload(previewPath, previewBlob, { contentType: "image/jpeg", upsert: true });
-          if (up.error) throw new Error(up.error.message);
-          await savePreview({ data: { id: r.id, preview_path: previewPath } });
-          done += 1;
-        } catch (e) {
-          failed += 1;
-          console.error("backfill failed", r.id, e);
-        }
-        setBackfill((s) => ({ ...s, done, failed }));
-      }
-    }
-    setBackfill({ running: false, done, failed, remaining: 0, message: "Done" });
-    qc.invalidateQueries({ queryKey: ["recent-images"] });
-  }, [fetchMissing, savePreview, qc]);
 
 
   // Revoke object URLs when component unmounts
