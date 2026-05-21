@@ -484,13 +484,46 @@ function Upload() {
       )}
 
       <div className="bi-section" style={{ marginTop: 32 }}>
-        <h2 className="bi-section-title">
-          Processing queue {queueRows.length ? `(${queueRows.length})` : ""}
-        </h2>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap", marginBottom: 12 }}>
+          <h2 className="bi-section-title" style={{ margin: 0 }}>
+            Processing queue {allQueueRows.length ? `(${failedOnly ? `${queueRows.length} of ${allQueueRows.length}` : allQueueRows.length})` : ""}
+          </h2>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <button
+              type="button"
+              onClick={() => setFailedOnly((v) => !v)}
+              style={{
+                ...retryBtn,
+                width: "auto",
+                background: failedOnly ? "#D75F68" : "#fff",
+                color: failedOnly ? "#fff" : "#000",
+                border: "1px solid #000",
+              }}
+            >
+              {failedOnly ? `Showing failed (${failedCount})` : `Show failed only (${failedCount})`}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                if (!failedCount) return;
+                if (confirm(`Retry all ${failedCount} failed image${failedCount === 1 ? "" : "s"}?`)) {
+                  retryAllMut.mutate();
+                }
+              }}
+              disabled={!failedCount || retryAllMut.isPending}
+              style={{ ...retryBtn, width: "auto", opacity: !failedCount ? 0.4 : 1 }}
+            >
+              {retryAllMut.isPending ? "Retrying…" : `Retry all failed${failedCount ? ` (${failedCount})` : ""}`}
+            </button>
+          </div>
+        </div>
+        {retryAllMut.data && (
+          <div style={notice}>Queued {retryAllMut.data.retried} failed image{retryAllMut.data.retried === 1 ? "" : "s"} for retry.</div>
+        )}
         {processing.isLoading ? (
           <div className="bi-placeholder">Loading…</div>
         ) : !queueRows.length ? (
-          <div className="bi-placeholder">Queue empty — all uploaded images are keyworded</div>
+          <div className="bi-placeholder">{failedOnly ? "No failed images" : "Queue empty — all uploaded images are keyworded"}</div>
         ) : (
           <div style={gridStyle}>
             {queueRows.map((r) => {
