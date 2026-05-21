@@ -13,15 +13,94 @@ export const getImageStats = createServerFn({ method: "GET" })
   .middleware([requireAdmin])
   .handler(async ({ context }) => {
     const { supabase } = context;
-    const [{ count: total }, { count: pending }] = await Promise.all([
+    const [{ count: total }, { count: pending }, { count: failed }] = await Promise.all([
       supabase.from("images").select("id", { count: "exact", head: true }),
       supabase
         .from("images")
         .select("id", { count: "exact", head: true })
         .is("keyworded_at", null),
+      supabase
+        .from("images")
+        .select("id", { count: "exact", head: true })
+        .not("processing_error", "is", null),
     ]);
-    return { total: total ?? 0, pending: pending ?? 0 };
+    const totalN = total ?? 0;
+    const pendingN = pending ?? 0;
+    const failedN = failed ?? 0;
+    return {
+      total: totalN,
+      pending: pendingN,
+      keyworded: totalN - pendingN,
+      processing: Math.max(0, pendingN - failedN),
+      failed: failedN,
+    };
   });
+
+export const checkImageNumberExists = createServerFn({ method: "POST" })
+  .middleware([requireAdmin])
+  .inputValidator(z.object({ image_number: z.number().int().min(1) }).parse)
+  .handler(async ({ data, context }) => {
+    const { count, error } = await context.supabase
+      .from("images")
+      .select("id", { count: "exact", head: true })
+      .eq("image_number", data.image_number);
+    if (error) throw new Error(error.message);
+    return { exists: (count ?? 0) > 0 };
+  });
+
+export const retryImageProcessing = createServerFn({ method: "POST" })
+  .middleware([requireAdmin])
+  .inputValidator(z.object({ id: z.string().uuid() }).parse)
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase
+      .from("images")
+      .update({ processing_attempts: 0, processing_error: null })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true as const };
+  });
+
+export type PendingQueueItem = {
+  id: string;
+  image_number: number;
+  filename: string;
+  created_at: string;
+  preview_path: string | null;
+  processing_attempts: number;
+  processing_error: string | null;
+  signed_url: string | null;
+};
+
+export const getProcessingQueue = createServerFn({ method: "GET" })
+  .middleware([requireAdmin])
+  .inputValidator(z.object({ limit: z.number().int().min(1).max(500).default(200) }).parse)
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+    const { data: rows, error } = await supabase
+      .from("images")
+      .select("id, image_number, filename, created_at, preview_path, processing_attempts, processing_error")
+      .is("keyworded_at", null)
+      .order("created_at", { ascending: false })
+      .limit(data.limit);
+    if (error) throw new Error(error.message);
+    const paths = (rows ?? []).map((r) => r.preview_path).filter(Boolean) as string[];
+    const signedMap = new Map<string, string | null>();
+    if (paths.length) {
+      const signed = await supabase.storage.from("images-private").createSignedUrls(paths, 3600);
+      (signed.data ?? []).forEach((s, i) => signedMap.set(paths[i], s.signedUrl ?? null));
+    }
+    return (rows ?? []).map((r) => ({
+      id: r.id,
+      image_number: r.image_number as number,
+      filename: r.filename,
+      created_at: r.created_at,
+      preview_path: r.preview_path,
+      processing_attempts: r.processing_attempts ?? 0,
+      processing_error: r.processing_error,
+      signed_url: r.preview_path ? signedMap.get(r.preview_path) ?? null : null,
+    })) as PendingQueueItem[];
+  });
+
 
 export type RecentImage = {
   id: string;
