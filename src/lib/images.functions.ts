@@ -40,11 +40,11 @@ export const getRecentImages = createServerFn({ method: "GET" })
     const { supabase } = context;
     const { data: rows, error } = await supabase
       .from("images")
-      .select("id, image_number, filename, title, keyworded_at, created_at, storage_path")
+      .select("id, image_number, filename, title, keyworded_at, created_at, storage_path, preview_path")
       .order("created_at", { ascending: false })
       .limit(data.limit);
     if (error) throw new Error(error.message);
-    const paths = (rows ?? []).map((r) => r.storage_path);
+    const paths = (rows ?? []).map((r) => r.preview_path ?? r.storage_path);
     const signed = paths.length
       ? await supabase.storage.from("images-private").createSignedUrls(paths, 3600)
       : { data: [] as Array<{ signedUrl: string | null }>, error: null };
@@ -58,6 +58,7 @@ export const getRecentImages = createServerFn({ method: "GET" })
       signed_url: signed.data?.[i]?.signedUrl ?? null,
     })) as RecentImage[];
   });
+
 
 export type LibraryImage = RecentImage & {
   caption: string | null;
@@ -85,7 +86,7 @@ export const listImages = createServerFn({ method: "GET" })
     let q = supabase
       .from("images")
       .select(
-        "id, image_number, filename, title, caption, keyworded_at, created_at, storage_path, category, availability, public, keywords",
+        "id, image_number, filename, title, caption, keyworded_at, created_at, storage_path, preview_path, category, availability, public, keywords",
       )
       .order("image_number", { ascending: false })
       .limit(data.limit);
@@ -99,7 +100,7 @@ export const listImages = createServerFn({ method: "GET" })
     }
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
-    const paths = (rows ?? []).map((r) => r.storage_path);
+    const paths = (rows ?? []).map((r) => r.preview_path ?? r.storage_path);
     const signed = paths.length
       ? await supabase.storage.from("images-private").createSignedUrls(paths, 3600)
       : { data: [] as Array<{ signedUrl: string | null }> };
