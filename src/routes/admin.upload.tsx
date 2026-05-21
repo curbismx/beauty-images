@@ -187,19 +187,14 @@ function Upload() {
         const token = data.session?.access_token;
         if (!token) throw new Error("Please log in again before uploading");
 
-        // Safari has a known bug where fetch+FormData with a File streams the
-        // body without Content-Length, which the edge route's formData() parser
-        // can't always handle. Read into an ArrayBuffer and send raw bytes
-        // instead — filename + content-type go in headers.
-        const buffer = await file.arrayBuffer();
+        const body = new FormData();
+        body.append("file", file, file.name);
+        body.append("filename", file.name);
+
         const response = await fetch("/api/admin/upload-image", {
           method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": file.type || "application/octet-stream",
-            "X-Filename": encodeURIComponent(file.name),
-          },
-          body: buffer,
+          headers: { Authorization: `Bearer ${token}` },
+          body,
         });
         const result = (await response.json().catch(() => null)) as
           | { ok: true; imageNumber: number }
