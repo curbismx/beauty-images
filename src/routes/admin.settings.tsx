@@ -1,14 +1,150 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 import { PageHeader } from "./admin";
+import { useAuth } from "@/lib/use-auth";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/admin/settings")({
   component: Settings,
 });
 
 function Settings() {
+  const { session } = useAuth();
+  const email = session?.user?.email ?? "";
+
+  const [currentPw, setCurrentPw] = useState("");
+  const [newPw, setNewPw] = useState("");
+  const [confirmPw, setConfirmPw] = useState("");
+  const [msg, setMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  const [resetMsg, setResetMsg] = useState<string | null>(null);
+  const [resetBusy, setResetBusy] = useState(false);
+
+  const onChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setMsg(null);
+    if (newPw.length < 8) {
+      setMsg({ kind: "err", text: "New password must be at least 8 characters" });
+      return;
+    }
+    if (newPw !== confirmPw) {
+      setMsg({ kind: "err", text: "Passwords do not match" });
+      return;
+    }
+    if (!email) {
+      setMsg({ kind: "err", text: "No active session" });
+      return;
+    }
+    setBusy(true);
+    // Re-verify current password
+    const { error: signInErr } = await supabase.auth.signInWithPassword({
+      email,
+      password: currentPw,
+    });
+    if (signInErr) {
+      setBusy(false);
+      setMsg({ kind: "err", text: "Current password is incorrect" });
+      return;
+    }
+    const { error: updErr } = await supabase.auth.updateUser({ password: newPw });
+    setBusy(false);
+    if (updErr) {
+      setMsg({ kind: "err", text: updErr.message });
+      return;
+    }
+    setCurrentPw("");
+    setNewPw("");
+    setConfirmPw("");
+    setMsg({ kind: "ok", text: "Password updated" });
+  };
+
+  const onSendResetEmail = async () => {
+    if (!email) return;
+    setResetMsg(null);
+    setResetBusy(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    setResetBusy(false);
+    setResetMsg(error ? error.message : "Reset email sent — check your inbox");
+  };
+
   return (
     <>
       <PageHeader title="Settings" />
+
+      <div className="bi-section">
+        <h2 className="bi-section-title">Admin account</h2>
+        <div className="bi-field">
+          <label className="bi-label">Email</label>
+          <input className="bi-input" value={email} readOnly />
+        </div>
+
+        <form onSubmit={onChangePassword}>
+          <div className="bi-field">
+            <label className="bi-label">Current password</label>
+            <input
+              className="bi-input"
+              type="password"
+              value={currentPw}
+              onChange={(e) => setCurrentPw(e.target.value)}
+              autoComplete="current-password"
+              required
+            />
+          </div>
+          <div className="bi-field">
+            <label className="bi-label">New password</label>
+            <input
+              className="bi-input"
+              type="password"
+              value={newPw}
+              onChange={(e) => setNewPw(e.target.value)}
+              autoComplete="new-password"
+              required
+            />
+          </div>
+          <div className="bi-field">
+            <label className="bi-label">Confirm new password</label>
+            <input
+              className="bi-input"
+              type="password"
+              value={confirmPw}
+              onChange={(e) => setConfirmPw(e.target.value)}
+              autoComplete="new-password"
+              required
+            />
+          </div>
+          {msg && (
+            <div
+              className="bi-label"
+              style={{ color: msg.kind === "ok" ? "#0a0" : "#D75F68", marginBottom: 12 }}
+            >
+              {msg.text}
+            </div>
+          )}
+          <button className="bi-btn" type="submit" disabled={busy}>
+            {busy ? "…" : "Update password"}
+          </button>
+        </form>
+
+        <div style={{ marginTop: 20 }}>
+          <button
+            type="button"
+            className="bi-btn"
+            onClick={onSendResetEmail}
+            disabled={resetBusy || !email}
+          >
+            {resetBusy ? "…" : "Send password reset email"}
+          </button>
+          {resetMsg && (
+            <div className="bi-label" style={{ marginTop: 12 }}>
+              {resetMsg}
+            </div>
+          )}
+        </div>
+      </div>
+
       <div className="bi-section">
         <h2 className="bi-section-title">Stripe</h2>
         <div className="bi-field">

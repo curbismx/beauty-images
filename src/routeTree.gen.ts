@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LightboxRouteImport } from './routes/lightbox'
 import { Route as DesignRouteImport } from './routes/design'
@@ -35,6 +36,11 @@ import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/publi
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -152,6 +158,7 @@ export interface FileRoutesByFullPath {
   '/design': typeof DesignRoute
   '/lightbox': typeof LightboxRoute
   '/login': typeof LoginRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/featured': typeof AdminFeaturedRoute
@@ -175,6 +182,7 @@ export interface FileRoutesByTo {
   '/design': typeof DesignRoute
   '/lightbox': typeof LightboxRoute
   '/login': typeof LoginRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/featured': typeof AdminFeaturedRoute
@@ -200,6 +208,7 @@ export interface FileRoutesById {
   '/design': typeof DesignRoute
   '/lightbox': typeof LightboxRoute
   '/login': typeof LoginRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/featured': typeof AdminFeaturedRoute
@@ -226,6 +235,7 @@ export interface FileRouteTypes {
     | '/design'
     | '/lightbox'
     | '/login'
+    | '/reset-password'
     | '/signup'
     | '/admin/customers'
     | '/admin/featured'
@@ -249,6 +259,7 @@ export interface FileRouteTypes {
     | '/design'
     | '/lightbox'
     | '/login'
+    | '/reset-password'
     | '/signup'
     | '/admin/customers'
     | '/admin/featured'
@@ -273,6 +284,7 @@ export interface FileRouteTypes {
     | '/design'
     | '/lightbox'
     | '/login'
+    | '/reset-password'
     | '/signup'
     | '/admin/customers'
     | '/admin/featured'
@@ -298,6 +310,7 @@ export interface RootRouteChildren {
   DesignRoute: typeof DesignRoute
   LightboxRoute: typeof LightboxRoute
   LoginRoute: typeof LoginRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   SignupRoute: typeof SignupRoute
   CheckoutReturnRoute: typeof CheckoutReturnRoute
   ImageIdRoute: typeof ImageIdRoute
@@ -313,6 +326,13 @@ declare module '@tanstack/react-router' {
       path: '/signup'
       fullPath: '/signup'
       preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -499,6 +519,7 @@ const rootRouteChildren: RootRouteChildren = {
   DesignRoute: DesignRoute,
   LightboxRoute: LightboxRoute,
   LoginRoute: LoginRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   SignupRoute: SignupRoute,
   CheckoutReturnRoute: CheckoutReturnRoute,
   ImageIdRoute: ImageIdRoute,
@@ -509,13 +530,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
