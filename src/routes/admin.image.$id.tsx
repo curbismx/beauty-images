@@ -132,7 +132,7 @@ function ImageEdit() {
           )}
           {next ? (
             <Link to="/admin/image/$id" params={{ id: next.id }} className="bi-btn">
-              #{next.image_number} →
+              #{String(next.image_number).padStart(8, "0")} →
             </Link>
           ) : (
             <button className="bi-btn" disabled>Next →</button>
