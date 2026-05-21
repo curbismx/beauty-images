@@ -424,11 +424,15 @@ function Upload() {
         {resolveUploadErrorMut.error && <div style={errBox}>{(resolveUploadErrorMut.error as Error).message}</div>}
       </div>
 
-      {queue.length > 0 && (
+      {(queue.length > 0 || totals.uploading > 0 || totals.queued > 0) && (
         <div className="bi-section" style={{ marginTop: 32 }}>
-          <h2 className="bi-section-title">This session ({queue.length})</h2>
+          <h2 className="bi-section-title">
+            This session · {totals.done} done · {totals.failed} failed · {totals.uploading} uploading · {totals.queued} queued
+            {queue.length >= VISIBLE_TILES ? ` (showing latest ${VISIBLE_TILES})` : ""}
+          </h2>
           <div style={gridStyle}>
             {queue.map((it) => (
+
               <div key={it.id} style={tileStyle}>
                 <div style={{ position: "relative", paddingBottom: "100%", background: "#f4f4f4" }}>
                   <img src={it.previewUrl} alt={it.name} style={imgStyle} />
