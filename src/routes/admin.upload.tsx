@@ -7,9 +7,7 @@ import { PageHeader } from "./admin";
 import {
   getImageStats,
   getProcessingQueue,
-  checkImageNumberExists,
   retryImageProcessing,
-  createUploadError,
   listUploadErrors,
   deleteUploadErrors,
   resolveUploadError,
@@ -173,8 +171,6 @@ function Upload() {
     refetchInterval: 15_000,
   });
 
-  const checkNumber = useServerFn(checkImageNumberExists);
-  const saveUploadError = useServerFn(createUploadError);
   const fetchUploadErrors = useServerFn(listUploadErrors);
   const removeUploadErrors = useServerFn(deleteUploadErrors);
   const fixUploadError = useServerFn(resolveUploadError);
@@ -246,14 +242,13 @@ function Upload() {
           if (up.error)
             throw new Error(`${message}; also failed to store error file: ${up.error.message}`);
         }
-        await saveUploadError({
-          data: {
-            filename: file.name,
-            storage_path: errorPath,
-            error_message: message,
-            detected_image_number: detectedNumber,
-          },
+        const { error } = await supabase.from("upload_errors").insert({
+          filename: file.name,
+          storage_path: errorPath,
+          error_message: message,
+          detected_image_number: detectedNumber,
         });
+        if (error) throw new Error(`${message}; also failed to save error record: ${error.message}`);
         return errorPath;
       };
       if (!match) {
@@ -275,8 +270,12 @@ function Upload() {
       let uploadedPath: string | null = null;
       let previewUploadedPath: string | null = null;
       try {
-        const dup = await checkNumber({ data: { image_number: parsedNumber } });
-        if (dup.exists) {
+        const { count, error: dupErr } = await supabase
+          .from("images")
+          .select("id", { count: "exact", head: true })
+          .eq("image_number", parsedNumber);
+        if (dupErr) throw new Error(`Number check failed: ${dupErr.message}`);
+        if ((count ?? 0) > 0) {
           const message = `Duplicate number — #${String(parsedNumber).padStart(8, "0")} already exists`;
           await uploadErrorRecord(message);
           throw new Error(message);
@@ -327,7 +326,7 @@ function Upload() {
         return false;
       }
     },
-    [checkNumber, saveUploadError, updateItem],
+    [updateItem],
   );
 
   const drainPipeline = useCallback(async () => {
