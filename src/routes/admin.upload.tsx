@@ -149,6 +149,7 @@ function Upload() {
               filename: file.name,
               storage_path: storagePath,
               preview_path: savedPreviewPath,
+              image_number: parsedNumber,
             })
             .select("image_number")
             .single();
