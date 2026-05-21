@@ -13,8 +13,12 @@ import {
   updateImage,
   retryImageProcessing,
   retryAllFailedImages,
+  listUploadErrors,
+  deleteUploadErrors,
+  resolveUploadError,
   type LibraryImage,
 } from "@/lib/images.functions";
+import { UploadErrorCard, uploadErrorGridStyle } from "@/components/UploadErrorCard";
 
 const stripExt = (name: string) => name.replace(/\.[^.]+$/, "");
 
