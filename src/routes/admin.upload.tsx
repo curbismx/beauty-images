@@ -1,16 +1,21 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "./admin";
-import { getRecentImages, getImageStats } from "@/lib/images.functions";
-import { resizeImageToBlob } from "@/lib/resize-image";
-
+import {
+  getImageStats,
+  getProcessingQueue,
+  checkImageNumberExists,
+  retryImageProcessing,
+} from "@/lib/images.functions";
 
 export const Route = createFileRoute("/admin/upload")({
   component: Upload,
 });
+
+const FILENAME_RE = /^a(\d{8})\.[a-z0-9]+$/i;
 
 type QueueItem = {
   id: string;
@@ -27,23 +32,30 @@ function Upload() {
   const inputRef = useRef<HTMLInputElement>(null);
   const qc = useQueryClient();
 
-  const fetchRecent = useServerFn(getRecentImages);
-  const recent = useQuery({
-    queryKey: ["recent-images"],
-    queryFn: () => fetchRecent({ data: { limit: 60 } }),
+  const fetchQueue = useServerFn(getProcessingQueue);
+  const processing = useQuery({
+    queryKey: ["processing-queue"],
+    queryFn: () => fetchQueue({ data: { limit: 300 } }),
+    refetchInterval: 15_000,
   });
 
   const fetchStats = useServerFn(getImageStats);
   const stats = useQuery({
     queryKey: ["image-stats"],
     queryFn: () => fetchStats(),
-    refetchInterval: 30_000,
+    refetchInterval: 15_000,
   });
 
+  const checkNumber = useServerFn(checkImageNumberExists);
+  const runRetry = useServerFn(retryImageProcessing);
+  const retryMut = useMutation({
+    mutationFn: (id: string) => runRetry({ data: { id } }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["processing-queue"] });
+      qc.invalidateQueries({ queryKey: ["image-stats"] });
+    },
+  });
 
-
-
-  // Revoke object URLs when component unmounts
   useEffect(() => {
     return () => {
       queue.forEach((it) => URL.revokeObjectURL(it.previewUrl));
@@ -53,7 +65,7 @@ function Upload() {
 
   const handleFiles = useCallback(
     async (files: FileList | File[]) => {
-      const arr = Array.from(files).filter((f) => f.type.startsWith("image/"));
+      const arr = Array.from(files);
       const items: QueueItem[] = arr.map((f) => ({
         id: crypto.randomUUID(),
         name: f.name,
@@ -65,42 +77,36 @@ function Upload() {
       for (let i = 0; i < arr.length; i++) {
         const file = arr[i];
         const item = items[i];
+        const match = file.name.match(FILENAME_RE);
+        if (!match) {
+          setQueue((q) =>
+            q.map((it) =>
+              it.id === item.id
+                ? { ...it, status: "error", message: `Invalid filename — must be A + 8 digits + extension` }
+                : it,
+            ),
+          );
+          continue;
+        }
+        const parsedNumber = parseInt(match[1], 10);
         setQueue((q) => q.map((it) => (it.id === item.id ? { ...it, status: "uploading" } : it)));
         try {
-          const ext = file.name.split(".").pop() ?? "jpg";
+          const dup = await checkNumber({ data: { image_number: parsedNumber } });
+          if (dup.exists) throw new Error(`Duplicate number — #${String(parsedNumber).padStart(8, "0")} already exists`);
+
+          const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
           const uid = crypto.randomUUID();
           const storagePath = `${uid}.${ext}`;
-          const previewPath = `previews/${uid}.jpg`;
-
-          // Derive image_number from filename: strip non-digits (e.g. "a00010001.jpg" -> 10010001)
-          const digits = file.name.replace(/\.[^.]+$/, "").replace(/\D/g, "");
-          const parsedNumber = digits ? parseInt(digits, 10) : NaN;
-          if (!digits || !Number.isFinite(parsedNumber)) {
-            throw new Error(`Filename "${file.name}" has no numeric image number`);
-          }
           const up = await supabase.storage
             .from("images-private")
-            .upload(storagePath, file, { contentType: file.type, upsert: false });
+            .upload(storagePath, file, { contentType: file.type || "image/jpeg", upsert: false });
           if (up.error) throw new Error(up.error.message);
-
-          // Build 800px preview (longest edge) and upload alongside the original
-          let savedPreviewPath: string | null = null;
-          try {
-            const previewBlob = await resizeImageToBlob(file, 800, 0.82);
-            const upPrev = await supabase.storage
-              .from("images-private")
-              .upload(previewPath, previewBlob, { contentType: "image/jpeg", upsert: false });
-            if (!upPrev.error) savedPreviewPath = previewPath;
-          } catch {
-            // preview generation is non-fatal; original still uploaded
-          }
 
           const ins = await supabase
             .from("images")
             .insert({
               filename: file.name,
               storage_path: storagePath,
-              preview_path: savedPreviewPath,
               image_number: parsedNumber,
             })
             .select("image_number")
@@ -121,11 +127,13 @@ function Upload() {
           );
         }
       }
-      qc.invalidateQueries({ queryKey: ["recent-images"] });
+      qc.invalidateQueries({ queryKey: ["processing-queue"] });
       qc.invalidateQueries({ queryKey: ["image-stats"] });
     },
-    [qc],
+    [qc, checkNumber],
   );
+
+  const queueRows = processing.data ?? [];
 
   return (
     <>
@@ -145,15 +153,13 @@ function Upload() {
       >
         <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: "0.04em", textTransform: "uppercase" }}>
           {stats.data
-            ? `${(stats.data.total - stats.data.pending).toLocaleString()} keyworded · ${stats.data.pending.toLocaleString()} remaining · ${stats.data.total.toLocaleString()} total`
+            ? `${stats.data.keyworded.toLocaleString()} keyworded · ${stats.data.processing.toLocaleString()} processing · ${stats.data.failed.toLocaleString()} failed · ${stats.data.total.toLocaleString()} total`
             : "Loading stats…"}
         </div>
         <div style={{ fontSize: 10, color: "#666", letterSpacing: "0.04em", textTransform: "uppercase" }}>
-          Auto-keywording 1,500 / day in background
+          Auto-processing runs every minute
         </div>
       </div>
-
-
 
       <div
         className="bi-drop"
@@ -175,6 +181,9 @@ function Upload() {
         }}
       >
         Drop images here or click to browse
+        <div style={{ fontSize: 10, marginTop: 8, opacity: 0.7 }}>
+          Filename format: A + 8 digits + extension (e.g. A00010001.JPG)
+        </div>
         <input
           ref={inputRef}
           type="file"
@@ -212,41 +221,49 @@ function Upload() {
 
       <div className="bi-section" style={{ marginTop: 32 }}>
         <h2 className="bi-section-title">
-          Recent uploads {recent.data ? `(${recent.data.length})` : ""}
+          Processing queue {queueRows.length ? `(${queueRows.length})` : ""}
         </h2>
-        {recent.isLoading ? (
+        {processing.isLoading ? (
           <div className="bi-placeholder">Loading…</div>
-        ) : !recent.data?.length ? (
-          <div className="bi-placeholder">No images yet</div>
+        ) : !queueRows.length ? (
+          <div className="bi-placeholder">Queue empty — all uploaded images are keyworded</div>
         ) : (
           <div style={gridStyle}>
-            {recent.data.map((r) => (
-              <Link
-                key={r.id}
-                to="/admin/image/$id"
-                params={{ id: r.id }}
-                style={{ ...tileStyle, textDecoration: "none", color: "#000" }}
-              >
-                <div style={{ position: "relative", paddingBottom: "100%", background: "#f4f4f4" }}>
-                  {r.signed_url ? (
-                    <img src={r.signed_url} alt={r.filename} style={imgStyle} loading="lazy" />
-                  ) : (
-                    <div style={{ ...imgStyle, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11 }}>
-                      NO PREVIEW
-                    </div>
-                  )}
-                  <span style={{ ...badgeStyle, background: "#000" }}>#{String(r.image_number).padStart(8, "0")}</span>
-                  {!r.keyworded_at && (
-                    <span style={{ ...badgeStyle, background: "#D75F68", left: "auto", right: 8 }}>
-                      PENDING
+            {queueRows.map((r) => {
+              const failed = !!r.processing_error;
+              const stage = !r.preview_path ? "WAITING PREVIEW" : "WAITING KEYWORDS";
+              return (
+                <div key={r.id} style={tileStyle}>
+                  <div style={{ position: "relative", paddingBottom: "100%", background: "#f4f4f4" }}>
+                    {r.signed_url ? (
+                      <img src={r.signed_url} alt={r.filename} style={imgStyle} loading="lazy" />
+                    ) : (
+                      <div style={{ ...imgStyle, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, color: "#888" }}>
+                        NO PREVIEW YET
+                      </div>
+                    )}
+                    <span style={{ ...badgeStyle, background: "#000" }}>#{String(r.image_number).padStart(8, "0")}</span>
+                    <span style={{ ...badgeStyle, background: failed ? "#D75F68" : "#666", left: "auto", right: 8 }}>
+                      {failed ? "FAILED" : stage}
                     </span>
+                  </div>
+                  <div style={tileName} title={r.filename}>{r.filename}</div>
+                  {failed && (
+                    <>
+                      <div style={errStyle}>{r.processing_error}</div>
+                      <button
+                        type="button"
+                        style={retryBtn}
+                        disabled={retryMut.isPending}
+                        onClick={() => retryMut.mutate(r.id)}
+                      >
+                        {retryMut.isPending ? "…" : "Retry"}
+                      </button>
+                    </>
                   )}
                 </div>
-                <div style={tileName} title={r.title ?? r.filename}>
-                  {r.title ?? r.filename}
-                </div>
-              </Link>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
@@ -300,4 +317,17 @@ const errStyle: React.CSSProperties = {
   fontSize: 11,
   color: "#D75F68",
   borderTop: "1px solid #D75F68",
+};
+const retryBtn: React.CSSProperties = {
+  width: "100%",
+  padding: "8px 10px",
+  fontSize: 11,
+  fontWeight: 800,
+  letterSpacing: "0.06em",
+  textTransform: "uppercase",
+  background: "#000",
+  color: "#fff",
+  border: "none",
+  borderTop: "1px solid #000",
+  cursor: "pointer",
 };

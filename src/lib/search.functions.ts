@@ -22,8 +22,6 @@ export type PublicImageDetail = {
   signed_url: string | null;
 };
 
-const TEST_APPEND_LIMIT = 5;
-
 export const searchPublicImages = createServerFn({ method: "POST" })
   .inputValidator(
     z
@@ -34,18 +32,18 @@ export const searchPublicImages = createServerFn({ method: "POST" })
       .parse,
   )
   .handler(async ({ data }): Promise<PublicSearchResult[]> => {
-    // TEST MODE: ignore the query and return every keyworded image so we
-    // can iterate on the detail page across all image types. Restore the
-    // proper title/caption/keywords filter + public=true before launch.
-    void data;
-
+    const term = data.q.trim();
+    const escaped = term.replace(/[%,]/g, " ");
     const { data: rows, error } = await supabaseAdmin
       .from("images")
       .select("id, image_number, title, caption, keywords, preview_path")
-      .not("keyworded_at", "is", null)
+      .eq("public", true)
       .not("preview_path", "is", null)
+      .or(
+        `title.ilike.%${escaped}%,caption.ilike.%${escaped}%,keywords.cs.{${term.toLowerCase()}}`,
+      )
       .order("image_number", { ascending: false })
-      .limit(200);
+      .limit(data.limit);
     if (error) throw new Error(error.message);
 
     const merged = (rows ?? []).filter((r) => !!r.preview_path);
@@ -73,6 +71,8 @@ export const getPublicImage = createServerFn({ method: "POST" })
       .from("images")
       .select("id, image_number, title, caption, keywords, category, pricing_tier, preview_path")
       .eq("id", data.id)
+      .eq("public", true)
+      .not("preview_path", "is", null)
       .maybeSingle();
     if (error) throw new Error(error.message);
     if (!row || !row.preview_path) return null;
@@ -100,7 +100,9 @@ export const getPublicImagesByIds = createServerFn({ method: "POST" })
     const { data: rows, error } = await supabaseAdmin
       .from("images")
       .select("id, image_number, title, caption, keywords, preview_path")
-      .in("id", data.ids);
+      .in("id", data.ids)
+      .eq("public", true)
+      .not("preview_path", "is", null);
     if (error) throw new Error(error.message);
 
     const byId = new Map((rows ?? []).filter((r) => !!r.preview_path).map((r) => [r.id, r]));
@@ -144,7 +146,7 @@ export const getSimilarShootImages = createServerFn({ method: "POST" })
       .gte("image_number", min)
       .lte("image_number", max)
       .neq("id", data.excludeId)
-      .not("keyworded_at", "is", null)
+      .eq("public", true)
       .not("preview_path", "is", null)
       .order("image_number", { ascending: true })
       .limit(60);

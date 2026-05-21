@@ -92,7 +92,7 @@ function Library() {
       <div style={batchBar}>
         <div style={{ fontSize: 12, letterSpacing: "0.04em", textTransform: "uppercase" }}>
           {stats.data
-            ? `${stats.data.total} total · ${stats.data.pending} pending keywords`
+            ? `${stats.data.total} total · ${stats.data.keyworded} keyworded · ${stats.data.processing} processing · ${stats.data.failed} failed`
             : "—"}
         </div>
         <div style={{ display: "flex", gap: 8 }}>
@@ -271,7 +271,7 @@ function EditableRow({
         <div style={topRow}>
           <span style={numBadge}>{String(row.image_number).padStart(8, "0")}</span>
           {!row.keyworded_at && <span style={{ ...statusBadge, background: "#D75F68" }}>PENDING</span>}
-          {row.keyworded_at && row.public && <span style={{ ...statusBadge, background: "#1f7a3d" }}>LIVE</span>}
+          {row.keyworded_at && row.public && <span style={{ ...statusBadge, background: "#D75F68" }}>PUBLISHED</span>}
           {row.keyworded_at && !row.public && <span style={{ ...statusBadge, background: "#888" }}>READY</span>}
           {row.category && <span style={catBadge}>{row.category}</span>}
           <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 10 }}>
