@@ -2,6 +2,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
+const escapeRegex = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 export type PublicSearchResult = {
   id: string;
   image_number: number;
@@ -70,9 +72,11 @@ export const searchPublicImages = createServerFn({ method: "POST" })
           const title = (r.title ?? "").toLowerCase();
           const caption = (r.caption ?? "").toLowerCase();
           const kwords = ((r.keywords ?? []) as string[]).map((k) => k.toLowerCase());
-          return terms.every(
-            (t) => title.includes(t) || caption.includes(t) || kwords.some((k) => k.includes(t)),
-          );
+          return terms.every((t) => {
+            // Whole-word match so "man" doesn't match "woman", "human", etc.
+            const re = new RegExp(`(?:^|[^\\p{L}\\p{N}])${escapeRegex(t)}(?:[^\\p{L}\\p{N}]|$)`, "iu");
+            return re.test(title) || re.test(caption) || kwords.some((k) => k === t || re.test(k));
+          });
         }),
       );
 
