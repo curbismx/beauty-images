@@ -11,6 +11,8 @@ import {
   unpublishAll,
   deleteImages,
   updateImage,
+  retryImageProcessing,
+  retryAllFailedImages,
   type LibraryImage,
 } from "@/lib/images.functions";
 
@@ -41,6 +43,7 @@ function Library() {
   const runPublish = useServerFn(publishAllReady);
   const runUnpublish = useServerFn(unpublishAll);
   const runDelete = useServerFn(deleteImages);
+  const runRetryAll = useServerFn(retryAllFailedImages);
 
   const q = useQuery({
     queryKey: ["library-images", active, search],
@@ -74,6 +77,10 @@ function Library() {
       setSelected(new Set());
       invalidate();
     },
+  });
+  const retryAllMut = useMutation({
+    mutationFn: () => runRetryAll({}),
+    onSuccess: invalidate,
   });
 
   const rows = q.data ?? [];
@@ -128,8 +135,24 @@ function Library() {
           >
             {unpublishMut.isPending ? "…" : "Unpublish all"}
           </button>
+          <button
+            style={btnDark}
+            disabled={!stats.data?.failed || retryAllMut.isPending}
+            onClick={() => {
+              const n = stats.data?.failed ?? 0;
+              if (!n) return;
+              if (confirm(`Retry all ${n} failed image${n === 1 ? "" : "s"}?`)) retryAllMut.mutate();
+            }}
+          >
+            {retryAllMut.isPending
+              ? "Retrying…"
+              : `Retry all failed${stats.data?.failed ? ` (${stats.data.failed})` : ""}`}
+          </button>
         </div>
       </div>
+      {retryAllMut.data && (
+        <div style={notice}>Queued {retryAllMut.data.retried} failed image{retryAllMut.data.retried === 1 ? "" : "s"} for retry.</div>
+      )}
       {publishMut.data && (
         <div style={notice}>Published {publishMut.data.published} images.</div>
       )}
@@ -213,6 +236,14 @@ function EditableRow({
 }) {
   const qc = useQueryClient();
   const runUpdate = useServerFn(updateImage);
+  const runRetry = useServerFn(retryImageProcessing);
+  const retryMut = useMutation({
+    mutationFn: () => runRetry({ data: { id: row.id } }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["library-images"] });
+      qc.invalidateQueries({ queryKey: ["image-stats"] });
+    },
+  });
   const [editing, setEditing] = useState(false);
   const [title, setTitle] = useState(row.title ?? "");
   const [caption, setCaption] = useState(row.caption ?? "");
@@ -350,7 +381,29 @@ function EditableRow({
           </>
         ) : (
           <>
-            {row.processing_error && <div style={errorPanel}>Error: {row.processing_error}</div>}
+            {row.processing_error && (
+              <div style={errorPanel}>
+                <div style={{ marginBottom: 8 }}>Error: {row.processing_error}</div>
+                <button
+                  type="button"
+                  onClick={() => retryMut.mutate()}
+                  disabled={retryMut.isPending}
+                  style={{
+                    background: "#fff",
+                    color: "#000",
+                    border: "1px solid #000",
+                    padding: "6px 12px",
+                    fontSize: 11,
+                    fontWeight: 800,
+                    letterSpacing: "0.06em",
+                    textTransform: "uppercase",
+                    cursor: "pointer",
+                  }}
+                >
+                  {retryMut.isPending ? "Retrying…" : retryMut.isSuccess ? "✓ Queued" : "Retry"}
+                </button>
+              </div>
+            )}
             <div style={titleStyle}>{row.title ?? stripExt(row.filename)}</div>
             {row.caption && <div style={captionStyle}>{row.caption}</div>}
             {displayKeywords.length > 0 && (
