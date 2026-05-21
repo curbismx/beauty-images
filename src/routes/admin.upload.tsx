@@ -119,6 +119,13 @@ function Upload() {
           const uid = crypto.randomUUID();
           const storagePath = `${uid}.${ext}`;
           const previewPath = `previews/${uid}.jpg`;
+
+          // Derive image_number from filename: strip non-digits (e.g. "a00010001.jpg" -> 10010001)
+          const digits = file.name.replace(/\.[^.]+$/, "").replace(/\D/g, "");
+          const parsedNumber = digits ? parseInt(digits, 10) : NaN;
+          if (!digits || !Number.isFinite(parsedNumber)) {
+            throw new Error(`Filename "${file.name}" has no numeric image number`);
+          }
           const up = await supabase.storage
             .from("images-private")
             .upload(storagePath, file, { contentType: file.type, upsert: false });
