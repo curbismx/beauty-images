@@ -363,7 +363,7 @@ function Upload() {
           }}
         >
           {stats.data
-            ? `${stats.data.keyworded.toLocaleString()} keyworded · ${stats.data.processing.toLocaleString()} processing · ${stats.data.failed.toLocaleString()} failed · ${stats.data.upload_errors.toLocaleString()} upload errors · ${stats.data.total.toLocaleString()} total`
+            ? `${stats.data.keyworded.toLocaleString()} keyworded · ${stats.data.published.toLocaleString()} published · ${stats.data.processing.toLocaleString()} processing · ${stats.data.failed.toLocaleString()} failed · ${stats.data.upload_errors.toLocaleString()} upload errors · ${stats.data.total.toLocaleString()} total`
             : "Loading stats…"}
         </div>
         <div
