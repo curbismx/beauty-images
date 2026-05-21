@@ -248,7 +248,8 @@ function Upload() {
           error_message: message,
           detected_image_number: detectedNumber,
         });
-        if (error) throw new Error(`${message}; also failed to save error record: ${error.message}`);
+        if (error)
+          throw new Error(`${message}; also failed to save error record: ${error.message}`);
         return errorPath;
       };
       if (!match) {
