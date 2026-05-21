@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
-import { PhotonImage, resize, SamplingFilter } from "@cf-wasm/photon/edge-light";
 
 const MAX_ATTEMPTS = 3;
 const PREVIEW_BATCH = 25;
