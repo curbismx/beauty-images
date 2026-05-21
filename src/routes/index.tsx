@@ -439,20 +439,63 @@ function Index() {
               {!searching && submittedQuery && results.length === 0 && (
                 <div className="search-results-status">NO MATCHES — TRY ANOTHER TERM</div>
               )}
-              {results.length > 0 && !masonry && (
-                <div className="search-results-grid">
-                  {results.map((r) => renderResultCard(r, saveSearchState))}
-                </div>
-              )}
-              {results.length > 0 && masonry && (
-                <div className="search-results-masonry">
-                  {Array.from({ length: cols }, (_, ci) => (
-                    <div className="masonry-col" key={ci}>
-                      {results.filter((_, i) => i % cols === ci).map((r) => renderResultCard(r, saveSearchState))}
-                    </div>
-                  ))}
-                </div>
-              )}
+              {(() => {
+                if (results.length === 0) return null;
+                const totalPages = Math.max(1, Math.ceil(results.length / PAGE_SIZE_RESULTS));
+                const safePage = Math.min(page, totalPages);
+                const start = (safePage - 1) * PAGE_SIZE_RESULTS;
+                const pageItems = results.slice(start, start + PAGE_SIZE_RESULTS);
+                const goPage = (p: number) => {
+                  const next = Math.max(1, Math.min(totalPages, p));
+                  setPage(next);
+                  requestAnimationFrame(() => {
+                    resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  });
+                };
+                const Pager = (
+                  <div className="search-pager">
+                    <button
+                      type="button"
+                      className="search-pager-btn"
+                      disabled={safePage <= 1}
+                      onClick={() => goPage(safePage - 1)}
+                    >
+                      ← PREV
+                    </button>
+                    <span className="search-pager-info">
+                      PAGE {safePage} / {totalPages} · {start + 1}–{start + pageItems.length} OF {results.length}
+                    </span>
+                    <button
+                      type="button"
+                      className="search-pager-btn"
+                      disabled={safePage >= totalPages}
+                      onClick={() => goPage(safePage + 1)}
+                    >
+                      NEXT →
+                    </button>
+                  </div>
+                );
+                return (
+                  <>
+                    {totalPages > 1 && Pager}
+                    {!masonry && (
+                      <div className="search-results-grid">
+                        {pageItems.map((r) => renderResultCard(r, saveSearchState))}
+                      </div>
+                    )}
+                    {masonry && (
+                      <div className="search-results-masonry">
+                        {Array.from({ length: cols }, (_, ci) => (
+                          <div className="masonry-col" key={ci}>
+                            {pageItems.filter((_, i) => i % cols === ci).map((r) => renderResultCard(r, saveSearchState))}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {totalPages > 1 && Pager}
+                  </>
+                );
+              })()}
             </div>
           )}
         </div>
