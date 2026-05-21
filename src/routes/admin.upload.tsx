@@ -120,10 +120,10 @@ function Upload() {
   const runningRef = useRef(false);
 
   const fetchQueue = useServerFn(getProcessingQueue);
-  const [failedOnlyEarly, setFailedOnlyEarly] = useState(false);
+  const [failedOnly, setFailedOnly] = useState(false);
   const processing = useQuery({
-    queryKey: ["processing-queue", failedOnlyEarly],
-    queryFn: () => fetchQueue({ data: { limit: 300, failedOnly: failedOnlyEarly } }),
+    queryKey: ["processing-queue", failedOnly],
+    queryFn: () => fetchQueue({ data: { limit: 300, failedOnly } }),
     refetchInterval: 15_000,
   });
 
