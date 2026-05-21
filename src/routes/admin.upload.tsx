@@ -9,6 +9,10 @@ import {
   getProcessingQueue,
   checkImageNumberExists,
   retryImageProcessing,
+  createUploadError,
+  listUploadErrors,
+  deleteUploadErrors,
+  resolveUploadError,
 } from "@/lib/images.functions";
 
 export const Route = createFileRoute("/admin/upload")({
@@ -47,7 +51,35 @@ function Upload() {
   });
 
   const checkNumber = useServerFn(checkImageNumberExists);
+  const saveUploadError = useServerFn(createUploadError);
+  const fetchUploadErrors = useServerFn(listUploadErrors);
+  const removeUploadErrors = useServerFn(deleteUploadErrors);
+  const fixUploadError = useServerFn(resolveUploadError);
   const runRetry = useServerFn(retryImageProcessing);
+
+  const uploadErrors = useQuery({
+    queryKey: ["upload-errors"],
+    queryFn: () => fetchUploadErrors({ data: { limit: 300 } }),
+    refetchInterval: 15_000,
+  });
+
+  const deleteUploadErrorMut = useMutation({
+    mutationFn: (id: string) => removeUploadErrors({ data: { ids: [id] } }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["upload-errors"] });
+      qc.invalidateQueries({ queryKey: ["image-stats"] });
+    },
+  });
+
+  const resolveUploadErrorMut = useMutation({
+    mutationFn: ({ id, image_number }: { id: string; image_number: number }) =>
+      fixUploadError({ data: { id, image_number } }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["upload-errors"] });
+      qc.invalidateQueries({ queryKey: ["processing-queue"] });
+      qc.invalidateQueries({ queryKey: ["image-stats"] });
+    },
+  });
   const retryMut = useMutation({
     mutationFn: (id: string) => runRetry({ data: { id } }),
     onSuccess: () => {
@@ -78,11 +110,47 @@ function Upload() {
         const file = arr[i];
         const item = items[i];
         const match = file.name.match(FILENAME_RE);
+        const detectedDigits = file.name.match(/^a(\d+)\./i)?.[1];
+        const detectedNumber = detectedDigits ? parseInt(detectedDigits, 10) : null;
+        const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
+        const uploadErrorRecord = async (message: string, existingPath?: string | null) => {
+          let errorPath = existingPath ?? null;
+          if (!errorPath) {
+            const uid = crypto.randomUUID();
+            errorPath = `upload-errors/${uid}.${ext}`;
+            const up = await supabase.storage
+              .from("images-private")
+              .upload(errorPath, file, { contentType: file.type || "image/jpeg", upsert: false });
+            if (up.error) throw new Error(`${message}; also failed to store error file: ${up.error.message}`);
+          }
+          await saveUploadError({
+            data: {
+              filename: file.name,
+              storage_path: errorPath,
+              error_message: message,
+              detected_image_number: detectedNumber,
+            },
+          });
+          return errorPath;
+        };
         if (!match) {
+          const message = detectedDigits && detectedDigits.length !== 8
+            ? `Invalid filename — found ${detectedDigits.length} digits after A, must be exactly 8`
+            : `Invalid filename — must be A + 8 digits + extension`;
+          try {
+            await uploadErrorRecord(message);
+          } catch (e) {
+            setQueue((q) =>
+              q.map((it) =>
+                it.id === item.id ? { ...it, status: "error", message: (e as Error).message } : it,
+              ),
+            );
+            continue;
+          }
           setQueue((q) =>
             q.map((it) =>
               it.id === item.id
-                ? { ...it, status: "error", message: `Invalid filename — must be A + 8 digits + extension` }
+                ? { ...it, status: "error", message }
                 : it,
             ),
           );
@@ -92,9 +160,12 @@ function Upload() {
         setQueue((q) => q.map((it) => (it.id === item.id ? { ...it, status: "uploading" } : it)));
         try {
           const dup = await checkNumber({ data: { image_number: parsedNumber } });
-          if (dup.exists) throw new Error(`Duplicate number — #${String(parsedNumber).padStart(8, "0")} already exists`);
+          if (dup.exists) {
+            const message = `Duplicate number — #${String(parsedNumber).padStart(8, "0")} already exists`;
+            await uploadErrorRecord(message);
+            throw new Error(message);
+          }
 
-          const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
           const uid = crypto.randomUUID();
           const storagePath = `${uid}.${ext}`;
           const up = await supabase.storage
@@ -120,6 +191,13 @@ function Upload() {
             ),
           );
         } catch (e) {
+          if (!String((e as Error).message).startsWith("Duplicate number")) {
+            try {
+              await uploadErrorRecord((e as Error).message);
+            } catch {
+              // Keep the visible session error even if the permanent error record could not be saved.
+            }
+          }
           setQueue((q) =>
             q.map((it) =>
               it.id === item.id ? { ...it, status: "error", message: (e as Error).message } : it,
@@ -129,8 +207,9 @@ function Upload() {
       }
       qc.invalidateQueries({ queryKey: ["processing-queue"] });
       qc.invalidateQueries({ queryKey: ["image-stats"] });
+      qc.invalidateQueries({ queryKey: ["upload-errors"] });
     },
-    [qc, checkNumber],
+    [qc, checkNumber, saveUploadError],
   );
 
   const queueRows = processing.data ?? [];
