@@ -111,8 +111,13 @@ export const Route = createFileRoute("/api/public/hooks/keyword-pending")({
             processed += 1;
           } catch (e) {
             failed += 1;
-            errors.push(`#${row.image_number}: ${(e as Error).message}`);
+            const message = (e as Error).message;
+            errors.push(`#${row.image_number}: ${message}`);
             console.error("keyword cron failed", row.id, e);
+            await supabase
+              .from("images")
+              .update({ processing_error: message.slice(0, 1000) })
+              .eq("id", row.id);
           }
         }
 
