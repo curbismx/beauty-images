@@ -161,7 +161,7 @@ function Index() {
     setSearching(true);
     setPage(1);
     try {
-      const r = await runSearch({ data: { q, limit: 1000 } });
+      const r = await runSearch({ data: { q, limit: 50000 } });
       setResults(r);
       if (typeof restoreY === "number") {
         requestAnimationFrame(() => {
@@ -206,7 +206,7 @@ function Index() {
     let alive = true;
     const q = restoreState.q.trim();
     setSearching(true);
-    runSearch({ data: { q, limit: 1000 } })
+    runSearch({ data: { q, limit: 50000 } })
       .then((r) => {
         if (!alive) return;
         setResults(r);
