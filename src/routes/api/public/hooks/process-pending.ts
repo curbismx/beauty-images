@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
-import { PhotonImage, resize, SamplingFilter } from "@cf-wasm/photon";
 
 const MAX_ATTEMPTS = 3;
 const PREVIEW_BATCH = 25;
@@ -33,6 +32,7 @@ function bytesToBase64(buf: Uint8Array): string {
 }
 
 async function resizeTo800Jpeg(bytes: Uint8Array): Promise<Uint8Array> {
+  const { PhotonImage, resize, SamplingFilter } = await import("@cf-wasm/photon/workerd");
   const img = PhotonImage.new_from_byteslice(bytes);
   const w = img.get_width();
   const h = img.get_height();
@@ -100,7 +100,7 @@ async function markFailure(
     .from("images")
     .update({
       processing_attempts: nextAttempts,
-      processing_error: nextAttempts >= MAX_ATTEMPTS ? message.slice(0, 1000) : null,
+      processing_error: message.slice(0, 1000),
     })
     .eq("id", id);
 }
@@ -136,7 +136,6 @@ async function processPreviews(supabase: ReturnType<typeof admin>) {
     .from("images")
     .select("id, storage_path, processing_attempts")
     .is("preview_path", null)
-    .is("processing_error", null)
     .lt("processing_attempts", MAX_ATTEMPTS)
     .or(`processing_started_at.is.null,processing_started_at.lt.${staleCutoff}`)
     .order("image_number", { ascending: true })
@@ -199,7 +198,6 @@ async function processKeywords(supabase: ReturnType<typeof admin>) {
     .select("id, image_number, filename, preview_path, processing_attempts")
     .is("keyworded_at", null)
     .not("preview_path", "is", null)
-    .is("processing_error", null)
     .lt("processing_attempts", MAX_ATTEMPTS)
     .or(`processing_started_at.is.null,processing_started_at.lt.${staleCutoff}`)
     .order("image_number", { ascending: true })
