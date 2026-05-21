@@ -236,6 +236,14 @@ function EditableRow({
 }) {
   const qc = useQueryClient();
   const runUpdate = useServerFn(updateImage);
+  const runRetry = useServerFn(retryImageProcessing);
+  const retryMut = useMutation({
+    mutationFn: () => runRetry({ data: { id: row.id } }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["library-images"] });
+      qc.invalidateQueries({ queryKey: ["image-stats"] });
+    },
+  });
   const [editing, setEditing] = useState(false);
   const [title, setTitle] = useState(row.title ?? "");
   const [caption, setCaption] = useState(row.caption ?? "");
