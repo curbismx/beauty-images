@@ -48,10 +48,21 @@ function Library() {
   const runUnpublish = useServerFn(unpublishAll);
   const runDelete = useServerFn(deleteImages);
   const runRetryAll = useServerFn(retryAllFailedImages);
+  const fetchUploadErrors = useServerFn(listUploadErrors);
+  const removeUploadErrors = useServerFn(deleteUploadErrors);
+  const fixUploadError = useServerFn(resolveUploadError);
 
   const q = useQuery({
     queryKey: ["library-images", active, search],
     queryFn: () => fetchList({ data: { filter: active, search, limit: 500 } }),
+  });
+  const stats = useQuery({
+    queryKey: ["image-stats"],
+    queryFn: () => fetchStats({}),
+  });
+  const uploadErrors = useQuery({
+    queryKey: ["upload-errors"],
+    queryFn: () => fetchUploadErrors({ data: { limit: 300 } }),
   });
   const stats = useQuery({
     queryKey: ["image-stats"],
