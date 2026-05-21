@@ -64,6 +64,24 @@ export const retryImageProcessing = createServerFn({ method: "POST" })
     return { ok: true as const };
   });
 
+export const retryAllFailedImages = createServerFn({ method: "POST" })
+  .middleware([requireAdmin])
+  .handler(async ({ context }) => {
+    const { data: rows, error: selErr } = await context.supabase
+      .from("images")
+      .select("id")
+      .not("processing_error", "is", null);
+    if (selErr) throw new Error(selErr.message);
+    const ids = (rows ?? []).map((r) => r.id);
+    if (!ids.length) return { retried: 0 };
+    const { error } = await context.supabase
+      .from("images")
+      .update({ processing_attempts: 0, processing_error: null })
+      .in("id", ids);
+    if (error) throw new Error(error.message);
+    return { retried: ids.length };
+  });
+
 export type PendingQueueItem = {
   id: string;
   image_number: number;
@@ -77,15 +95,24 @@ export type PendingQueueItem = {
 
 export const getProcessingQueue = createServerFn({ method: "GET" })
   .middleware([requireAdmin])
-  .inputValidator(z.object({ limit: z.number().int().min(1).max(500).default(200) }).parse)
+  .inputValidator(
+    z
+      .object({
+        limit: z.number().int().min(1).max(500).default(200),
+        failedOnly: z.boolean().default(false),
+      })
+      .parse,
+  )
   .handler(async ({ data, context }) => {
     const { supabase } = context;
-    const { data: rows, error } = await supabase
+    let q = supabase
       .from("images")
       .select("id, image_number, filename, created_at, preview_path, processing_attempts, processing_error")
       .is("keyworded_at", null)
       .order("created_at", { ascending: false })
       .limit(data.limit);
+    if (data.failedOnly) q = q.not("processing_error", "is", null);
+    const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
     const paths = (rows ?? []).map((r) => r.preview_path).filter(Boolean) as string[];
     const signedMap = new Map<string, string | null>();

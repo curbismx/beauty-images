@@ -8,6 +8,7 @@ import {
   getImageStats,
   getProcessingQueue,
   retryImageProcessing,
+  retryAllFailedImages,
   listUploadErrors,
   deleteUploadErrors,
   resolveUploadError,
@@ -119,9 +120,10 @@ function Upload() {
   const runningRef = useRef(false);
 
   const fetchQueue = useServerFn(getProcessingQueue);
+  const [failedOnly, setFailedOnly] = useState(false);
   const processing = useQuery({
-    queryKey: ["processing-queue"],
-    queryFn: () => fetchQueue({ data: { limit: 300 } }),
+    queryKey: ["processing-queue", failedOnly],
+    queryFn: () => fetchQueue({ data: { limit: 300, failedOnly } }),
     refetchInterval: 15_000,
   });
 
@@ -136,12 +138,14 @@ function Upload() {
   const removeUploadErrors = useServerFn(deleteUploadErrors);
   const fixUploadError = useServerFn(resolveUploadError);
   const runRetry = useServerFn(retryImageProcessing);
+  const runRetryAll = useServerFn(retryAllFailedImages);
 
   const uploadErrors = useQuery({
     queryKey: ["upload-errors"],
     queryFn: () => fetchUploadErrors({ data: { limit: 300 } }),
     refetchInterval: 15_000,
   });
+
 
   const deleteUploadErrorMut = useMutation({
     mutationFn: (id: string) => removeUploadErrors({ data: { ids: [id] } }),
@@ -162,6 +166,13 @@ function Upload() {
   });
   const retryMut = useMutation({
     mutationFn: (id: string) => runRetry({ data: { id } }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["processing-queue"] });
+      qc.invalidateQueries({ queryKey: ["image-stats"] });
+    },
+  });
+  const retryAllMut = useMutation({
+    mutationFn: () => runRetryAll({}),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["processing-queue"] });
       qc.invalidateQueries({ queryKey: ["image-stats"] });
@@ -292,6 +303,7 @@ function Upload() {
   );
 
   const queueRows = processing.data ?? [];
+  const failedCount = stats.data?.failed ?? queueRows.filter((r) => !!r.processing_error).length;
 
   return (
     <>
@@ -471,13 +483,46 @@ function Upload() {
       )}
 
       <div className="bi-section" style={{ marginTop: 32 }}>
-        <h2 className="bi-section-title">
-          Processing queue {queueRows.length ? `(${queueRows.length})` : ""}
-        </h2>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap", marginBottom: 12 }}>
+          <h2 className="bi-section-title" style={{ margin: 0 }}>
+            Processing queue {queueRows.length ? `(${queueRows.length}${failedOnly ? " failed" : ""})` : ""}
+          </h2>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <button
+              type="button"
+              onClick={() => setFailedOnly((v) => !v)}
+              style={{
+                ...retryBtn,
+                width: "auto",
+                background: failedOnly ? "#D75F68" : "#fff",
+                color: failedOnly ? "#fff" : "#000",
+                border: "1px solid #000",
+              }}
+            >
+              {failedOnly ? `Showing failed (${failedCount})` : `Show failed only (${failedCount})`}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                if (!failedCount) return;
+                if (confirm(`Retry all ${failedCount} failed image${failedCount === 1 ? "" : "s"}?`)) {
+                  retryAllMut.mutate();
+                }
+              }}
+              disabled={!failedCount || retryAllMut.isPending}
+              style={{ ...retryBtn, width: "auto", opacity: !failedCount ? 0.4 : 1 }}
+            >
+              {retryAllMut.isPending ? "Retrying…" : `Retry all failed${failedCount ? ` (${failedCount})` : ""}`}
+            </button>
+          </div>
+        </div>
+        {retryAllMut.data && (
+          <div style={notice}>Queued {retryAllMut.data.retried} failed image{retryAllMut.data.retried === 1 ? "" : "s"} for retry.</div>
+        )}
         {processing.isLoading ? (
           <div className="bi-placeholder">Loading…</div>
         ) : !queueRows.length ? (
-          <div className="bi-placeholder">Queue empty — all uploaded images are keyworded</div>
+          <div className="bi-placeholder">{failedOnly ? "No failed images" : "Queue empty — all uploaded images are keyworded"}</div>
         ) : (
           <div style={gridStyle}>
             {queueRows.map((r) => {
