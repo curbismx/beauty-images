@@ -54,6 +54,12 @@ function LightboxPage() {
     fetchImages({ data: { ids } })
       .then((r) => {
         if (!alive) return;
+        // Prune any IDs that no longer exist (deleted or unpublished).
+        const returned = new Set(r.map((x) => x.id));
+        const stale = ids.filter((id) => !returned.has(id));
+        if (stale.length > 0) {
+          stale.forEach((id) => removeFromLightbox(id));
+        }
         setItems(r);
         setLoading(false);
       })
