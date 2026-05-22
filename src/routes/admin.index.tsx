@@ -1,32 +1,38 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useMemo, useState } from "react";
-import { ComposableMap, Geographies, Geography } from "react-simple-maps";
+import { useMemo } from "react";
+import { ComposableMap, Geographies, Geography, Marker } from "react-simple-maps";
 import { PageHeader } from "./admin";
 import { getVisitors, type CountryCount, type VisitorRow } from "@/lib/visitors.functions";
-import { getImageStats, keywordPendingBatch } from "@/lib/images.functions";
+import { getImageStats } from "@/lib/images.functions";
 
 export const Route = createFileRoute("/admin/")({
   component: Dashboard,
 });
 
-const STATS = [
-  { label: "Revenue today" },
-  { label: "Revenue month" },
-  { label: "Revenue year" },
-  { label: "Revenue lifetime" },
-];
+const GEO_URL = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
 
-const GEO_URL =
-  "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
+// Approximate country centroids [lng, lat] for marker placement.
+const CENTROIDS: Record<string, [number, number]> = {
+  GB: [-2, 54], US: [-98, 39], FR: [2, 46], DE: [10, 51], NL: [5, 52],
+  IE: [-8, 53], ES: [-4, 40], IT: [12, 42], CA: [-106, 56], AU: [134, -25],
+  NZ: [172, -41], JP: [138, 36], CN: [104, 35], IN: [78, 22], BR: [-55, -10],
+  MX: [-102, 23], PL: [19, 52], SE: [15, 62], NO: [10, 62], DK: [10, 56],
+  FI: [26, 64], BE: [4, 50], PT: [-8, 39], CH: [8, 47], AT: [14, 47],
+  RU: [105, 61], UA: [32, 49], TR: [35, 39], GR: [22, 39], ZA: [25, -29],
+  AE: [54, 24], SG: [104, 1], HK: [114, 22], KR: [128, 36], TH: [101, 15],
+  ID: [113, -2], PH: [122, 13], MY: [102, 4], VN: [108, 16], EG: [30, 27],
+  AR: [-64, -34], CL: [-71, -35], CO: [-74, 4], PE: [-75, -10], NG: [8, 9],
+  KE: [38, 0], MA: [-7, 32], IL: [35, 31], SA: [45, 24], CZ: [15, 50],
+  HU: [19, 47], RO: [25, 46], BG: [25, 43], HR: [16, 45], RS: [21, 44],
+  SK: [19, 49], SI: [15, 46], EE: [26, 59], LV: [25, 57], LT: [24, 56],
+  LU: [6, 50], IS: [-19, 65], MT: [14, 36], CY: [33, 35],
+};
 
 function Dashboard() {
   const fetchVisitors = useServerFn(getVisitors);
   const fetchImageStats = useServerFn(getImageStats);
-  const runBatch = useServerFn(keywordPendingBatch);
-  const qc = useQueryClient();
-  const [lastResult, setLastResult] = useState<string | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ["visitors"],
@@ -37,213 +43,149 @@ function Dashboard() {
   const imgStats = useQuery({
     queryKey: ["image-stats"],
     queryFn: () => fetchImageStats(),
-    refetchInterval: 15_000,
-  });
-
-  const batchMutation = useMutation({
-    mutationFn: () => runBatch({ data: { limit: 25 } }),
-    onSuccess: (r) => {
-      setLastResult(
-        `Keyworded ${r.processed}, failed ${r.failed}${r.errors.length ? " — " + r.errors.slice(0, 3).join("; ") : ""}`,
-      );
-      qc.invalidateQueries({ queryKey: ["image-stats"] });
-    },
-    onError: (e) => setLastResult((e as Error).message),
+    refetchInterval: 30_000,
   });
 
   return (
     <>
+      <style>{dashCss}</style>
       <PageHeader title="Dashboard" />
 
-      <div className="bi-section">
-        <h2 className="bi-section-title">Keywording</h2>
-        <div style={{ border: "1px solid #000", padding: 24, display: "grid", gridTemplateColumns: "1fr 1fr auto", gap: 24, alignItems: "center" }}>
-          <div>
-            <div className="bi-stat-label">Total images</div>
-            <div className="bi-stat-value">{imgStats.isLoading ? "…" : imgStats.data?.total ?? 0}</div>
-          </div>
-          <div>
-            <div className="bi-stat-label">Pending keywords</div>
-            <div className="bi-stat-value" style={{ color: (imgStats.data?.pending ?? 0) > 0 ? "#D75F68" : "#000" }}>
-              {imgStats.isLoading ? "…" : imgStats.data?.pending ?? 0}
-            </div>
-          </div>
-          <button
-            className="bi-btn bi-btn--accent"
-            disabled={batchMutation.isPending || (imgStats.data?.pending ?? 0) === 0}
-            onClick={() => { setLastResult(null); batchMutation.mutate(); }}
-          >
-            {batchMutation.isPending ? "Sending…" : `Keyword ${Math.min(imgStats.data?.pending ?? 0, 25)} now`}
-          </button>
-        </div>
-        {lastResult && (
-          <div style={{ marginTop: 12, padding: 12, border: "1px solid #000", fontSize: 12, fontWeight: 800, letterSpacing: "0.02em", textTransform: "uppercase" }}>
-            {lastResult}
-          </div>
-        )}
+      <div className="dash-stats">
+        <Stat label="Images published" value={imgStats.isLoading ? "…" : imgStats.data?.published ?? 0} />
+        <Stat label="Visitors today" value={isLoading ? "…" : data?.todayCount ?? 0} />
+        <Stat label="This week" value={isLoading ? "…" : data?.weekCount ?? 0} />
+        <Stat label="This month" value={isLoading ? "…" : data?.monthCount ?? 0} />
+        <Stat label="All time" value={isLoading ? "…" : data?.allTimeCount ?? 0} />
       </div>
 
-      <div className="bi-stat-row">
-        {STATS.map((s) => (
-          <div key={s.label} className="bi-stat">
-            <div className="bi-stat-label">{s.label}</div>
-            <div className="bi-stat-value">—</div>
-          </div>
-        ))}
+      <div className="dash-grid">
+        <Panel title="Where visitors come from">
+          <VisitorMap countries={data?.countries ?? []} />
+        </Panel>
+        <Panel title="Top countries">
+          <TopCountries countries={data?.countries ?? []} />
+        </Panel>
       </div>
 
-      <div className="bi-section">
-        <h2 className="bi-section-title">Unique visitors</h2>
-        <div className="bi-stat-row">
-          <div className="bi-stat">
-            <div className="bi-stat-label">Today</div>
-            <div className="bi-stat-value">{isLoading ? "…" : data?.todayCount ?? 0}</div>
-          </div>
-          <div className="bi-stat">
-            <div className="bi-stat-label">This week</div>
-            <div className="bi-stat-value">{isLoading ? "…" : data?.weekCount ?? 0}</div>
-          </div>
-          <div className="bi-stat">
-            <div className="bi-stat-label">This month</div>
-            <div className="bi-stat-value">{isLoading ? "…" : data?.monthCount ?? 0}</div>
-          </div>
-          <div className="bi-stat">
-            <div className="bi-stat-label">All time</div>
-            <div className="bi-stat-value">{isLoading ? "…" : data?.allTimeCount ?? 0}</div>
-          </div>
-        </div>
-      </div>
-
-      <div className="bi-section">
-        <h2 className="bi-section-title">Where visitors come from</h2>
-        <VisitorMap countries={data?.countries ?? []} />
-      </div>
-
-      <div className="bi-section">
-        <h2 className="bi-section-title">Visitors</h2>
+      <Panel title="Recent visitors">
         {isLoading ? (
-          <div className="bi-placeholder">Loading…</div>
+          <div className="dash-empty">Loading…</div>
         ) : !data?.recent?.length ? (
-          <div className="bi-placeholder">No visits yet</div>
+          <div className="dash-empty">No visits yet</div>
         ) : (
-          <VisitorsTable rows={data.recent} />
+          <VisitorsTable rows={data.recent.slice(0, 25)} />
         )}
-      </div>
-
-      <div className="bi-section">
-        <h2 className="bi-section-title">Recent sales</h2>
-        <div className="bi-placeholder">No data yet</div>
-      </div>
-      <div className="bi-section">
-        <h2 className="bi-section-title">Alerts</h2>
-        <div className="bi-placeholder">No alerts</div>
-      </div>
+      </Panel>
     </>
   );
 }
 
-function VisitorMap({ countries }: { countries: CountryCount[] }) {
-  const lookup = useMemo(() => {
-    const m = new Map<string, number>();
-    for (const c of countries) m.set(c.country.toUpperCase(), c.count);
-    return m;
-  }, [countries]);
+function Stat({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <div className="dash-stat">
+      <div className="dash-stat-label">{label}</div>
+      <div className="dash-stat-value">{value}</div>
+    </div>
+  );
+}
 
-  const max = useMemo(
-    () => countries.reduce((a, b) => Math.max(a, b.count), 0),
+function Panel({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section className="dash-panel">
+      <h2 className="dash-panel-title">{title}</h2>
+      <div className="dash-panel-body">{children}</div>
+    </section>
+  );
+}
+
+function VisitorMap({ countries }: { countries: CountryCount[] }) {
+  const max = useMemo(() => countries.reduce((a, b) => Math.max(a, b.count), 0), [countries]);
+  const markers = useMemo(
+    () =>
+      countries
+        .map((c) => {
+          const key = c.country.toUpperCase();
+          const pos = CENTROIDS[key];
+          return pos ? { key, count: c.count, pos } : null;
+        })
+        .filter(Boolean) as { key: string; count: number; pos: [number, number] }[],
     [countries],
   );
 
-  const colorFor = (n: number) => {
-    if (!n) return "#f3f3f3";
-    const t = Math.min(1, Math.log(n + 1) / Math.log(max + 1 || 2));
-    // interpolate from light pink to brand red #D75F68
-    const r = Math.round(255 + (215 - 255) * t);
-    const g = Math.round(235 + (95 - 235) * t);
-    const b = Math.round(238 + (104 - 238) * t);
-    return `rgb(${r}, ${g}, ${b})`;
+  const radius = (n: number) => {
+    if (!max) return 0;
+    const t = Math.log(n + 1) / Math.log(max + 1 || 2);
+    return 3 + t * 9;
   };
 
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "1fr 220px", gap: 24, border: "1px solid #000", padding: 16 }}>
-      <div style={{ width: "100%" }}>
-        <ComposableMap projectionConfig={{ scale: 140 }} width={800} height={400} style={{ width: "100%", height: "auto" }}>
-          <Geographies geography={GEO_URL}>
-            {({ geographies }) =>
-              geographies.map((geo) => {
-                // world-atlas uses ISO numeric ids; properties.name has the name.
-                // react-simple-maps exposes ISO_A2 via properties when available.
-                const iso2 = (geo.properties as { iso_a2?: string; ISO_A2?: string }).iso_a2 ||
-                  (geo.properties as { ISO_A2?: string }).ISO_A2 || "";
-                const name = (geo.properties as { name?: string }).name || "";
-                const count = lookup.get(iso2.toUpperCase()) || lookup.get(name.toUpperCase()) || 0;
-                return (
-                  <Geography
-                    key={geo.rsmKey}
-                    geography={geo}
-                    fill={colorFor(count)}
-                    stroke="#000"
-                    strokeWidth={0.3}
-                    style={{
-                      default: { outline: "none" },
-                      hover: { outline: "none", fill: "#D75F68" },
-                      pressed: { outline: "none" },
-                    }}
-                  >
-                    <title>{`${name}${count ? ` — ${count} visitors` : ""}`}</title>
-                  </Geography>
-                );
-              })
-            }
-          </Geographies>
-        </ComposableMap>
-      </div>
-      <div>
-        <div className="bi-stat-label" style={{ marginBottom: 12 }}>Top countries</div>
-        {countries.length === 0 ? (
-          <div style={{ fontSize: 12, color: "#888" }}>No data</div>
-        ) : (
-          <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 6 }}>
-            {countries.slice(0, 10).map((c) => (
-              <li key={c.country} style={{ display: "flex", justifyContent: "space-between", fontSize: 12, fontWeight: 800, letterSpacing: "0.02em", textTransform: "uppercase", borderBottom: "1px solid #eee", paddingBottom: 4 }}>
-                <span>{c.country}</span>
-                <span>{c.count}</span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+    <div className="dash-map">
+      <ComposableMap projectionConfig={{ scale: 130 }} width={800} height={380} style={{ width: "100%", height: "auto" }}>
+        <Geographies geography={GEO_URL}>
+          {({ geographies }) =>
+            geographies.map((geo) => (
+              <Geography
+                key={geo.rsmKey}
+                geography={geo}
+                fill="#f3f3f3"
+                stroke="#bbb"
+                strokeWidth={0.3}
+                style={{
+                  default: { outline: "none" },
+                  hover: { outline: "none", fill: "#eee" },
+                  pressed: { outline: "none" },
+                }}
+              />
+            ))
+          }
+        </Geographies>
+        {markers.map((m) => (
+          <Marker key={m.key} coordinates={m.pos}>
+            <circle r={radius(m.count)} fill="#D75F68" fillOpacity={0.7} stroke="#000" strokeWidth={0.5} />
+            <title>{`${m.key} — ${m.count}`}</title>
+          </Marker>
+        ))}
+      </ComposableMap>
     </div>
+  );
+}
+
+function TopCountries({ countries }: { countries: CountryCount[] }) {
+  if (!countries.length) return <div className="dash-empty">No data</div>;
+  return (
+    <ul className="dash-top">
+      {countries.slice(0, 10).map((c) => (
+        <li key={c.country}>
+          <span>{c.country}</span>
+          <span>{c.count}</span>
+        </li>
+      ))}
+    </ul>
   );
 }
 
 function VisitorsTable({ rows }: { rows: VisitorRow[] }) {
   return (
-    <div style={{ border: "1px solid #000", overflow: "auto" }}>
-      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+    <div className="dash-table-wrap">
+      <table className="dash-table">
         <thead>
-          <tr style={{ background: "#000", color: "#fff", textTransform: "uppercase", letterSpacing: "0.02em" }}>
-            <Th>Date</Th>
-            <Th>Country</Th>
-            <Th>City</Th>
-            <Th>IP</Th>
-            <Th>Path</Th>
-            <Th>Referer</Th>
-            <Th>User agent</Th>
-            <Th>Last seen</Th>
+          <tr>
+            <th>Date</th>
+            <th>Country</th>
+            <th>City</th>
+            <th>IP</th>
+            <th>Path</th>
           </tr>
         </thead>
         <tbody>
           {rows.map((v) => (
-            <tr key={v.id} style={{ borderTop: "1px solid #000" }}>
-              <Td>{v.visit_date}</Td>
-              <Td>{v.country || "—"}</Td>
-              <Td>{[v.city, v.region].filter(Boolean).join(", ") || "—"}</Td>
-              <Td><code>{v.ip}</code></Td>
-              <Td>{v.path || "—"}</Td>
-              <Td title={v.referer || ""}>{shorten(v.referer, 30)}</Td>
-              <Td title={v.user_agent || ""}>{shorten(v.user_agent, 40)}</Td>
-              <Td>{new Date(v.last_seen_at).toLocaleString()}</Td>
+            <tr key={v.id}>
+              <td>{v.visit_date}</td>
+              <td>{v.country || "—"}</td>
+              <td>{[v.city, v.region].filter(Boolean).join(", ") || "—"}</td>
+              <td><code>{v.ip}</code></td>
+              <td title={v.path || ""}>{shorten(v.path, 24)}</td>
             </tr>
           ))}
         </tbody>
@@ -252,13 +194,33 @@ function VisitorsTable({ rows }: { rows: VisitorRow[] }) {
   );
 }
 
-function Th({ children }: { children: React.ReactNode }) {
-  return <th style={{ textAlign: "left", padding: "10px 12px", fontWeight: 800, fontSize: 11 }}>{children}</th>;
-}
-function Td({ children, title }: { children: React.ReactNode; title?: string }) {
-  return <td style={{ padding: "10px 12px", verticalAlign: "top" }} title={title}>{children}</td>;
-}
 function shorten(s: string | null, n: number) {
   if (!s) return "—";
   return s.length > n ? s.slice(0, n) + "…" : s;
 }
+
+const dashCss = `
+.dash-stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 20px; }
+.dash-stat { border: 1px solid #000; padding: 10px 12px; }
+.dash-stat-label { font-size: 9px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; color: #555; margin-bottom: 4px; }
+.dash-stat-value { font-size: 20px; font-weight: 900; letter-spacing: -0.02em; line-height: 1; }
+.dash-grid { display: grid; grid-template-columns: 1fr 220px; gap: 12px; margin-bottom: 20px; }
+.dash-panel { border: 1px solid #000; margin-bottom: 12px; }
+.dash-panel-title { font-size: 10px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; margin: 0; padding: 8px 10px; border-bottom: 1px solid #000; background: #000; color: #fff; }
+.dash-panel-body { padding: 10px; }
+.dash-map { width: 100%; }
+.dash-top { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 2px; }
+.dash-top li { display: flex; justify-content: space-between; font-size: 11px; font-weight: 700; letter-spacing: 0.02em; padding: 4px 0; border-bottom: 1px solid #eee; }
+.dash-empty { font-size: 11px; color: #888; text-align: center; padding: 16px; font-weight: 700; letter-spacing: 0.02em; text-transform: uppercase; }
+.dash-table-wrap { overflow-x: auto; }
+.dash-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.dash-table th { text-align: left; padding: 6px 8px; font-weight: 800; font-size: 10px; text-transform: uppercase; letter-spacing: 0.02em; background: #f5f5f5; border-bottom: 1px solid #000; }
+.dash-table td { padding: 6px 8px; border-bottom: 1px solid #eee; vertical-align: top; }
+.dash-table code { font-size: 10px; }
+
+@media (max-width: 768px) {
+  .dash-stats { grid-template-columns: repeat(2, 1fr); }
+  .dash-grid { grid-template-columns: 1fr; }
+  .dash-stat-value { font-size: 18px; }
+}
+`;
