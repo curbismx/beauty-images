@@ -1,16 +1,6 @@
-// Initialize @cf-wasm/photon with inline wasm bytes so the Cloudflare Worker
-// bundler embeds the wasm into the JS — avoids the "No such module
-// assets/photon_rs_bg-*.wasm" runtime failure with the default workerd entry.
-import wasmBytes from "@cf-wasm/photon/dist/lib/photon_rs_bg.wasm.inline.js";
-import { initPhoton } from "@cf-wasm/photon/dist/photon.js";
-import * as photonExports from "@cf-wasm/photon/dist/lib/photon_rs.js";
-
-let initialized = false;
-
-export async function getPhoton(): Promise<typeof photonExports> {
-  if (!initialized) {
-    await initPhoton(wasmBytes as unknown as BufferSource);
-    initialized = true;
-  }
-  return photonExports;
-}
+// Initialize @cf-wasm/photon for the Cloudflare Worker runtime.
+// The `workerd` entry imports the wasm as a default URL import which the
+// Cloudflare Vite plugin emits as a separate asset that the runtime cannot
+// resolve ("No such module assets/photon_rs_bg-*.wasm"). The `edge-light`
+// entry uses `?module` which gets bundled as a WebAssembly.Module and works.
+export * from "@cf-wasm/photon/edge-light";
