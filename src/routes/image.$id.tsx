@@ -71,6 +71,9 @@ function ImageDetail() {
   const [img, setImg] = useState<PublicImageDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [imgReady, setImgReady] = useState(false);
+  const [wmVariant, setWmVariant] = useState<
+    "portrait" | "square" | "landscape" | null
+  >(null);
   const [tier, setTier] = useState<TierId>("medium");
   const fetchSimilar = useServerFn(getSimilarShootImages);
   const [similar, setSimilar] = useState<PublicSearchResult[]>([]);
@@ -181,14 +184,28 @@ function ImageDetail() {
                         className={`img-el${imgReady ? " img-el--ready" : ""}`}
                         src={img.signed_url}
                         alt={img.title ?? ""}
-                        onLoad={() => setImgReady(true)}
+                        draggable={false}
+                        onContextMenu={(e) => e.preventDefault()}
+                        onLoad={(e) => {
+                          const el = e.currentTarget;
+                          const aspect = el.naturalWidth / el.naturalHeight;
+                          setWmVariant(
+                            aspect < 0.9
+                              ? "portrait"
+                              : aspect > 1.1
+                                ? "landscape"
+                                : "square",
+                          );
+                          setImgReady(true);
+                        }}
                       />
-                      {imgReady && (
+                      {imgReady && wmVariant && (
                         <img
                           className="wm-mark"
-                          src="/watermark.png"
+                          src={`/watermark_${wmVariant}.png`}
                           alt=""
                           aria-hidden="true"
+                          draggable={false}
                         />
                       )}
                     </>
@@ -400,8 +417,8 @@ const CSS = `
   left: 50%;
   top: 60%;
   transform: translateY(-50%);
-  width: 50%;
-  height: auto;
+  height: 70px;
+  width: auto;
   pointer-events: none;
   user-select: none;
 }
@@ -415,6 +432,10 @@ const CSS = `
   object-fit: contain;
   opacity: 0;
   transition: opacity 0.4s ease;
+  -webkit-user-drag: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
 .img-el--ready { opacity: 1; }
 
