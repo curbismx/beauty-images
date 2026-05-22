@@ -225,9 +225,12 @@ function Index() {
 
   const saveSearchState = () => {
     try {
+      // Do NOT persist `results` — signed URLs expire (1h) and large payloads
+      // can blow the sessionStorage quota. On restore we re-run the search to
+      // get fresh signed URLs.
       sessionStorage.setItem(
         "bi_search_state",
-        JSON.stringify({ q: submittedQuery || searchValue.trim(), y: window.scrollY, results }),
+        JSON.stringify({ q: submittedQuery || searchValue.trim(), y: window.scrollY }),
       );
       sessionStorage.setItem("bi_restore_search", "1");
     } catch {
