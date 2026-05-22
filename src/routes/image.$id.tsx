@@ -641,8 +641,15 @@ const CSS = `
   display: block; background: #eee;
 }
 @media (max-width: 768px) {
+  .img-header { padding: 16px 18px; gap: 12px; flex-wrap: wrap; }
+  .img-back { padding: 8px; margin: -8px; }
+  .img-back span { display: none; }
+  .img-back--home { display: none; }
+  .img-header-right { gap: 6px; }
+  .img-nav-link, .img-nav-sep { font-size: 10px; letter-spacing: 0.08em; }
   .img-similar { padding: 36px 22px 80px; }
   .img-similar .search-results-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  .img-similar .search-result-card { min-width: 0; }
   .img-similar .search-results-masonry { gap: 14px; }
   .img-similar .masonry-col { gap: 14px; }
 }
