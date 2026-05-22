@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { ComposableMap, Geographies, Geography } from "react-simple-maps";
 import { PageHeader } from "./admin";
-import { getVisitors, type VisitorRow } from "@/lib/visitors.functions";
+import { getVisitors, type CountryCount, type VisitorRow } from "@/lib/visitors.functions";
 import { getImageStats, keywordPendingBatch } from "@/lib/images.functions";
 
 export const Route = createFileRoute("/admin/")({
@@ -16,6 +17,9 @@ const STATS = [
   { label: "Revenue year" },
   { label: "Revenue lifetime" },
 ];
+
+const GEO_URL =
+  "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
 
 function Dashboard() {
   const fetchVisitors = useServerFn(getVisitors);
@@ -88,15 +92,31 @@ function Dashboard() {
         ))}
       </div>
 
-      <div className="bi-stat-row" style={{ gridTemplateColumns: "repeat(2, 1fr)" }}>
-        <div className="bi-stat">
-          <div className="bi-stat-label">Unique visitors today</div>
-          <div className="bi-stat-value">{isLoading ? "…" : data?.todayCount ?? 0}</div>
+      <div className="bi-section">
+        <h2 className="bi-section-title">Unique visitors</h2>
+        <div className="bi-stat-row">
+          <div className="bi-stat">
+            <div className="bi-stat-label">Today</div>
+            <div className="bi-stat-value">{isLoading ? "…" : data?.todayCount ?? 0}</div>
+          </div>
+          <div className="bi-stat">
+            <div className="bi-stat-label">This week</div>
+            <div className="bi-stat-value">{isLoading ? "…" : data?.weekCount ?? 0}</div>
+          </div>
+          <div className="bi-stat">
+            <div className="bi-stat-label">This month</div>
+            <div className="bi-stat-value">{isLoading ? "…" : data?.monthCount ?? 0}</div>
+          </div>
+          <div className="bi-stat">
+            <div className="bi-stat-label">All time</div>
+            <div className="bi-stat-value">{isLoading ? "…" : data?.allTimeCount ?? 0}</div>
+          </div>
         </div>
-        <div className="bi-stat">
-          <div className="bi-stat-label">Unique visitors · last 30d</div>
-          <div className="bi-stat-value">{isLoading ? "…" : data?.last30Count ?? 0}</div>
-        </div>
+      </div>
+
+      <div className="bi-section">
+        <h2 className="bi-section-title">Where visitors come from</h2>
+        <VisitorMap countries={data?.countries ?? []} />
       </div>
 
       <div className="bi-section">
@@ -119,6 +139,81 @@ function Dashboard() {
         <div className="bi-placeholder">No alerts</div>
       </div>
     </>
+  );
+}
+
+function VisitorMap({ countries }: { countries: CountryCount[] }) {
+  const lookup = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const c of countries) m.set(c.country.toUpperCase(), c.count);
+    return m;
+  }, [countries]);
+
+  const max = useMemo(
+    () => countries.reduce((a, b) => Math.max(a, b.count), 0),
+    [countries],
+  );
+
+  const colorFor = (n: number) => {
+    if (!n) return "#f3f3f3";
+    const t = Math.min(1, Math.log(n + 1) / Math.log(max + 1 || 2));
+    // interpolate from light pink to brand red #D75F68
+    const r = Math.round(255 + (215 - 255) * t);
+    const g = Math.round(235 + (95 - 235) * t);
+    const b = Math.round(238 + (104 - 238) * t);
+    return `rgb(${r}, ${g}, ${b})`;
+  };
+
+  return (
+    <div style={{ display: "grid", gridTemplateColumns: "1fr 220px", gap: 24, border: "1px solid #000", padding: 16 }}>
+      <div style={{ width: "100%" }}>
+        <ComposableMap projectionConfig={{ scale: 140 }} width={800} height={400} style={{ width: "100%", height: "auto" }}>
+          <Geographies geography={GEO_URL}>
+            {({ geographies }) =>
+              geographies.map((geo) => {
+                // world-atlas uses ISO numeric ids; properties.name has the name.
+                // react-simple-maps exposes ISO_A2 via properties when available.
+                const iso2 = (geo.properties as { iso_a2?: string; ISO_A2?: string }).iso_a2 ||
+                  (geo.properties as { ISO_A2?: string }).ISO_A2 || "";
+                const name = (geo.properties as { name?: string }).name || "";
+                const count = lookup.get(iso2.toUpperCase()) || lookup.get(name.toUpperCase()) || 0;
+                return (
+                  <Geography
+                    key={geo.rsmKey}
+                    geography={geo}
+                    fill={colorFor(count)}
+                    stroke="#000"
+                    strokeWidth={0.3}
+                    style={{
+                      default: { outline: "none" },
+                      hover: { outline: "none", fill: "#D75F68" },
+                      pressed: { outline: "none" },
+                    }}
+                  >
+                    <title>{`${name}${count ? ` — ${count} visitors` : ""}`}</title>
+                  </Geography>
+                );
+              })
+            }
+          </Geographies>
+        </ComposableMap>
+      </div>
+      <div>
+        <div className="bi-stat-label" style={{ marginBottom: 12 }}>Top countries</div>
+        {countries.length === 0 ? (
+          <div style={{ fontSize: 12, color: "#888" }}>No data</div>
+        ) : (
+          <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 6 }}>
+            {countries.slice(0, 10).map((c) => (
+              <li key={c.country} style={{ display: "flex", justifyContent: "space-between", fontSize: 12, fontWeight: 800, letterSpacing: "0.02em", textTransform: "uppercase", borderBottom: "1px solid #eee", paddingBottom: 4 }}>
+                <span>{c.country}</span>
+                <span>{c.count}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
   );
 }
 
