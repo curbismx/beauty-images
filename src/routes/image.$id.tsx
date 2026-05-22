@@ -69,6 +69,8 @@ const TIERS: Array<{
 
 function ImageDetail() {
   const { id } = Route.useParams();
+  const { from } = Route.useSearch();
+  const cameFromHome = from === "home";
   const navigate = useNavigate();
   const fetchImage = useServerFn(getPublicImage);
   const [img, setImg] = useState<PublicImageDetail | null>(null);
