@@ -1174,6 +1174,7 @@ const PAGE_CSS = `
 @media (max-width: 768px) {
   .curbism-root .search-results { padding: 24px 22px 80px; }
   .curbism-root .search-results-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  .curbism-root .search-result-card { min-width: 0; }
 }
 @keyframes searchResultsIn {
   from { opacity: 0; transform: translateY(8px); }
