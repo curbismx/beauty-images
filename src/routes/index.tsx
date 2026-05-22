@@ -84,6 +84,7 @@ const HERO_IMAGES = [
 type SavedSearchState = {
   q?: string;
   y?: number;
+  seed?: number;
   results?: PublicSearchResult[];
 };
 
