@@ -414,10 +414,12 @@ const CSS = `
 
 .wm-mark {
   position: absolute;
-  left: 50%;
+  right: 0;
   top: 60%;
   transform: translateY(-50%);
-  height: 70px;
+  max-height: 70px;
+  max-width: 100%;
+  height: auto;
   width: auto;
   pointer-events: none;
   user-select: none;
