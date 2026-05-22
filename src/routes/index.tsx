@@ -241,7 +241,11 @@ function Index() {
       // get fresh signed URLs.
       sessionStorage.setItem(
         "bi_search_state",
-        JSON.stringify({ q: submittedQuery || searchValue.trim(), y: window.scrollY }),
+        JSON.stringify({
+          q: submittedQuery || searchValue.trim(),
+          y: window.scrollY,
+          seed: searchSeedRef.current,
+        }),
       );
       sessionStorage.setItem("bi_restore_search", "1");
     } catch {
