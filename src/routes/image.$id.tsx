@@ -184,14 +184,28 @@ function ImageDetail() {
                         className={`img-el${imgReady ? " img-el--ready" : ""}`}
                         src={img.signed_url}
                         alt={img.title ?? ""}
-                        onLoad={() => setImgReady(true)}
+                        draggable={false}
+                        onContextMenu={(e) => e.preventDefault()}
+                        onLoad={(e) => {
+                          const el = e.currentTarget;
+                          const aspect = el.naturalWidth / el.naturalHeight;
+                          setWmVariant(
+                            aspect < 0.9
+                              ? "portrait"
+                              : aspect > 1.1
+                                ? "landscape"
+                                : "square",
+                          );
+                          setImgReady(true);
+                        }}
                       />
-                      {imgReady && (
+                      {imgReady && wmVariant && (
                         <img
                           className="wm-mark"
-                          src="/watermark.png"
+                          src={`/watermark_${wmVariant}.png`}
                           alt=""
                           aria-hidden="true"
+                          draggable={false}
                         />
                       )}
                     </>
