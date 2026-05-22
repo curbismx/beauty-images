@@ -213,8 +213,11 @@ function Index() {
     }
     let alive = true;
     const q = restoreState.q.trim();
+    if (typeof restoreState.seed === "number") {
+      searchSeedRef.current = restoreState.seed;
+    }
     setSearching(true);
-    runSearch({ data: { q, limit: 50000 } })
+    runSearch({ data: { q, limit: 50000, seed: searchSeedRef.current } })
       .then((r) => {
         if (!alive) return;
         setResults(r);
