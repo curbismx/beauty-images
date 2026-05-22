@@ -468,20 +468,23 @@ function Index() {
                     <path d="M5 12h14M13 5l7 7-7 7" />
                   </svg>
                 );
-                // Build compact page list: always include 1, last, current ±1, with ellipses.
+                // Show ~10 page links. For long lists: first 7 around current, ellipsis, last 3.
                 const pagesToShow: Array<number | "..."> = (() => {
-                  if (totalPages <= 7) {
+                  if (totalPages <= 10) {
                     return Array.from({ length: totalPages }, (_, i) => i + 1);
                   }
                   const out: Array<number | "..."> = [];
-                  const add = (n: number) => {
-                    if (n >= 1 && n <= totalPages && out[out.length - 1] !== n) out.push(n);
-                  };
-                  add(1);
-                  if (safePage > 4) out.push("...");
-                  for (let p = Math.max(2, safePage - 1); p <= Math.min(totalPages - 1, safePage + 1); p++) add(p);
-                  if (safePage < totalPages - 3) out.push("...");
-                  add(totalPages);
+                  const lastBlockStart = totalPages - 2; // last 3 pages
+                  // Anchor a 7-page window around current page, but keep it before the last block.
+                  let headStart = Math.max(1, safePage - 3);
+                  let headEnd = headStart + 6;
+                  if (headEnd >= lastBlockStart - 1) {
+                    headEnd = lastBlockStart - 2;
+                    headStart = Math.max(1, headEnd - 6);
+                  }
+                  for (let p = headStart; p <= headEnd; p++) out.push(p);
+                  if (headEnd + 1 < lastBlockStart) out.push("...");
+                  for (let p = lastBlockStart; p <= totalPages; p++) out.push(p);
                   return out;
                 })();
                 const Pager = (
