@@ -76,7 +76,13 @@ function CheckoutReturn() {
     <>
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
       <div className="ret-root">
-        <Link to="/" className="ret-back">← BACK TO SEARCH</Link>
+        <Link
+          to="/"
+          className="ret-back"
+          onClick={() => {
+            try { sessionStorage.setItem("bi_restore_search", "1"); } catch { /* ignore */ }
+          }}
+        >← BACK TO SEARCH</Link>
 
         <div className="ret-wrap">
           <h1 className="ret-h1">
