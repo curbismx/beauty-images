@@ -4,6 +4,10 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 const escapeRegex = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
+// Watermarked preview URL — served by /api/public/preview-image/$id.
+// Watermark is composited server-side so it's embedded if the file is dragged out.
+const previewUrl = (id: string) => `/api/public/preview-image/${id}`;
+
 export type PublicSearchResult = {
   id: string;
   image_number: number;
@@ -33,16 +37,13 @@ export const searchPublicImages = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }): Promise<PublicSearchResult[]> => {
     const DB_PAGE_SIZE = 1000;
-    const SIGNED_URL_BATCH_SIZE = 500;
     const term = data.q.trim();
-    // Split on commas or spaces, trim, and filter empty terms
     const terms = term
       .split(/[, ]+/)
       .map((t) => t.trim().toLowerCase())
       .filter(Boolean);
     if (terms.length === 0) return [];
 
-    // Fetch all matching rows using the first term as the broad filter
     const primary = terms[0];
     const merged: Array<{
       id: string;
@@ -73,7 +74,6 @@ export const searchPublicImages = createServerFn({ method: "POST" })
           const caption = (r.caption ?? "").toLowerCase();
           const kwords = ((r.keywords ?? []) as string[]).map((k) => k.toLowerCase());
           return terms.every((t) => {
-            // Whole-word match so "man" doesn't match "woman", "human", etc.
             const re = new RegExp(`(?:^|[^\\p{L}\\p{N}])${escapeRegex(t)}(?:[^\\p{L}\\p{N}]|$)`, "iu");
             return re.test(title) || re.test(caption) || kwords.some((k) => k === t || re.test(k));
           });
@@ -84,22 +84,13 @@ export const searchPublicImages = createServerFn({ method: "POST" })
     }
 
     const limited = merged.slice(0, data.limit);
-    const paths = limited.map((r) => r.preview_path as string);
-    const signedUrls: Array<{ signedUrl: string | null }> = [];
-    for (let i = 0; i < paths.length; i += SIGNED_URL_BATCH_SIZE) {
-      const signed = await supabaseAdmin.storage
-        .from("images-private")
-        .createSignedUrls(paths.slice(i, i + SIGNED_URL_BATCH_SIZE), 3600);
-      signedUrls.push(...(signed.data ?? []));
-    }
-
-    return limited.map((r, i) => ({
+    return limited.map((r) => ({
       id: r.id,
       image_number: r.image_number as number,
       title: r.title,
       caption: r.caption,
       keywords: (r.keywords ?? []) as string[],
-      signed_url: signedUrls[i]?.signedUrl ?? null,
+      signed_url: previewUrl(r.id),
     }));
   });
 
@@ -116,9 +107,6 @@ export const getPublicImage = createServerFn({ method: "POST" })
       .maybeSingle();
     if (error) throw new Error(error.message);
     if (!row || !row.preview_path) return null;
-    const signed = await supabaseAdmin.storage
-      .from("images-private")
-      .createSignedUrl(row.preview_path, 3600);
     return {
       id: row.id,
       image_number: row.image_number as number,
@@ -127,7 +115,7 @@ export const getPublicImage = createServerFn({ method: "POST" })
       keywords: (row.keywords ?? []) as string[],
       category: row.category,
       pricing_tier: row.pricing_tier,
-      signed_url: signed.data?.signedUrl ?? null,
+      signed_url: previewUrl(row.id),
     };
   });
 
@@ -149,18 +137,13 @@ export const getPublicImagesByIds = createServerFn({ method: "POST" })
       NonNullable<ReturnType<typeof byId.get>>
     >;
 
-    const paths = ordered.map((r) => r.preview_path as string);
-    const signed = paths.length
-      ? await supabaseAdmin.storage.from("images-private").createSignedUrls(paths, 3600)
-      : { data: [] as Array<{ signedUrl: string | null }> };
-
-    return ordered.map((r, i) => ({
+    return ordered.map((r) => ({
       id: r.id,
       image_number: r.image_number as number,
       title: r.title,
       caption: r.caption,
       keywords: (r.keywords ?? []) as string[],
-      signed_url: signed.data?.[i]?.signedUrl ?? null,
+      signed_url: previewUrl(r.id),
     }));
   });
 
@@ -172,7 +155,6 @@ export const getSimilarShootImages = createServerFn({ method: "POST" })
     }).parse,
   )
   .handler(async ({ data }): Promise<PublicSearchResult[]> => {
-    // First 4 digits of an 8-digit padded number = shoot id.
     const shoot = Math.floor(data.imageNumber / 10000);
     const min = shoot * 10000;
     const max = min + 9999;
@@ -192,15 +174,12 @@ export const getSimilarShootImages = createServerFn({ method: "POST" })
     const merged = (rows ?? []).filter((r) => !!r.preview_path);
     if (merged.length === 0) return [];
 
-    const paths = merged.map((r) => r.preview_path as string);
-    const signed = await supabaseAdmin.storage.from("images-private").createSignedUrls(paths, 3600);
-
-    return merged.map((r, i) => ({
+    return merged.map((r) => ({
       id: r.id,
       image_number: r.image_number as number,
       title: r.title,
       caption: r.caption,
       keywords: (r.keywords ?? []) as string[],
-      signed_url: signed.data?.[i]?.signedUrl ?? null,
+      signed_url: previewUrl(r.id),
     }));
   });
