@@ -26,6 +26,9 @@ import { LayoutGrid, Rows3 } from "lucide-react";
 
 export const Route = createFileRoute("/image/$id")({
   component: ImageDetail,
+  validateSearch: (search: Record<string, unknown>): { from?: string } => ({
+    from: typeof search.from === "string" ? search.from : undefined,
+  }),
 });
 
 type TierId = "small" | "medium" | "large";
