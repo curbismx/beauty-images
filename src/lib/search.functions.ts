@@ -33,6 +33,7 @@ export const searchPublicImages = createServerFn({ method: "POST" })
     z.object({
       q: z.string().trim().min(1).max(120),
       limit: z.number().int().min(1).max(50000).default(50000),
+      seed: z.number().int().optional(),
     }).parse,
   )
   .handler(async ({ data }): Promise<PublicSearchResult[]> => {
