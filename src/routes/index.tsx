@@ -655,7 +655,11 @@ function FeaturedMasonry() {
   );
 }
 
-function MasonryColumns({ items }: { items: Array<{ id: string; url: string; alt: string }> }) {
+function MasonryColumns({
+  items,
+}: {
+  items: Array<{ id: string; url: string; alt: string; imageId?: string }>;
+}) {
   const [cols, setCols] = useState(3);
   useEffect(() => {
     const update = () => setCols(window.innerWidth <= 768 ? 2 : 3);
@@ -669,9 +673,21 @@ function MasonryColumns({ items }: { items: Array<{ id: string; url: string; alt
     <div className="featured-masonry-grid">
       {buckets.map((col, i) => (
         <div key={i} className="featured-masonry-col">
-          {col.map((it) => (
-            <img key={it.id} src={it.url} alt={it.alt} loading="lazy" />
-          ))}
+          {col.map((it) =>
+            it.imageId ? (
+              <Link
+                key={it.id}
+                to="/image/$id"
+                params={{ id: it.imageId }}
+                search={{ from: "home" }}
+                className="featured-masonry-link"
+              >
+                <img src={it.url} alt={it.alt} loading="lazy" />
+              </Link>
+            ) : (
+              <img key={it.id} src={it.url} alt={it.alt} loading="lazy" />
+            ),
+          )}
         </div>
       ))}
     </div>
