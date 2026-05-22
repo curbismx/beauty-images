@@ -564,7 +564,7 @@ type FeaturedRow = { id: string; storage_path: string; filename: string };
 const PAGE_SIZE = 15;
 
 function FeaturedMasonry() {
-  const [items, setItems] = useState<Array<{ id: string; url: string; alt: string }>>([]);
+  const [items, setItems] = useState<Array<{ id: string; url: string; alt: string; imageId?: string }>>([]);
   const [, setPage] = useState(0);
   const [done, setDone] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -572,6 +572,7 @@ function FeaturedMasonry() {
   const loadingRef = useRef(false);
   const doneRef = useRef(false);
   const pageRef = useRef(0);
+  const resolveIds = useServerFn(getImageIdsByNumbers);
 
   const loadMore = async () => {
     if (loadingRef.current || doneRef.current) return;
