@@ -1044,25 +1044,38 @@ const PAGE_CSS = `
   padding: 40px 0 200px;
 }
 .curbism-root .search-pager {
-  display: flex; align-items: center; justify-content: flex-start; flex-wrap: wrap; gap: 8px;
+  display: flex; align-items: center; justify-content: flex-start; flex-wrap: nowrap; gap: 6px;
   padding: 18px 0; margin: 0 0 8px;
   border-top: 1px solid #eee; border-bottom: 1px solid #eee;
   font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+  overflow-x: auto;
 }
 .curbism-root .search-pager-btn {
-  background: #000; color: #fff; border: none; padding: 8px 14px;
-  font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase;
-  cursor: pointer; font-family: inherit;
+  background: #000; color: #fff; border: none; padding: 0;
+  width: 38px; height: 38px;
+  display: inline-flex; align-items: center; justify-content: center;
+  cursor: pointer; font-family: inherit; flex-shrink: 0;
 }
+.curbism-root .search-pager-btn--prev svg { transform: scaleX(-1); }
 .curbism-root .search-pager-btn:disabled { opacity: 0.25; cursor: not-allowed; }
+.curbism-root .search-pager-ellipsis {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 24px; height: 38px; color: #777; flex-shrink: 0;
+}
 .curbism-root .search-pager-num {
   background: transparent; color: #000; border: 1px solid #ddd;
-  padding: 8px 12px; min-width: 38px; font-size: 11px; letter-spacing: 0.15em;
-  cursor: pointer; font-family: inherit;
+  padding: 0 10px; min-width: 38px; height: 38px; font-size: 11px; letter-spacing: 0.15em;
+  cursor: pointer; font-family: inherit; flex-shrink: 0;
 }
 .curbism-root .search-pager-num:hover { border-color: #000; }
 .curbism-root .search-pager-num.is-active {
   background: #000; color: #fff; border-color: #000;
+}
+@media (max-width: 480px) {
+  .curbism-root .search-pager { gap: 4px; }
+  .curbism-root .search-pager-btn { width: 34px; height: 34px; }
+  .curbism-root .search-pager-num { min-width: 32px; height: 34px; padding: 0 6px; font-size: 10px; letter-spacing: 0.08em; }
+  .curbism-root .search-pager-ellipsis { min-width: 16px; height: 34px; }
 }
 .curbism-root .search-results-grid {
   display: grid;
