@@ -164,8 +164,12 @@ function Index() {
     setSubmittedQuery(q);
     setSearching(true);
     setPage(1);
+    // New search -> new shuffle seed. Stored so it can be saved and reused,
+    // keeping the result order identical when returning to this search.
+    const seed = Math.floor(Math.random() * 0xffffffff);
+    searchSeedRef.current = seed;
     try {
-      const r = await runSearch({ data: { q, limit: 50000 } });
+      const r = await runSearch({ data: { q, limit: 50000, seed } });
       setResults(r);
       if (typeof restoreY === "number") {
         requestAnimationFrame(() => {
