@@ -184,12 +184,12 @@ function ImageDetail() {
                         onLoad={() => setImgReady(true)}
                       />
                       {imgReady && (
-                        <div className="wm-overlay" aria-hidden="true">
-                          <span className="wm-text">
-                            <span className="wm-a">Beauty</span>
-                            <span className="wm-b">Images</span>
-                          </span>
-                        </div>
+                        <img
+                          className="wm-mark"
+                          src="/watermark.png"
+                          alt=""
+                          aria-hidden="true"
+                        />
                       )}
                     </>
                   ) : (
