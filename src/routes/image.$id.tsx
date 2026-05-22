@@ -392,35 +392,19 @@ const CSS = `
   max-width: 100%;
   line-height: 0;
   position: relative;
+  overflow: hidden;
 }
 
-.wm-overlay {
+.wm-mark {
   position: absolute;
-  top: 50%;
   left: 50%;
-  right: 0;
+  top: 50%;
   transform: translateY(-50%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: clamp(6px, 1vw, 13px) 0;
-  background: rgba(58, 22, 28, 0.4);
+  width: clamp(180px, 42vw, 500px);
+  height: auto;
   pointer-events: none;
   user-select: none;
 }
-
-.wm-text {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  font-weight: 800;
-  font-size: clamp(13px, 2.2vw, 28px);
-  line-height: 1;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-.wm-a { color: rgba(255, 255, 255, 0.85); }
-.wm-b { color: rgba(215, 95, 104, 0.95); }
 
 .img-el {
   display: block;
