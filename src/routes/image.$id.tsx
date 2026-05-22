@@ -378,21 +378,15 @@ const CSS = `
 }
 
 .img-box {
-  width: min(800px, 100%);
-  height: 600px;
-  max-height: 600px;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  background: #0a0a0a;
-  border: 1px solid #3a3a3a;
-  overflow: hidden;
+  display: inline-block;
+  max-width: 100%;
+  line-height: 0;
 }
 
 .img-el {
   display: block;
-  max-width: 100%;
-  max-height: 100%;
+  max-width: min(1000px, 100%);
+  max-height: 700px;
   width: auto;
   height: auto;
   object-fit: contain;
@@ -403,7 +397,7 @@ const CSS = `
 
 .img-empty {
   display: flex; align-items: center; justify-content: center;
-  width: 100%; height: 100%;
+  width: min(1000px, 100%); height: 400px;
   font-size: 11px; letter-spacing: 0.25em; color: #555;
   background: #0a0a0a;
 }
