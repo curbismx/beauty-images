@@ -1,8 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { PageHeader } from "./admin";
 import { useAuth } from "@/lib/use-auth";
 import { supabase } from "@/integrations/supabase/client";
+import { regenerateAllPreviews } from "@/lib/images.functions";
 
 export const Route = createFileRoute("/admin/settings")({
   component: Settings,
