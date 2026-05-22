@@ -87,6 +87,32 @@ export const retryAllFailedImages = createServerFn({ method: "POST" })
     return { retried: ids.length };
   });
 
+export const regenerateAllPreviews = createServerFn({ method: "POST" })
+  .middleware([requireAdmin])
+  .handler(async ({ context }) => {
+    // Clear preview_path on all rows so the process-pending job regenerates them at 800px.
+    const { data: rows, error: selErr } = await context.supabase
+      .from("images")
+      .select("id")
+      .not("preview_path", "is", null);
+    if (selErr) throw new Error(selErr.message);
+    const ids = (rows ?? []).map((r) => r.id);
+    if (!ids.length) return { queued: 0 };
+    const { error } = await context.supabase
+      .from("images")
+      .update({
+        preview_path: null,
+        processing_attempts: 0,
+        processing_error: null,
+        processing_started_at: null,
+      })
+      .in("id", ids);
+    if (error) throw new Error(error.message);
+    return { queued: ids.length };
+  });
+
+
+
 export type PendingQueueItem = {
   id: string;
   image_number: number;
