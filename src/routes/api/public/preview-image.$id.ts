@@ -16,20 +16,23 @@ function compositeWatermark(jpegBytes: Uint8Array): Uint8Array {
   const base = decodeJpeg(jpegBytes, {
     useTArray: true,
     formatAsRGBA: true,
-    maxMemoryUsageInMB: 384,
+    maxMemoryUsageInMB: 768,
   });
   const watermark = PNG.sync.read(Buffer.from(getWatermarkBytes()));
 
   // The watermark's left edge must always begin halfway across the image.
   // Anything that would extend beyond the right side is naturally clipped.
   const x = Math.floor(base.width / 2);
-  const y = Math.max(0, Math.floor((base.height - WATERMARK_H) / 2));
-  const drawW = Math.min(WATERMARK_W, Math.max(0, base.width - x));
-  const drawH = Math.min(WATERMARK_H, Math.max(0, base.height - y));
+  const drawW = Math.max(0, base.width - x);
+  const scaledH = Math.max(1, Math.round(drawW * (WATERMARK_H / WATERMARK_W)));
+  const y = Math.max(0, Math.floor((base.height - scaledH) / 2));
+  const drawH = Math.min(scaledH, Math.max(0, base.height - y));
 
   for (let wy = 0; wy < drawH; wy++) {
+    const sourceY = Math.min(watermark.height - 1, Math.floor((wy / scaledH) * watermark.height));
     for (let wx = 0; wx < drawW; wx++) {
-      const source = (wy * watermark.width + wx) * 4;
+      const sourceX = Math.min(watermark.width - 1, Math.floor((wx / drawW) * watermark.width));
+      const source = (sourceY * watermark.width + sourceX) * 4;
       const alpha = watermark.data[source + 3] / 255;
       if (alpha <= 0) continue;
 
