@@ -7,7 +7,7 @@ function getSupabase() {
 }
 
 const CACHE_BUCKET = "images-derived";
-const CACHE_KEY = (id: string) => `${id}/preview-wm.jpg`;
+const CACHE_KEY = (id: string) => `${id}/preview-wm-v2.jpg`;
 
 async function compositeWatermark(jpegBytes: Uint8Array): Promise<Uint8Array> {
   const photon = await import("@/lib/photon-init.server");
