@@ -10,7 +10,7 @@ function getSupabase() {
 }
 
 const CACHE_BUCKET = "images-derived";
-const CACHE_KEY = (id: string) => `${id}/preview-wm-v3.jpg`;
+const CACHE_KEY = (id: string) => `${id}/preview-wm-v4.jpg`;
 
 function compositeWatermark(jpegBytes: Uint8Array): Uint8Array {
   const base = decodeJpeg(jpegBytes, {
@@ -87,10 +87,10 @@ export const Route = createFileRoute("/api/public/preview-image/$id")({
           }
           const sourceBytes = new Uint8Array(await original.arrayBuffer());
           try {
-            outBytes = await compositeWatermark(sourceBytes);
+            outBytes = compositeWatermark(sourceBytes);
           } catch (e) {
             console.error("Watermark composite failed:", e);
-            outBytes = sourceBytes;
+            return new Response("Watermark failed", { status: 500 });
           }
           // Best-effort cache.
           await supabase.storage
