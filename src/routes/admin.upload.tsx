@@ -12,6 +12,7 @@ import {
   listUploadErrors,
   deleteUploadErrors,
   resolveUploadError,
+  deleteImages,
 } from "@/lib/images.functions";
 import { UploadErrorCard, uploadErrorGridStyle } from "@/components/UploadErrorCard";
 
@@ -173,6 +174,14 @@ function Upload() {
   });
   const retryAllMut = useMutation({
     mutationFn: () => runRetryAll({}),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["processing-queue"] });
+      qc.invalidateQueries({ queryKey: ["image-stats"] });
+    },
+  });
+  const removeImages = useServerFn(deleteImages);
+  const deleteImageMut = useMutation({
+    mutationFn: (id: string) => removeImages({ data: { ids: [id] } }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["processing-queue"] });
       qc.invalidateQueries({ queryKey: ["image-stats"] });
@@ -612,6 +621,17 @@ function Upload() {
                       </button>
                     </>
                   )}
+                  <button
+                    type="button"
+                    style={{ ...retryBtn, background: "#a32020" }}
+                    disabled={deleteImageMut.isPending}
+                    onClick={() => {
+                      if (confirm(`Delete image #${String(r.image_number).padStart(8, "0")} (${r.filename})? This cannot be undone.`))
+                        deleteImageMut.mutate(r.id);
+                    }}
+                  >
+                    {deleteImageMut.isPending ? "…" : "Delete image"}
+                  </button>
                 </div>
               );
             })}
