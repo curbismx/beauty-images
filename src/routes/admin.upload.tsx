@@ -179,6 +179,14 @@ function Upload() {
       qc.invalidateQueries({ queryKey: ["image-stats"] });
     },
   });
+  const removeImages = useServerFn(deleteImages);
+  const deleteImageMut = useMutation({
+    mutationFn: (id: string) => removeImages({ data: { ids: [id] } }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["processing-queue"] });
+      qc.invalidateQueries({ queryKey: ["image-stats"] });
+    },
+  });
 
   const updateItem = useCallback((id: string, patch: Partial<QueueItem>) => {
     setQueue((q) => {
