@@ -84,6 +84,7 @@ const HERO_IMAGES = [
 type SavedSearchState = {
   q?: string;
   y?: number;
+  seed?: number;
   results?: PublicSearchResult[];
 };
 
@@ -121,6 +122,9 @@ function Index() {
   const runSearch = useServerFn(searchPublicImages);
   const justClosedSearchRef = useRef(false);
   const restoreConsumedRef = useRef(false);
+  const searchSeedRef = useRef<number>(
+    restoreState?.seed ?? Math.floor(Math.random() * 0xffffffff),
+  );
   const searchInputRef = useRef<HTMLInputElement>(null);
   const heroRef = useRef<HTMLElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
@@ -160,8 +164,12 @@ function Index() {
     setSubmittedQuery(q);
     setSearching(true);
     setPage(1);
+    // New search -> new shuffle seed. Stored so it can be saved and reused,
+    // keeping the result order identical when returning to this search.
+    const seed = Math.floor(Math.random() * 0xffffffff);
+    searchSeedRef.current = seed;
     try {
-      const r = await runSearch({ data: { q, limit: 50000 } });
+      const r = await runSearch({ data: { q, limit: 50000, seed } });
       setResults(r);
       if (typeof restoreY === "number") {
         requestAnimationFrame(() => {
@@ -205,8 +213,11 @@ function Index() {
     }
     let alive = true;
     const q = restoreState.q.trim();
+    if (typeof restoreState.seed === "number") {
+      searchSeedRef.current = restoreState.seed;
+    }
     setSearching(true);
-    runSearch({ data: { q, limit: 50000 } })
+    runSearch({ data: { q, limit: 50000, seed: searchSeedRef.current } })
       .then((r) => {
         if (!alive) return;
         setResults(r);
@@ -230,7 +241,11 @@ function Index() {
       // get fresh signed URLs.
       sessionStorage.setItem(
         "bi_search_state",
-        JSON.stringify({ q: submittedQuery || searchValue.trim(), y: window.scrollY }),
+        JSON.stringify({
+          q: submittedQuery || searchValue.trim(),
+          y: window.scrollY,
+          seed: searchSeedRef.current,
+        }),
       );
       sessionStorage.setItem("bi_restore_search", "1");
     } catch {
@@ -967,7 +982,7 @@ const PAGE_CSS = `
   .curbism-root .hero-logo  { top: 40px; left: 0; height: 40px; }
   .curbism-root .hero-title { left: 0; top: 100px; padding-left: 22px; max-width: 60%; font-size: clamp(20px, 5.5vw, 36px); }
   .curbism-root .hero-search { left: 22px; width: calc(80% - 22px); padding-left: 0; top: calc(100px + clamp(20px, 5.5vw, 36px) * 3 + 18px); }
-  .curbism-root .hero-search input { padding: 12px 14px; font-size: 14px; }
+  .curbism-root .hero-search input { padding: 12px 14px; font-size: 16px; }
   .curbism-root .hero-counter { bottom: 22px; right: 22px; font-size: 10px; }
   .curbism-root .hero-account { top: 22px; right: 22px; }
   .curbism-root .section { min-height: 380px; }

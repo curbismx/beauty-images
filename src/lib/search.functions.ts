@@ -33,6 +33,7 @@ export const searchPublicImages = createServerFn({ method: "POST" })
     z.object({
       q: z.string().trim().min(1).max(120),
       limit: z.number().int().min(1).max(50000).default(50000),
+      seed: z.number().int().optional(),
     }).parse,
   )
   .handler(async ({ data }): Promise<PublicSearchResult[]> => {
@@ -119,9 +120,18 @@ export const searchPublicImages = createServerFn({ method: "POST" })
 
     // Give each section one fixed random key; preferred sections get a smaller
     // key so they lean toward the front (a nudge, not a guarantee). Sorting by
-    // that key shuffles the sections across the whole result set.
+    // that key shuffles the sections across the whole result set. When a seed
+    // is supplied the shuffle is deterministic, so returning to a search shows
+    // the exact same order until a new search (with a new seed) is run.
+    let rngState = ((data.seed ?? Math.floor(Math.random() * 0xffffffff)) >>> 0) || 1;
+    const rand = () => {
+      rngState = (rngState + 0x6d2b79f5) | 0;
+      let t = Math.imul(rngState ^ (rngState >>> 15), 1 | rngState);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
     const ordered = sections
-      .map((s) => ({ s, key: Math.random() * (s.boosted ? BOOST_FACTOR : 1) }))
+      .map((s) => ({ s, key: rand() * (s.boosted ? BOOST_FACTOR : 1) }))
       .sort((a, b) => a.key - b.key)
       .flatMap((x) => x.s.rows);
 
