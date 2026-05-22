@@ -588,13 +588,33 @@ function FeaturedMasonry() {
       .range(from, to);
     if (!error && data) {
       const rows = data as FeaturedRow[];
-      const next = rows.map((r) => ({
-        id: r.id,
-        url: supabase.storage.from("featured-images").getPublicUrl(r.storage_path, {
-          transform: { height: 800, resize: "contain", quality: 75 },
-        }).data.publicUrl,
-        alt: r.filename,
-      }));
+      // Derive the catalogue image number from each favourite's filename
+      // (e.g. "01-A01370026.jpg" -> 1370026) and resolve it to an image id.
+      const rowNumbers = rows.map((r) => {
+        const m = r.filename.match(/^\d{2}-A(\d+)\.[a-z0-9]+$/i);
+        return m ? parseInt(m[1], 10) : null;
+      });
+      const numbers = rowNumbers.filter((n): n is number => n != null);
+      let idByNumber = new Map<number, string>();
+      if (numbers.length > 0) {
+        try {
+          const resolved = await resolveIds({ data: { numbers } });
+          idByNumber = new Map(resolved.map((x) => [x.image_number, x.id]));
+        } catch {
+          /* if resolution fails, favourites just stay non-clickable */
+        }
+      }
+      const next = rows.map((r, i) => {
+        const num = rowNumbers[i];
+        return {
+          id: r.id,
+          url: supabase.storage.from("featured-images").getPublicUrl(r.storage_path, {
+            transform: { height: 800, resize: "contain", quality: 75 },
+          }).data.publicUrl,
+          alt: r.filename,
+          imageId: num != null ? idByNumber.get(num) : undefined,
+        };
+      });
       setItems((prev) => [...prev, ...next]);
       pageRef.current += 1;
       setPage(pageRef.current);
