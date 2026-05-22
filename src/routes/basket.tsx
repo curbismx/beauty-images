@@ -151,7 +151,13 @@ function BasketPage() {
     <>
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
       <div className="lb-root">
-        <Link to="/" className="lb-back">← BACK TO SEARCH</Link>
+        <Link
+          to="/"
+          className="lb-back"
+          onClick={() => {
+            try { sessionStorage.setItem("bi_restore_search", "1"); } catch { /* ignore */ }
+          }}
+        >← BACK TO SEARCH</Link>
 
         <div className="search-results">
           <div className="search-results-header">
