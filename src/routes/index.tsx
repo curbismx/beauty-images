@@ -122,6 +122,9 @@ function Index() {
   const runSearch = useServerFn(searchPublicImages);
   const justClosedSearchRef = useRef(false);
   const restoreConsumedRef = useRef(false);
+  const searchSeedRef = useRef<number>(
+    restoreState?.seed ?? Math.floor(Math.random() * 0xffffffff),
+  );
   const searchInputRef = useRef<HTMLInputElement>(null);
   const heroRef = useRef<HTMLElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
