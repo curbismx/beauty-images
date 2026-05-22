@@ -1,5 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
+import { decode as decodeJpeg, encode as encodeJpeg } from "jpeg-js";
+import { PNG } from "pngjs";
+
 import { getWatermarkBytes, WATERMARK_W, WATERMARK_H } from "@/lib/watermark-data.server";
 
 function getSupabase() {
@@ -7,42 +10,42 @@ function getSupabase() {
 }
 
 const CACHE_BUCKET = "images-derived";
-const CACHE_KEY = (id: string) => `${id}/preview-wm-v2.jpg`;
+const CACHE_KEY = (id: string) => `${id}/preview-wm-v4.jpg`;
 
-async function compositeWatermark(jpegBytes: Uint8Array): Promise<Uint8Array> {
-  const photon = await import("@/lib/photon-init.server");
-  const img = photon.PhotonImage.new_from_byteslice(jpegBytes);
-  const iw = img.get_width();
-  const ih = img.get_height();
+function compositeWatermark(jpegBytes: Uint8Array): Uint8Array {
+  const base = decodeJpeg(jpegBytes, {
+    useTArray: true,
+    formatAsRGBA: true,
+    maxMemoryUsageInMB: 768,
+  });
+  const watermark = PNG.sync.read(Buffer.from(getWatermarkBytes()));
 
-  // Decode watermark.
-  const wmFull = photon.PhotonImage.new_from_byteslice(getWatermarkBytes());
+  // The watermark's left edge must always begin halfway across the image.
+  // Anything that would extend beyond the right side is naturally clipped.
+  const x = Math.floor(base.width / 2);
+  const drawW = Math.max(0, base.width - x);
+  const scaledH = Math.max(1, Math.round(drawW * (WATERMARK_H / WATERMARK_W)));
+  const y = Math.max(0, Math.floor((base.height - scaledH) / 2));
+  const drawH = Math.min(scaledH, Math.max(0, base.height - y));
 
-  // Left edge of watermark sits at exactly 50% of image width.
-  // Watermark draws at native size; if it overflows the right edge, crop the overflow.
-  const x = Math.floor(iw / 2);
-  const avail = iw - x;
-  const wmW = WATERMARK_W;
-  const wmH = WATERMARK_H;
+  for (let wy = 0; wy < drawH; wy++) {
+    const sourceY = Math.min(watermark.height - 1, Math.floor((wy / scaledH) * watermark.height));
+    for (let wx = 0; wx < drawW; wx++) {
+      const sourceX = Math.min(watermark.width - 1, Math.floor((wx / drawW) * watermark.width));
+      const source = (sourceY * watermark.width + sourceX) * 4;
+      const alpha = watermark.data[source + 3] / 255;
+      if (alpha <= 0) continue;
 
-  let wmToDraw = wmFull;
-  let cropped: any = null;
-  if (avail < wmW) {
-    cropped = photon.crop(wmFull, 0, 0, avail, wmH);
-    wmToDraw = cropped;
+      const target = ((y + wy) * base.width + x + wx) * 4;
+      const inverseAlpha = 1 - alpha;
+      base.data[target] = Math.round(watermark.data[source] * alpha + base.data[target] * inverseAlpha);
+      base.data[target + 1] = Math.round(watermark.data[source + 1] * alpha + base.data[target + 1] * inverseAlpha);
+      base.data[target + 2] = Math.round(watermark.data[source + 2] * alpha + base.data[target + 2] * inverseAlpha);
+      base.data[target + 3] = 255;
+    }
   }
 
-  // Vertically centered ("halfway down").
-  const y = Math.max(0, Math.floor((ih - wmH) / 2));
-
-  photon.watermark(img, wmToDraw, BigInt(x), BigInt(y));
-
-  const out = img.get_bytes_jpeg(85);
-
-  img.free();
-  wmFull.free();
-  if (cropped) cropped.free();
-  return out;
+  return new Uint8Array(encodeJpeg({ data: base.data, width: base.width, height: base.height }, 86).data);
 }
 
 export const Route = createFileRoute("/api/public/preview-image/$id")({
@@ -84,10 +87,10 @@ export const Route = createFileRoute("/api/public/preview-image/$id")({
           }
           const sourceBytes = new Uint8Array(await original.arrayBuffer());
           try {
-            outBytes = await compositeWatermark(sourceBytes);
+            outBytes = compositeWatermark(sourceBytes);
           } catch (e) {
             console.error("Watermark composite failed:", e);
-            outBytes = sourceBytes;
+            return new Response("Watermark failed", { status: 500 });
           }
           // Best-effort cache.
           await supabase.storage
