@@ -1,7 +1,7 @@
 // Worker-compatible JPEG resize via @cf-wasm/photon.
 // Returns JPEG bytes. If input's longest edge already <= maxEdge, just re-encodes.
 export async function resizeJpeg(input: Uint8Array, maxEdge: number, quality = 82): Promise<Uint8Array> {
-  const photon = await import("@cf-wasm/photon/workerd");
+  const photon = await import("@cf-wasm/photon/edge-light");
   const img = photon.PhotonImage.new_from_byteslice(input);
   const w = img.get_width();
   const h = img.get_height();
