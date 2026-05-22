@@ -1,8 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { PageHeader } from "./admin";
 import { useAuth } from "@/lib/use-auth";
 import { supabase } from "@/integrations/supabase/client";
+import { regenerateAllPreviews } from "@/lib/images.functions";
 
 export const Route = createFileRoute("/admin/settings")({
   component: Settings,
@@ -167,7 +169,40 @@ function Settings() {
         <h2 className="bi-section-title">Pricing tiers</h2>
         <div className="bi-placeholder">No tiers configured</div>
       </div>
+
+      <div className="bi-section">
+        <h2 className="bi-section-title">Image previews</h2>
+        <RegeneratePreviewsButton />
+      </div>
+
       <button className="bi-btn">Save</button>
     </>
+  );
+}
+
+function RegeneratePreviewsButton() {
+  const regen = useServerFn(regenerateAllPreviews);
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState<string | null>(null);
+  const onClick = async () => {
+    if (!confirm("Regenerate all previews at 800px? Existing previews will be cleared and rebuilt on the next processing run.")) return;
+    setBusy(true);
+    setMsg(null);
+    try {
+      const r = await regen();
+      setMsg(`Queued ${r.queued} image${r.queued === 1 ? "" : "s"} for preview regeneration.`);
+    } catch (e) {
+      setMsg((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <div>
+      <button type="button" className="bi-btn" onClick={onClick} disabled={busy}>
+        {busy ? "Queuing…" : "Regenerate all previews (800px)"}
+      </button>
+      {msg && <div className="bi-label" style={{ marginTop: 12 }}>{msg}</div>}
+    </div>
   );
 }

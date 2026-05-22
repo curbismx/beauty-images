@@ -174,16 +174,18 @@ function ImageDetail() {
           <div className="img-stage">
             <div className="img-stage-inner">
               <div className="img-frame">
-                {img?.signed_url ? (
-                  <img
-                    className={`img-el${imgReady ? " img-el--ready" : ""}`}
-                    src={img.signed_url}
-                    alt={img.title ?? ""}
-                    onLoad={() => setImgReady(true)}
-                  />
-                ) : (
-                  <div className="img-empty">{loading ? "LOADING…" : "IMAGE UNAVAILABLE"}</div>
-                )}
+                <div className="img-box">
+                  {img?.signed_url ? (
+                    <img
+                      className={`img-el${imgReady ? " img-el--ready" : ""}`}
+                      src={img.signed_url}
+                      alt={img.title ?? ""}
+                      onLoad={() => setImgReady(true)}
+                    />
+                  ) : (
+                    <div className="img-empty">{loading ? "LOADING…" : "IMAGE UNAVAILABLE"}</div>
+                  )}
+                </div>
               </div>
               {imgReady && (
                 <div className="lc-detail lc-detail--under">
@@ -375,13 +377,25 @@ const CSS = `
   font-size: 0;
 }
 
+.img-box {
+  width: min(800px, 100%);
+  height: 600px;
+  max-height: 600px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  background: #0a0a0a;
+  border: 1px solid #3a3a3a;
+  overflow: hidden;
+}
+
 .img-el {
   display: block;
   max-width: 100%;
-  max-height: calc(100vh - ${FRAME * 2}px);
-  width: auto; height: auto;
-  background: #0a0a0a;
-  border: 1px solid #3a3a3a;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
   opacity: 0;
   transition: opacity 0.4s ease;
 }
@@ -389,14 +403,14 @@ const CSS = `
 
 .img-empty {
   display: flex; align-items: center; justify-content: center;
-  width: 100%; aspect-ratio: 1 / 1;
+  width: 100%; height: 100%;
   font-size: 11px; letter-spacing: 0.25em; color: #555;
   background: #0a0a0a;
 }
 
 /* Detail under image (left-aligned with image) */
 .lc-detail { margin-bottom: 0; }
-.lc-detail--under { margin: 0; max-width: 100%; }
+.lc-detail--under { margin: 75px 0 0; max-width: 100%; }
 .lc-detail-eyebrow { font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; color: #888; font-weight: 700; margin: 28px 0 12px; }
 .lc-detail-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 8px; }
 .lc-detail-tier { font-size: 14px; font-weight: 700; color: #fff; letter-spacing: 0.2em; }
@@ -407,7 +421,7 @@ const CSS = `
   display: inline-flex;
   flex-wrap: wrap;
   gap: 10px;
-  margin-top: 75px;
+  margin-top: 0;
 }
 .lc-btn {
   all: unset; cursor: pointer;
