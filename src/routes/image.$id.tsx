@@ -392,7 +392,6 @@ const CSS = `
   max-width: 100%;
   line-height: 0;
   position: relative;
-  container-type: inline-size;
 }
 
 .wm-overlay {
@@ -404,7 +403,7 @@ const CSS = `
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1.7cqw 0;
+  padding: clamp(6px, 1vw, 13px) 0;
   background: rgba(58, 22, 28, 0.4);
   pointer-events: none;
   user-select: none;
@@ -413,7 +412,7 @@ const CSS = `
 .wm-text {
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-weight: 800;
-  font-size: clamp(11px, 3.4cqw, 32px);
+  font-size: clamp(13px, 2.2vw, 28px);
   line-height: 1;
   letter-spacing: 0.04em;
   text-transform: uppercase;
