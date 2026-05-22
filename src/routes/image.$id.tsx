@@ -26,6 +26,9 @@ import { LayoutGrid, Rows3 } from "lucide-react";
 
 export const Route = createFileRoute("/image/$id")({
   component: ImageDetail,
+  validateSearch: (search: Record<string, unknown>): { from?: string } => ({
+    from: typeof search.from === "string" ? search.from : undefined,
+  }),
 });
 
 type TierId = "small" | "medium" | "large";
@@ -66,6 +69,8 @@ const TIERS: Array<{
 
 function ImageDetail() {
   const { id } = Route.useParams();
+  const { from } = Route.useSearch();
+  const cameFromHome = from === "home";
   const navigate = useNavigate();
   const fetchImage = useServerFn(getPublicImage);
   const [img, setImg] = useState<PublicImageDetail | null>(null);
@@ -133,29 +138,47 @@ function ImageDetail() {
       <div className="img-root">
         <header className={`img-header${imgReady ? " img-header--ready" : ""}`}>
           <div className="img-header-left">
-            <button
-              type="button"
-              className="img-back"
-              onClick={() => {
-                try { sessionStorage.setItem("bi_restore_search", "1"); } catch { /* ignore */ }
-                navigate({ to: "/" });
-              }}
-            >
-              <svg className="img-back-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="square">
-                <path d="M19 12H5M11 5l-7 7 7 7" />
-              </svg>
-              <span>BACK TO SEARCH RESULTS</span>
-            </button>
-            <button
-              type="button"
-              className="img-back img-back--home"
-              onClick={() => {
-                try { sessionStorage.removeItem("bi_restore_search"); sessionStorage.removeItem("bi_search_state"); } catch { /* ignore */ }
-                navigate({ to: "/" });
-              }}
-            >
-              / BACK TO HOME
-            </button>
+            {cameFromHome ? (
+              <button
+                type="button"
+                className="img-back"
+                onClick={() => {
+                  try { sessionStorage.removeItem("bi_restore_search"); sessionStorage.removeItem("bi_search_state"); } catch { /* ignore */ }
+                  navigate({ to: "/" });
+                }}
+              >
+                <svg className="img-back-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="square">
+                  <path d="M19 12H5M11 5l-7 7 7 7" />
+                </svg>
+                <span>BACK TO HOME</span>
+              </button>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  className="img-back"
+                  onClick={() => {
+                    try { sessionStorage.setItem("bi_restore_search", "1"); } catch { /* ignore */ }
+                    navigate({ to: "/" });
+                  }}
+                >
+                  <svg className="img-back-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="square">
+                    <path d="M19 12H5M11 5l-7 7 7 7" />
+                  </svg>
+                  <span>BACK TO SEARCH RESULTS</span>
+                </button>
+                <button
+                  type="button"
+                  className="img-back img-back--home"
+                  onClick={() => {
+                    try { sessionStorage.removeItem("bi_restore_search"); sessionStorage.removeItem("bi_search_state"); } catch { /* ignore */ }
+                    navigate({ to: "/" });
+                  }}
+                >
+                  / BACK TO HOME
+                </button>
+              </>
+            )}
           </div>
           <nav className="img-header-right">
             <button

@@ -3,7 +3,7 @@ import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Layers, LayoutGrid, Rows3, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { searchPublicImages, type PublicSearchResult } from "@/lib/search.functions";
+import { searchPublicImages, getImageIdsByNumbers, type PublicSearchResult } from "@/lib/search.functions";
 import { getLightbox, subscribeLightbox } from "@/lib/lightbox";
 import { useViewMode, useMasonryCols } from "@/lib/view-mode";
 import { useSession } from "@/lib/use-session";
@@ -564,7 +564,7 @@ type FeaturedRow = { id: string; storage_path: string; filename: string };
 const PAGE_SIZE = 15;
 
 function FeaturedMasonry() {
-  const [items, setItems] = useState<Array<{ id: string; url: string; alt: string }>>([]);
+  const [items, setItems] = useState<Array<{ id: string; url: string; alt: string; imageId?: string }>>([]);
   const [, setPage] = useState(0);
   const [done, setDone] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -572,6 +572,7 @@ function FeaturedMasonry() {
   const loadingRef = useRef(false);
   const doneRef = useRef(false);
   const pageRef = useRef(0);
+  const resolveIds = useServerFn(getImageIdsByNumbers);
 
   const loadMore = async () => {
     if (loadingRef.current || doneRef.current) return;
@@ -587,13 +588,33 @@ function FeaturedMasonry() {
       .range(from, to);
     if (!error && data) {
       const rows = data as FeaturedRow[];
-      const next = rows.map((r) => ({
-        id: r.id,
-        url: supabase.storage.from("featured-images").getPublicUrl(r.storage_path, {
-          transform: { height: 800, resize: "contain", quality: 75 },
-        }).data.publicUrl,
-        alt: r.filename,
-      }));
+      // Derive the catalogue image number from each favourite's filename
+      // (e.g. "01-A01370026.jpg" -> 1370026) and resolve it to an image id.
+      const rowNumbers = rows.map((r) => {
+        const m = r.filename.match(/^\d{2}-A(\d+)\.[a-z0-9]+$/i);
+        return m ? parseInt(m[1], 10) : null;
+      });
+      const numbers = rowNumbers.filter((n): n is number => n != null);
+      let idByNumber = new Map<number, string>();
+      if (numbers.length > 0) {
+        try {
+          const resolved = await resolveIds({ data: { numbers } });
+          idByNumber = new Map(resolved.map((x) => [x.image_number, x.id]));
+        } catch {
+          /* if resolution fails, favourites just stay non-clickable */
+        }
+      }
+      const next = rows.map((r, i) => {
+        const num = rowNumbers[i];
+        return {
+          id: r.id,
+          url: supabase.storage.from("featured-images").getPublicUrl(r.storage_path, {
+            transform: { height: 800, resize: "contain", quality: 75 },
+          }).data.publicUrl,
+          alt: r.filename,
+          imageId: num != null ? idByNumber.get(num) : undefined,
+        };
+      });
       setItems((prev) => [...prev, ...next]);
       pageRef.current += 1;
       setPage(pageRef.current);
@@ -634,7 +655,11 @@ function FeaturedMasonry() {
   );
 }
 
-function MasonryColumns({ items }: { items: Array<{ id: string; url: string; alt: string }> }) {
+function MasonryColumns({
+  items,
+}: {
+  items: Array<{ id: string; url: string; alt: string; imageId?: string }>;
+}) {
   const [cols, setCols] = useState(3);
   useEffect(() => {
     const update = () => setCols(window.innerWidth <= 768 ? 2 : 3);
@@ -648,9 +673,21 @@ function MasonryColumns({ items }: { items: Array<{ id: string; url: string; alt
     <div className="featured-masonry-grid">
       {buckets.map((col, i) => (
         <div key={i} className="featured-masonry-col">
-          {col.map((it) => (
-            <img key={it.id} src={it.url} alt={it.alt} loading="lazy" />
-          ))}
+          {col.map((it) =>
+            it.imageId ? (
+              <Link
+                key={it.id}
+                to="/image/$id"
+                params={{ id: it.imageId }}
+                search={{ from: "home" }}
+                className="featured-masonry-link"
+              >
+                <img src={it.url} alt={it.alt} loading="lazy" />
+              </Link>
+            ) : (
+              <img key={it.id} src={it.url} alt={it.alt} loading="lazy" />
+            ),
+          )}
         </div>
       ))}
     </div>
@@ -964,6 +1001,7 @@ const PAGE_CSS = `
   flex-direction: column;
   gap: 0;
 }
+.curbism-root .featured-masonry-link { display: block; }
 .curbism-root .featured-masonry-col img {
   width: 100%;
   height: auto;

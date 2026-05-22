@@ -119,6 +119,29 @@ export const getPublicImage = createServerFn({ method: "POST" })
     };
   });
 
+// Resolve catalogue image numbers (e.g. 1370026) to their image ids.
+// Used by the homepage favourites to link each preview to its real image.
+// Same visibility filters as getPublicImage, so any id returned is openable.
+export const getImageIdsByNumbers = createServerFn({ method: "POST" })
+  .inputValidator(z.object({ numbers: z.array(z.number().int()).max(200) }).parse)
+  .handler(
+    async ({ data }): Promise<Array<{ image_number: number; id: string }>> => {
+      if (data.numbers.length === 0) return [];
+      const { data: rows, error } = await supabaseAdmin
+        .from("images")
+        .select("id, image_number")
+        .in("image_number", data.numbers)
+        .eq("public", true)
+        .eq("featured", false)
+        .not("preview_path", "is", null);
+      if (error) throw new Error(error.message);
+      return (rows ?? []).map((r) => ({
+        image_number: r.image_number as number,
+        id: r.id as string,
+      }));
+    },
+  );
+
 export const getPublicImagesByIds = createServerFn({ method: "POST" })
   .inputValidator(z.object({ ids: z.array(z.string().uuid()).max(200) }).parse)
   .handler(async ({ data }): Promise<PublicSearchResult[]> => {
