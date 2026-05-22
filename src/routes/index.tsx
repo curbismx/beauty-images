@@ -468,23 +468,23 @@ function Index() {
                     <path d="M5 12h14M13 5l7 7-7 7" />
                   </svg>
                 );
-                // Show ~10 page links. For long lists: first 7 around current, ellipsis, last 3.
+                // Always show first 3 + window around current + last 3, with ellipses as needed.
                 const pagesToShow: Array<number | "..."> = (() => {
                   if (totalPages <= 10) {
                     return Array.from({ length: totalPages }, (_, i) => i + 1);
                   }
-                  const out: Array<number | "..."> = [];
-                  const lastBlockStart = totalPages - 2; // last 3 pages
-                  // Anchor a 7-page window around current page, but keep it before the last block.
-                  let headStart = Math.max(1, safePage - 3);
-                  let headEnd = headStart + 6;
-                  if (headEnd >= lastBlockStart - 1) {
-                    headEnd = lastBlockStart - 2;
-                    headStart = Math.max(1, headEnd - 6);
+                  const set = new Set<number>();
+                  for (let p = 1; p <= 3; p++) set.add(p);
+                  for (let p = totalPages - 2; p <= totalPages; p++) set.add(p);
+                  for (let p = safePage - 1; p <= safePage + 1; p++) {
+                    if (p >= 1 && p <= totalPages) set.add(p);
                   }
-                  for (let p = headStart; p <= headEnd; p++) out.push(p);
-                  if (headEnd + 1 < lastBlockStart) out.push("...");
-                  for (let p = lastBlockStart; p <= totalPages; p++) out.push(p);
+                  const sorted = Array.from(set).sort((a, b) => a - b);
+                  const out: Array<number | "..."> = [];
+                  for (let i = 0; i < sorted.length; i++) {
+                    if (i > 0 && sorted[i] - sorted[i - 1] > 1) out.push("...");
+                    out.push(sorted[i]);
+                  }
                   return out;
                 })();
                 const Pager = (
