@@ -22,7 +22,7 @@ const CACHE_KEY = (id: string) => `${id}/preview-wm-v5.jpg`;
 // threw on every request and the route returned HTTP 500 (broken-image icon).
 // The pixel blend below is plain JavaScript and runs anywhere.
 async function compositeWatermark(jpegBytes: Uint8Array): Promise<Uint8Array> {
-  const photon = await import("@cf-wasm/photon/workerd");
+  const photon = await import("@cf-wasm/photon/edge-light");
 
   // Decode the base photo -> raw RGBA pixels.
   const baseImg = photon.PhotonImage.new_from_byteslice(jpegBytes);
