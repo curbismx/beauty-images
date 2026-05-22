@@ -71,6 +71,9 @@ function ImageDetail() {
   const [img, setImg] = useState<PublicImageDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [imgReady, setImgReady] = useState(false);
+  const [wmVariant, setWmVariant] = useState<
+    "portrait" | "square" | "landscape" | null
+  >(null);
   const [tier, setTier] = useState<TierId>("medium");
   const fetchSimilar = useServerFn(getSimilarShootImages);
   const [similar, setSimilar] = useState<PublicSearchResult[]>([]);
