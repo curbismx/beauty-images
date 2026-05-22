@@ -174,16 +174,18 @@ function ImageDetail() {
           <div className="img-stage">
             <div className="img-stage-inner">
               <div className="img-frame">
-                {img?.signed_url ? (
-                  <img
-                    className={`img-el${imgReady ? " img-el--ready" : ""}`}
-                    src={img.signed_url}
-                    alt={img.title ?? ""}
-                    onLoad={() => setImgReady(true)}
-                  />
-                ) : (
-                  <div className="img-empty">{loading ? "LOADING…" : "IMAGE UNAVAILABLE"}</div>
-                )}
+                <div className="img-box">
+                  {img?.signed_url ? (
+                    <img
+                      className={`img-el${imgReady ? " img-el--ready" : ""}`}
+                      src={img.signed_url}
+                      alt={img.title ?? ""}
+                      onLoad={() => setImgReady(true)}
+                    />
+                  ) : (
+                    <div className="img-empty">{loading ? "LOADING…" : "IMAGE UNAVAILABLE"}</div>
+                  )}
+                </div>
               </div>
               {imgReady && (
                 <div className="lc-detail lc-detail--under">
