@@ -455,6 +455,7 @@ const CSS = `
   .lb-back { padding: 18px 22px 0; }
   .search-results { padding: 24px 22px 80px; }
   .search-results-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  .search-result-card { min-width: 0; }
   .search-results-masonry { gap: 14px; }
   .masonry-col { gap: 14px; }
 }
