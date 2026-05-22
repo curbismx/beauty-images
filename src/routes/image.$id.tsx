@@ -428,7 +428,7 @@ const CSS = `
 .img-el {
   display: block;
   max-width: min(1000px, 100%);
-  max-height: 700px;
+  max-height: 800px;
   width: auto;
   height: auto;
   object-fit: contain;
