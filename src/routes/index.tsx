@@ -452,34 +452,69 @@ function Index() {
                     resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
                   });
                 };
+                const ArrowSvg = (
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="square"
+                  >
+                    <path d="M5 12h14M13 5l7 7-7 7" />
+                  </svg>
+                );
+                // Build compact page list: always include 1, last, current ±1, with ellipses.
+                const pagesToShow: Array<number | "..."> = (() => {
+                  if (totalPages <= 7) {
+                    return Array.from({ length: totalPages }, (_, i) => i + 1);
+                  }
+                  const out: Array<number | "..."> = [];
+                  const add = (n: number) => {
+                    if (n >= 1 && n <= totalPages && out[out.length - 1] !== n) out.push(n);
+                  };
+                  add(1);
+                  if (safePage > 4) out.push("...");
+                  for (let p = Math.max(2, safePage - 1); p <= Math.min(totalPages - 1, safePage + 1); p++) add(p);
+                  if (safePage < totalPages - 3) out.push("...");
+                  add(totalPages);
+                  return out;
+                })();
                 const Pager = (
                   <div className="search-pager">
                     <button
                       type="button"
-                      className="search-pager-btn"
+                      className="search-pager-btn search-pager-btn--prev"
                       disabled={safePage <= 1}
                       onClick={() => goPage(safePage - 1)}
+                      aria-label="Previous page"
                     >
-                      ← PREV
+                      {ArrowSvg}
                     </button>
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                      <button
-                        key={p}
-                        type="button"
-                        className={`search-pager-num${p === safePage ? " is-active" : ""}`}
-                        onClick={() => goPage(p)}
-                        aria-current={p === safePage ? "page" : undefined}
-                      >
-                        {String(p).padStart(2, "0")}
-                      </button>
-                    ))}
+                    {pagesToShow.map((p, i) =>
+                      p === "..." ? (
+                        <span key={`e${i}`} className="search-pager-ellipsis">…</span>
+                      ) : (
+                        <button
+                          key={p}
+                          type="button"
+                          className={`search-pager-num${p === safePage ? " is-active" : ""}`}
+                          onClick={() => goPage(p)}
+                          aria-current={p === safePage ? "page" : undefined}
+                        >
+                          {String(p).padStart(2, "0")}
+                        </button>
+                      ),
+                    )}
                     <button
                       type="button"
                       className="search-pager-btn"
                       disabled={safePage >= totalPages}
                       onClick={() => goPage(safePage + 1)}
+                      aria-label="Next page"
                     >
-                      NEXT →
+                      {ArrowSvg}
                     </button>
                   </div>
                 );
@@ -1009,25 +1044,38 @@ const PAGE_CSS = `
   padding: 40px 0 200px;
 }
 .curbism-root .search-pager {
-  display: flex; align-items: center; justify-content: flex-start; flex-wrap: wrap; gap: 8px;
+  display: flex; align-items: center; justify-content: flex-start; flex-wrap: nowrap; gap: 6px;
   padding: 18px 0; margin: 0 0 8px;
   border-top: 1px solid #eee; border-bottom: 1px solid #eee;
   font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+  overflow-x: auto;
 }
 .curbism-root .search-pager-btn {
-  background: #000; color: #fff; border: none; padding: 8px 14px;
-  font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase;
-  cursor: pointer; font-family: inherit;
+  background: #000; color: #fff; border: none; padding: 0;
+  width: 38px; height: 38px;
+  display: inline-flex; align-items: center; justify-content: center;
+  cursor: pointer; font-family: inherit; flex-shrink: 0;
 }
+.curbism-root .search-pager-btn--prev svg { transform: scaleX(-1); }
 .curbism-root .search-pager-btn:disabled { opacity: 0.25; cursor: not-allowed; }
+.curbism-root .search-pager-ellipsis {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 24px; height: 38px; color: #777; flex-shrink: 0;
+}
 .curbism-root .search-pager-num {
   background: transparent; color: #000; border: 1px solid #ddd;
-  padding: 8px 12px; min-width: 38px; font-size: 11px; letter-spacing: 0.15em;
-  cursor: pointer; font-family: inherit;
+  padding: 0 10px; min-width: 38px; height: 38px; font-size: 11px; letter-spacing: 0.15em;
+  cursor: pointer; font-family: inherit; flex-shrink: 0;
 }
 .curbism-root .search-pager-num:hover { border-color: #000; }
 .curbism-root .search-pager-num.is-active {
   background: #000; color: #fff; border-color: #000;
+}
+@media (max-width: 480px) {
+  .curbism-root .search-pager { gap: 4px; }
+  .curbism-root .search-pager-btn { width: 34px; height: 34px; }
+  .curbism-root .search-pager-num { min-width: 32px; height: 34px; padding: 0 6px; font-size: 10px; letter-spacing: 0.08em; }
+  .curbism-root .search-pager-ellipsis { min-width: 16px; height: 34px; }
 }
 .curbism-root .search-results-grid {
   display: grid;
