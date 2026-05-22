@@ -452,34 +452,69 @@ function Index() {
                     resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
                   });
                 };
+                const ArrowSvg = (
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="square"
+                  >
+                    <path d="M5 12h14M13 5l7 7-7 7" />
+                  </svg>
+                );
+                // Build compact page list: always include 1, last, current ±1, with ellipses.
+                const pagesToShow: Array<number | "..."> = (() => {
+                  if (totalPages <= 7) {
+                    return Array.from({ length: totalPages }, (_, i) => i + 1);
+                  }
+                  const out: Array<number | "..."> = [];
+                  const add = (n: number) => {
+                    if (n >= 1 && n <= totalPages && out[out.length - 1] !== n) out.push(n);
+                  };
+                  add(1);
+                  if (safePage > 4) out.push("...");
+                  for (let p = Math.max(2, safePage - 1); p <= Math.min(totalPages - 1, safePage + 1); p++) add(p);
+                  if (safePage < totalPages - 3) out.push("...");
+                  add(totalPages);
+                  return out;
+                })();
                 const Pager = (
                   <div className="search-pager">
                     <button
                       type="button"
-                      className="search-pager-btn"
+                      className="search-pager-btn search-pager-btn--prev"
                       disabled={safePage <= 1}
                       onClick={() => goPage(safePage - 1)}
+                      aria-label="Previous page"
                     >
-                      ← PREV
+                      {ArrowSvg}
                     </button>
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                      <button
-                        key={p}
-                        type="button"
-                        className={`search-pager-num${p === safePage ? " is-active" : ""}`}
-                        onClick={() => goPage(p)}
-                        aria-current={p === safePage ? "page" : undefined}
-                      >
-                        {String(p).padStart(2, "0")}
-                      </button>
-                    ))}
+                    {pagesToShow.map((p, i) =>
+                      p === "..." ? (
+                        <span key={`e${i}`} className="search-pager-ellipsis">…</span>
+                      ) : (
+                        <button
+                          key={p}
+                          type="button"
+                          className={`search-pager-num${p === safePage ? " is-active" : ""}`}
+                          onClick={() => goPage(p)}
+                          aria-current={p === safePage ? "page" : undefined}
+                        >
+                          {String(p).padStart(2, "0")}
+                        </button>
+                      ),
+                    )}
                     <button
                       type="button"
                       className="search-pager-btn"
                       disabled={safePage >= totalPages}
                       onClick={() => goPage(safePage + 1)}
+                      aria-label="Next page"
                     >
-                      NEXT →
+                      {ArrowSvg}
                     </button>
                   </div>
                 );
