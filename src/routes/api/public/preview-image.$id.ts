@@ -10,7 +10,7 @@ const CACHE_BUCKET = "images-derived";
 const CACHE_KEY = (id: string) => `${id}/preview-wm.jpg`;
 
 async function compositeWatermark(jpegBytes: Uint8Array): Promise<Uint8Array> {
-  const photon = await import("@cf-wasm/photon/workerd");
+  const photon = await import("@/lib/photon-init.server");
   const img = photon.PhotonImage.new_from_byteslice(jpegBytes);
   const iw = img.get_width();
   const ih = img.get_height();
