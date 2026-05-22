@@ -224,7 +224,7 @@ function ImageDetail() {
                       />
                       {imgReady && wmVariant && (
                         <img
-                          className="wm-mark"
+                          className={`wm-mark wm-mark--${wmVariant}`}
                           src={`/watermark_${wmVariant}.png`}
                           alt=""
                           aria-hidden="true"
@@ -647,6 +647,15 @@ const CSS = `
   .img-back--home { display: none; }
   .img-header-right { gap: 6px; }
   .img-nav-link, .img-nav-sep { font-size: 10px; letter-spacing: 0.08em; }
+  .wm-mark { max-height: none; }
+  .wm-mark--portrait { width: 70%; }
+  .wm-mark--square { width: 60%; }
+  .wm-mark--landscape { width: 50%; }
+  .lc-btn-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .lc-btn--cta { grid-column: 1 / -1; justify-content: space-between; }
+  .lc-btn-box { width: 32px; font-size: 12px; }
+  .lc-btn-price { padding: 0 8px; font-size: 12px; }
+  .lc-btn:not(.lc-btn--cta) .lc-btn-price { flex: 1; justify-content: center; }
   .img-similar { padding: 36px 22px 80px; }
   .img-similar .search-results-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
   .img-similar .search-result-card { min-width: 0; }
