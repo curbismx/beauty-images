@@ -621,6 +621,17 @@ function Upload() {
                       </button>
                     </>
                   )}
+                  <button
+                    type="button"
+                    style={{ ...retryBtn, background: "#a32020" }}
+                    disabled={deleteImageMut.isPending}
+                    onClick={() => {
+                      if (confirm(`Delete image #${String(r.image_number).padStart(8, "0")} (${r.filename})? This cannot be undone.`))
+                        deleteImageMut.mutate(r.id);
+                    }}
+                  >
+                    {deleteImageMut.isPending ? "…" : "Delete image"}
+                  </button>
                 </div>
               );
             })}
