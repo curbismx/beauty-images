@@ -12,6 +12,7 @@ import {
   listUploadErrors,
   deleteUploadErrors,
   resolveUploadError,
+  deleteImages,
 } from "@/lib/images.functions";
 import { UploadErrorCard, uploadErrorGridStyle } from "@/components/UploadErrorCard";
 
