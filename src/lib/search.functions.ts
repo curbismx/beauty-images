@@ -83,7 +83,50 @@ export const searchPublicImages = createServerFn({ method: "POST" })
       if (pageRows.length < DB_PAGE_SIZE) break;
     }
 
-    const limited = merged.slice(0, data.limit);
+    // --- Section-based shuffle for search variety -------------------------
+
+    // Each shoot is split into small consecutive sections; the sections are
+    // then shuffled across the whole result set, so similar images don't clump
+    // together and the order differs on every search. Shoots in the preferred
+    // range get a soft bias toward the front. The three constants below are
+    // safe to change at any time.
+
+    const SECTION_SIZE = 3;        // images per section
+    const BOOST_SHOOT_MIN = 136;   // first shoot in the preferred range
+    const BOOST_SHOOT_MAX = 214;   // last shoot in the preferred range
+    const BOOST_FACTOR = 0.65;     // 1 = no preference; lower = stronger pull forward
+
+    // Group matching rows by shoot (the first 4 digits of the 8-digit number).
+    const byShoot = new Map<number, typeof merged>();
+
+    for (const r of merged) {
+      const shoot = Math.floor(r.image_number / 10000);
+      const group = byShoot.get(shoot);
+      if (group) group.push(r);
+      else byShoot.set(shoot, [r]);
+    }
+
+    // Order each shoot by image number, then cut it into fixed-size sections.
+    const sections: Array<{ boosted: boolean; rows: typeof merged }> = [];
+
+    for (const [shoot, rows] of byShoot) {
+      rows.sort((a, b) => a.image_number - b.image_number);
+      const boosted = shoot >= BOOST_SHOOT_MIN && shoot <= BOOST_SHOOT_MAX;
+      for (let i = 0; i < rows.length; i += SECTION_SIZE) {
+        sections.push({ boosted, rows: rows.slice(i, i + SECTION_SIZE) });
+      }
+    }
+
+    // Give each section one fixed random key; preferred sections get a smaller
+    // key so they lean toward the front (a nudge, not a guarantee). Sorting by
+    // that key shuffles the sections across the whole result set.
+    const ordered = sections
+      .map((s) => ({ s, key: Math.random() * (s.boosted ? BOOST_FACTOR : 1) }))
+      .sort((a, b) => a.key - b.key)
+      .flatMap((x) => x.s.rows);
+
+    const limited = ordered.slice(0, data.limit);
+
     return limited.map((r) => ({
       id: r.id,
       image_number: r.image_number as number,
