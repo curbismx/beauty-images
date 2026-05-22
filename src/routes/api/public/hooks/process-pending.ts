@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
+import { resizeJpeg } from "@/lib/resize-jpeg.server";
 
 const MAX_ATTEMPTS = 3;
 const PREVIEW_BATCH = 25;
