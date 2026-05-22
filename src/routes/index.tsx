@@ -1001,6 +1001,7 @@ const PAGE_CSS = `
   flex-direction: column;
   gap: 0;
 }
+.curbism-root .featured-masonry-link { display: block; }
 .curbism-root .featured-masonry-col img {
   width: 100%;
   height: auto;
