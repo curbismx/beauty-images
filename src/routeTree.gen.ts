@@ -32,6 +32,7 @@ import { Route as ApiPublicTrackRouteImport } from './routes/api/public/track'
 import { Route as ApiPublicDownloadRouteImport } from './routes/api/public/download'
 import { Route as ApiAdminUploadImageRouteImport } from './routes/api/admin/upload-image'
 import { Route as AdminImageIdRouteImport } from './routes/admin.image.$id'
+import { Route as ApiPublicPreviewImageIdRouteImport } from './routes/api/public/preview-image.$id'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as ApiPublicHooksProcessPendingRouteImport } from './routes/api/public/hooks/process-pending'
 import { Route as ApiPublicHooksKeywordPendingRouteImport } from './routes/api/public/hooks/keyword-pending'
@@ -151,6 +152,11 @@ const AdminImageIdRoute = AdminImageIdRouteImport.update({
   path: '/image/$id',
   getParentRoute: () => AdminRoute,
 } as any)
+const ApiPublicPreviewImageIdRoute = ApiPublicPreviewImageIdRouteImport.update({
+  id: '/api/public/preview-image/$id',
+  path: '/api/public/preview-image/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicPaymentsWebhookRoute =
   ApiPublicPaymentsWebhookRouteImport.update({
     id: '/api/public/payments/webhook',
@@ -197,6 +203,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/keyword-pending': typeof ApiPublicHooksKeywordPendingRoute
   '/api/public/hooks/process-pending': typeof ApiPublicHooksProcessPendingRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
+  '/api/public/preview-image/$id': typeof ApiPublicPreviewImageIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -224,6 +231,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/keyword-pending': typeof ApiPublicHooksKeywordPendingRoute
   '/api/public/hooks/process-pending': typeof ApiPublicHooksProcessPendingRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
+  '/api/public/preview-image/$id': typeof ApiPublicPreviewImageIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -253,6 +261,7 @@ export interface FileRoutesById {
   '/api/public/hooks/keyword-pending': typeof ApiPublicHooksKeywordPendingRoute
   '/api/public/hooks/process-pending': typeof ApiPublicHooksProcessPendingRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
+  '/api/public/preview-image/$id': typeof ApiPublicPreviewImageIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -283,6 +292,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/keyword-pending'
     | '/api/public/hooks/process-pending'
     | '/api/public/payments/webhook'
+    | '/api/public/preview-image/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -310,6 +320,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/keyword-pending'
     | '/api/public/hooks/process-pending'
     | '/api/public/payments/webhook'
+    | '/api/public/preview-image/$id'
   id:
     | '__root__'
     | '/'
@@ -338,6 +349,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/keyword-pending'
     | '/api/public/hooks/process-pending'
     | '/api/public/payments/webhook'
+    | '/api/public/preview-image/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -358,6 +370,7 @@ export interface RootRouteChildren {
   ApiPublicHooksKeywordPendingRoute: typeof ApiPublicHooksKeywordPendingRoute
   ApiPublicHooksProcessPendingRoute: typeof ApiPublicHooksProcessPendingRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
+  ApiPublicPreviewImageIdRoute: typeof ApiPublicPreviewImageIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -523,6 +536,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminImageIdRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/api/public/preview-image/$id': {
+      id: '/api/public/preview-image/$id'
+      path: '/api/public/preview-image/$id'
+      fullPath: '/api/public/preview-image/$id'
+      preLoaderRoute: typeof ApiPublicPreviewImageIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/payments/webhook': {
       id: '/api/public/payments/webhook'
       path: '/api/public/payments/webhook'
@@ -591,6 +611,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksKeywordPendingRoute: ApiPublicHooksKeywordPendingRoute,
   ApiPublicHooksProcessPendingRoute: ApiPublicHooksProcessPendingRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
+  ApiPublicPreviewImageIdRoute: ApiPublicPreviewImageIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
