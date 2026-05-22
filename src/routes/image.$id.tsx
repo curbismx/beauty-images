@@ -417,8 +417,8 @@ const CSS = `
   left: 50%;
   top: 60%;
   transform: translateY(-50%);
-  width: 50%;
-  height: auto;
+  height: 70px;
+  width: auto;
   pointer-events: none;
   user-select: none;
 }
@@ -432,6 +432,10 @@ const CSS = `
   object-fit: contain;
   opacity: 0;
   transition: opacity 0.4s ease;
+  -webkit-user-drag: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
 .img-el--ready { opacity: 1; }
 
