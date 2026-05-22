@@ -398,9 +398,9 @@ const CSS = `
 .wm-mark {
   position: absolute;
   left: 50%;
-  top: 50%;
+  top: 60%;
   transform: translateY(-50%);
-  width: clamp(180px, 42vw, 500px);
+  width: 50%;
   height: auto;
   pointer-events: none;
   user-select: none;
