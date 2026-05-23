@@ -7,6 +7,8 @@ const escapeRegex = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 // Watermarked preview URL — served by /api/public/preview-image/$id.
 // Watermark is composited server-side so it's embedded if the file is dragged out.
 const previewUrl = (id: string) => `/api/public/preview-image/${id}`;
+// Small resized copy for grid thumbnails — far less data than the full preview.
+const thumbUrl = (id: string) => `/api/public/preview-image/${id}?w=500`;
 
 export type PublicSearchResult = {
   id: string;
@@ -143,7 +145,7 @@ export const searchPublicImages = createServerFn({ method: "POST" })
       title: r.title,
       caption: r.caption,
       keywords: (r.keywords ?? []) as string[],
-      signed_url: previewUrl(r.id),
+      signed_url: thumbUrl(r.id),
     }));
   });
 
@@ -219,7 +221,7 @@ export const getPublicImagesByIds = createServerFn({ method: "POST" })
       title: r.title,
       caption: r.caption,
       keywords: (r.keywords ?? []) as string[],
-      signed_url: previewUrl(r.id),
+      signed_url: thumbUrl(r.id),
     }));
   });
 
@@ -256,6 +258,6 @@ export const getSimilarShootImages = createServerFn({ method: "POST" })
       title: r.title,
       caption: r.caption,
       keywords: (r.keywords ?? []) as string[],
-      signed_url: previewUrl(r.id),
+      signed_url: thumbUrl(r.id),
     }));
   });
