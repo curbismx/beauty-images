@@ -31,13 +31,13 @@ const TIER_LABEL: Record<string, string> = { small: "S", medium: "M", large: "L"
 const TIER_NAME: Record<string, string> = { small: "Small", medium: "Medium", large: "Large" };
 const TIER_PRICE: Record<string, number> = { small: 150, medium: 275, large: 375 };
 const TIER_PRICE_ID: Record<string, string> = {
-  small: "license_small_gbp",
-  medium: "license_medium_gbp",
-  large: "license_large_gbp",
+  small: "license_small_usd",
+  medium: "license_medium_usd",
+  large: "license_large_usd",
 };
 
 function fmt(n: number) {
-  return `£${n.toFixed(2)}`;
+  return `$${n.toFixed(2)}`;
 }
 
 function useBasketJson(): string {
