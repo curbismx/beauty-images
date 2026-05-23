@@ -104,10 +104,13 @@ function BasketPage() {
     return () => { alive = false; };
   }, [idsKey, fetchImages]);
 
-  const total = basket.reduce((s, b) => s + (TIER_PRICE[b.tier] ?? 0), 0);
+  const total = basket.reduce((s, b) => s + (pricing[b.tier as Tier]?.amount ?? 0), 0);
+  const currencySymbol = pricing.medium.symbol;
+  const fmtTotal = (n: number) => `${currencySymbol}${n.toFixed(2)}`;
 
   const renderCard = useCallback((b: BasketItem, idx: number) => {
     const r = items.find((x) => x.id === b.id);
+    const p = pricing[b.tier as Tier];
     return (
       <div key={`${b.id}-${b.tier}-${idx}`} className="search-result-card">
         <Link to="/image/$id" params={{ id: b.id }} search={{ from: "basket" }} className="src-link">
@@ -133,12 +136,12 @@ function BasketPage() {
           </div>
           <div className="src-row">
             {r?.title && <span className="src-title">{r.title}</span>}
-            <span className="src-price">{fmt(TIER_PRICE[b.tier] ?? 0)}</span>
+            <span className="src-price">{p ? formatPrice(p) : ""}</span>
           </div>
         </figcaption>
       </div>
     );
-  }, [items]);
+  }, [items, pricing]);
 
   return (
     <>
@@ -207,14 +210,14 @@ function BasketPage() {
             <div className="basket-checkout">
               <div className="basket-total">
                 <span className="basket-total-label">TOTAL</span>
-                <span className="basket-total-value">{fmt(total)}</span>
+                <span className="basket-total-value">{fmtTotal(total)}</span>
               </div>
               <button
                 type="button"
                 className="basket-checkout-btn"
                 onClick={() => setCheckoutOpen(true)}
               >
-                CHECKOUT · {fmt(total)}
+                CHECKOUT · {fmtTotal(total)}
               </button>
             </div>
           )}
