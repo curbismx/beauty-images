@@ -484,24 +484,31 @@ function Index() {
                     <path d="M5 12h14M13 5l7 7-7 7" />
                   </svg>
                 );
-                // Always show first 3 + window around current + last 3, with ellipses as needed.
+                // Fixed-length pager: the SAME number of cells on every page,
+                // so the layout never shifts as you move through results.
+                // Page 1 and the last 3 pages are always shown; the middle is
+                // a 5-page sliding window. Total cells stay constant at 11.
                 const pagesToShow: Array<number | "..."> = (() => {
-                  if (totalPages <= 10) {
-                    return Array.from({ length: totalPages }, (_, i) => i + 1);
+                  const total = totalPages;
+                  const cur = safePage;
+                  if (total <= 13) {
+                    return Array.from({ length: total }, (_, i) => i + 1);
                   }
-                  const set = new Set<number>();
-                  for (let p = 1; p <= 3; p++) set.add(p);
-                  for (let p = totalPages - 2; p <= totalPages; p++) set.add(p);
-                  for (let p = safePage - 1; p <= safePage + 1; p++) {
-                    if (p >= 1 && p <= totalPages) set.add(p);
+                  if (cur <= 7) {
+                    return [1, 2, 3, 4, 5, 6, 7, "...", total - 2, total - 1, total];
                   }
-                  const sorted = Array.from(set).sort((a, b) => a - b);
-                  const out: Array<number | "..."> = [];
-                  for (let i = 0; i < sorted.length; i++) {
-                    if (i > 0 && sorted[i] - sorted[i - 1] > 1) out.push("...");
-                    out.push(sorted[i]);
+                  if (cur >= total - 7) {
+                    return [
+                      1, "...",
+                      total - 8, total - 7, total - 6, total - 5, total - 4,
+                      total - 3, total - 2, total - 1, total,
+                    ];
                   }
-                  return out;
+                  return [
+                    1, "...",
+                    cur - 2, cur - 1, cur, cur + 1, cur + 2,
+                    "...", total - 2, total - 1, total,
+                  ];
                 })();
                 const Pager = (
                   <div className="search-pager">
@@ -981,8 +988,8 @@ const PAGE_CSS = `
 
 @media (max-width: 768px) {
   .curbism-root .hero-logo  { top: 40px; left: 0; height: 40px; }
-  .curbism-root .hero-title { left: 0; top: 100px; padding-left: 22px; max-width: 60%; font-size: clamp(20px, 5.5vw, 36px); }
-  .curbism-root .hero-search { left: 22px; width: calc(80% - 22px); padding-left: 0; top: calc(100px + clamp(20px, 5.5vw, 36px) * 3 + 18px); }
+  .curbism-root .hero-title { left: 0; top: 100px; padding-left: 22px; max-width: 60%; font-size: clamp(20px, 5.5vw, 36px); line-height: 1.35; letter-spacing: -0.01em; }
+  .curbism-root .hero-search { left: 22px; right: 22px; width: auto; top: auto; bottom: 56px; padding-left: 0; }
   .curbism-root .hero-search input { padding: 12px 14px; font-size: 16px; }
   .curbism-root .hero-counter { bottom: 22px; right: 22px; font-size: 10px; }
   .curbism-root .hero-account { top: 22px; right: 22px; }
