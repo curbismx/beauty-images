@@ -107,10 +107,13 @@ function LightboxPage() {
         <Link
           to="/"
           className="lb-back"
-          onClick={() => {
-            try { sessionStorage.setItem("bi_restore_search", "1"); } catch { /* ignore */ }
+          onClick={(e) => {
+            if (typeof window !== "undefined" && window.history.length > 1) {
+              e.preventDefault();
+              router.history.back();
+            }
           }}
-        >← BACK TO SEARCH</Link>
+        >← BACK</Link>
 
 
         <div className="search-results">
