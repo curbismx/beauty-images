@@ -118,7 +118,7 @@ function BasketPage() {
     const r = items.find((x) => x.id === b.id);
     return (
       <div key={`${b.id}-${b.tier}-${idx}`} className="search-result-card">
-        <Link to="/image/$id" params={{ id: b.id }} className="src-link">
+        <Link to="/image/$id" params={{ id: b.id }} search={{ from: "basket" }} className="src-link">
           {r?.signed_url ? (
             <img src={r.signed_url} alt={r.title ?? r.caption ?? ""} loading="lazy" />
           ) : (
