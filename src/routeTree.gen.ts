@@ -11,8 +11,10 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LightboxRouteImport } from './routes/lightbox'
+import { Route as LicenceRouteImport } from './routes/licence'
 import { Route as BasketRouteImport } from './routes/basket'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AccountRouteImport } from './routes/account'
@@ -46,6 +48,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
   path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -54,6 +61,11 @@ const LoginRoute = LoginRouteImport.update({
 const LightboxRoute = LightboxRouteImport.update({
   id: '/lightbox',
   path: '/lightbox',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LicenceRoute = LicenceRouteImport.update({
+  id: '/licence',
+  path: '/licence',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BasketRoute = BasketRouteImport.update({
@@ -175,8 +187,10 @@ export interface FileRoutesByFullPath {
   '/account': typeof AccountRoute
   '/admin': typeof AdminRouteWithChildren
   '/basket': typeof BasketRoute
+  '/licence': typeof LicenceRoute
   '/lightbox': typeof LightboxRoute
   '/login': typeof LoginRoute
+  '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/admin/customers': typeof AdminCustomersRoute
@@ -202,8 +216,10 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
   '/basket': typeof BasketRoute
+  '/licence': typeof LicenceRoute
   '/lightbox': typeof LightboxRoute
   '/login': typeof LoginRoute
+  '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/admin/customers': typeof AdminCustomersRoute
@@ -231,8 +247,10 @@ export interface FileRoutesById {
   '/account': typeof AccountRoute
   '/admin': typeof AdminRouteWithChildren
   '/basket': typeof BasketRoute
+  '/licence': typeof LicenceRoute
   '/lightbox': typeof LightboxRoute
   '/login': typeof LoginRoute
+  '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/admin/customers': typeof AdminCustomersRoute
@@ -261,8 +279,10 @@ export interface FileRouteTypes {
     | '/account'
     | '/admin'
     | '/basket'
+    | '/licence'
     | '/lightbox'
     | '/login'
+    | '/privacy'
     | '/reset-password'
     | '/signup'
     | '/admin/customers'
@@ -288,8 +308,10 @@ export interface FileRouteTypes {
     | '/'
     | '/account'
     | '/basket'
+    | '/licence'
     | '/lightbox'
     | '/login'
+    | '/privacy'
     | '/reset-password'
     | '/signup'
     | '/admin/customers'
@@ -316,8 +338,10 @@ export interface FileRouteTypes {
     | '/account'
     | '/admin'
     | '/basket'
+    | '/licence'
     | '/lightbox'
     | '/login'
+    | '/privacy'
     | '/reset-password'
     | '/signup'
     | '/admin/customers'
@@ -345,8 +369,10 @@ export interface RootRouteChildren {
   AccountRoute: typeof AccountRoute
   AdminRoute: typeof AdminRouteWithChildren
   BasketRoute: typeof BasketRoute
+  LicenceRoute: typeof LicenceRoute
   LightboxRoute: typeof LightboxRoute
   LoginRoute: typeof LoginRoute
+  PrivacyRoute: typeof PrivacyRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SignupRoute: typeof SignupRoute
   CheckoutReturnRoute: typeof CheckoutReturnRoute
@@ -376,6 +402,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -388,6 +421,13 @@ declare module '@tanstack/react-router' {
       path: '/lightbox'
       fullPath: '/lightbox'
       preLoaderRoute: typeof LightboxRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/licence': {
+      id: '/licence'
+      path: '/licence'
+      fullPath: '/licence'
+      preLoaderRoute: typeof LicenceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/basket': {
@@ -578,8 +618,10 @@ const rootRouteChildren: RootRouteChildren = {
   AccountRoute: AccountRoute,
   AdminRoute: AdminRouteWithChildren,
   BasketRoute: BasketRoute,
+  LicenceRoute: LicenceRoute,
   LightboxRoute: LightboxRoute,
   LoginRoute: LoginRoute,
+  PrivacyRoute: PrivacyRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SignupRoute: SignupRoute,
   CheckoutReturnRoute: CheckoutReturnRoute,
