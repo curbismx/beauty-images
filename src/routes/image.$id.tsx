@@ -22,6 +22,7 @@ import {
   type BasketItem,
 } from "@/lib/basket";
 import { useViewMode, useMasonryCols } from "@/lib/view-mode";
+import { useRegionPricing, formatPrice, type Tier } from "@/lib/pricing";
 import { LayoutGrid, Rows3 } from "lucide-react";
 
 export const Route = createFileRoute("/image/$id")({
@@ -31,19 +32,17 @@ export const Route = createFileRoute("/image/$id")({
   }),
 });
 
-type TierId = "small" | "medium" | "large";
+type TierId = Tier;
 
 const TIERS: Array<{
   id: TierId;
   label: string;
-  price: string;
   sub: string;
   description: string;
 }> = [
   {
     id: "small",
     label: "Small",
-    price: "$150.00",
     sub: "800 px max width",
     description:
       "A Small image delivers an image with maximum edge 800px as a JPG download. These images will be ideal for small usage on websites, social media, blog and small editorial usage. Digital rights will last for 12 months worldwide license.",
@@ -51,7 +50,6 @@ const TIERS: Array<{
   {
     id: "medium",
     label: "Medium",
-    price: "$275.00",
     sub: "2000 px max width",
     description:
       "A Medium image delivers an image with maximum edge 2000px as a JPG download. These images will be suited to magazine spreads, brochures, packaging mock-ups and quarter-page print. Digital rights will last for 12 months worldwide license.",
@@ -59,7 +57,6 @@ const TIERS: Array<{
   {
     id: "large",
     label: "Large",
-    price: "$375.00",
     sub: "5400 px max width",
     description:
       "A Large image delivers an image with maximum edge 5400px as a JPG download. These images will be suited to for full-page print, posters, billboards and high-end advertising campaigns. Digital rights will last for 12 months worldwide license.",
