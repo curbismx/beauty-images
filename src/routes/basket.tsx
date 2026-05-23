@@ -50,16 +50,17 @@ function BasketPage() {
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const { session } = useSession();
   const router = useRouter();
+  const { pricing } = useRegionPricing();
 
   const checkoutItems = useMemo(() => {
     const counts = new Map<string, number>();
     for (const b of basket) {
-      const priceId = TIER_PRICE_ID[b.tier];
-      if (!priceId) continue;
-      counts.set(priceId, (counts.get(priceId) ?? 0) + 1);
+      const p = pricing[b.tier as Tier];
+      if (!p) continue;
+      counts.set(p.priceId, (counts.get(p.priceId) ?? 0) + 1);
     }
     return Array.from(counts.entries()).map(([priceId, quantity]) => ({ priceId, quantity }));
-  }, [basketJson]);
+  }, [basketJson, pricing]);
 
   const checkoutImageIds = useMemo(
     () => Array.from(new Set(basket.map((b) => b.id))),
