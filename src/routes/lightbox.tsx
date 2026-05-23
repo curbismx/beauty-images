@@ -78,7 +78,7 @@ function LightboxPage() {
 
   const renderCard = (r: PublicSearchResult) => (
     <div key={r.id} className="search-result-card">
-      <Link to="/image/$id" params={{ id: r.id }} className="src-link">
+      <Link to="/image/$id" params={{ id: r.id }} search={{ from: "lightbox" }} className="src-link">
         {r.signed_url ? (
           <img src={r.signed_url} alt={r.title ?? r.caption ?? ""} loading="lazy" />
         ) : (
