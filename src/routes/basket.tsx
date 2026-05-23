@@ -434,6 +434,17 @@ const CSS = `
 .lb-checkout-body {
   flex: 1; overflow-y: auto; padding: 16px 24px 24px;
 }
+.lb-checkout-error {
+  margin: 0 0 14px;
+  padding: 12px 14px;
+  border: 1px solid #D75F68;
+  background: #fff5f6;
+  color: #9e2630;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
 .lb-modal-title {
   font-family: 'DIN Condensed', 'DIN Alternate', 'Barlow Condensed', 'Oswald', sans-serif;
   font-size: 32px; font-weight: 900; letter-spacing: -0.02em; text-transform: uppercase;
