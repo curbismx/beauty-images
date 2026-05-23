@@ -1051,7 +1051,8 @@ const PAGE_CSS = `
   .curbism-root .section--apps { min-height: 240px; height: 240px; }
   .curbism-root .apps-row { margin-top: 0; }
   .curbism-root .design-strip { height: 240px; }
-  .curbism-root .footer { flex-direction: column; align-items: flex-start; gap: 26px; padding: 36px 24px 36px 0; }
+  .curbism-root .footer { flex-direction: column; align-items: flex-start; gap: 26px; padding: 36px 24px; }
+  .curbism-root .footer-brand { margin-left: -24px; }
   .curbism-root .footer-curbism { align-items: flex-start; }
 }
 
