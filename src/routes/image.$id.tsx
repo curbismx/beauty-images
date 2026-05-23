@@ -90,6 +90,7 @@ function ImageDetail() {
     "portrait" | "square" | "landscape" | null
   >(null);
   const [tier, setTier] = useState<TierId>("medium");
+  const { pricing } = useRegionPricing();
   const fetchSimilar = useServerFn(getSimilarShootImages);
   const [similar, setSimilar] = useState<PublicSearchResult[]>([]);
   const [viewMode, setViewMode] = useViewMode();
@@ -229,7 +230,7 @@ function ImageDetail() {
                           onClick={() => setTier(t.id)}
                         >
                           <span className="lc-btn-box">{t.label.charAt(0).toUpperCase()}</span>
-                          <span className="lc-btn-price">{t.price}</span>
+                          <span className="lc-btn-price">{formatPrice(pricing[t.id])}</span>
                         </button>
                       );
                     })}
@@ -243,13 +244,13 @@ function ImageDetail() {
                       <span className="lc-btn-label">
                         {inBasket ? "REMOVE FROM BASKET" : "ADD TO BASKET"}
                       </span>
-                      <span className="lc-btn-price">{activeTier.price}</span>
+                      <span className="lc-btn-price">{formatPrice(pricing[tier])}</span>
                     </button>
                   </div>
                   <div className="lc-detail-eyebrow">LICENCE DETAILS</div>
                   <div className="lc-detail-head">
                     <span className="lc-detail-tier">{activeTier.label.toUpperCase()}</span>
-                    <span className="lc-detail-price">{activeTier.price}</span>
+                    <span className="lc-detail-price">{formatPrice(pricing[tier])}</span>
                   </div>
                   <p className="lc-detail-text">{activeTier.description}</p>
                 </div>
