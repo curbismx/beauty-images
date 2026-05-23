@@ -575,8 +575,26 @@ function Index() {
         <div className="line-thin" />
 
         <footer className="footer">
-          <span>BEAUTYIMAGES</span>
-          <span>UK · 2026</span>
+          <div className="footer-main">
+            <div className="footer-brand">BEAUTY IMAGES</div>
+            <p className="footer-copy">
+              All images and content © The Beauty Images. All rights reserved.
+            </p>
+            <nav className="footer-links">
+              <Link to="/privacy">Privacy Policy</Link>
+              <span className="footer-dot">·</span>
+              <Link to="/licence">Licence Agreement</Link>
+            </nav>
+          </div>
+          <a
+            className="footer-curbism"
+            href="https://www.curbism.com"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span>Designed by</span>
+            <img src="/curbism-logo-red.png" alt="Curbism" />
+          </a>
         </footer>
       </div>
     </>
@@ -981,10 +999,36 @@ const PAGE_CSS = `
 }
 
 .curbism-root .footer {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 20px 40px; background: white;
-  font-size: 11px; text-transform: uppercase; letter-spacing: 0.25em; color: #777;
+  display: flex; justify-content: space-between; align-items: flex-end;
+  gap: 32px; padding: 48px 40px; background: #fff;
+  border-top: 1px solid #ededed;
 }
+.curbism-root .footer-brand {
+  font-size: 13px; font-weight: 800; letter-spacing: 0.22em;
+  text-transform: uppercase; color: #111;
+}
+.curbism-root .footer-copy {
+  margin: 14px 0 0; font-size: 11px; letter-spacing: 0.05em;
+  color: #8a8a8a; line-height: 1.6;
+}
+.curbism-root .footer-links {
+  margin-top: 16px; display: flex; align-items: center; gap: 12px;
+  font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;
+}
+.curbism-root .footer-links a { color: #111; text-decoration: none; transition: color 0.15s ease; }
+.curbism-root .footer-links a:hover { color: #D75F68; }
+.curbism-root .footer-dot { color: #ccc; }
+.curbism-root .footer-curbism {
+  display: flex; flex-direction: column; align-items: flex-end; gap: 8px;
+  text-decoration: none; flex-shrink: 0;
+}
+.curbism-root .footer-curbism span {
+  font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; color: #aaa;
+}
+.curbism-root .footer-curbism img {
+  height: 22px; width: auto; display: block; transition: opacity 0.15s ease;
+}
+.curbism-root .footer-curbism:hover img { opacity: 0.6; }
 
 @media (max-width: 768px) {
   .curbism-root .hero-logo  { top: 40px; left: 0; height: 40px; }
@@ -1007,7 +1051,8 @@ const PAGE_CSS = `
   .curbism-root .section--apps { min-height: 240px; height: 240px; }
   .curbism-root .apps-row { margin-top: 0; }
   .curbism-root .design-strip { height: 240px; }
-  .curbism-root .footer { padding: 16px 24px; font-size: 10px; }
+  .curbism-root .footer { flex-direction: column; align-items: flex-start; gap: 26px; padding: 36px 24px; }
+  .curbism-root .footer-curbism { align-items: flex-start; }
 }
 
 /* FEATURED MASONRY */
