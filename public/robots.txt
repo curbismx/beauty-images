@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /account
+Disallow: /basket
+Disallow: /lightbox
+Disallow: /checkout
+Disallow: /api
+Disallow: /login
+Disallow: /signup
+Disallow: /reset-password
+
+Sitemap: https://beautyimages.lovable.app/sitemap.xml

@@ -13,7 +13,6 @@ import { Route as SignupRouteImport } from './routes/signup'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LightboxRouteImport } from './routes/lightbox'
-import { Route as DesignRouteImport } from './routes/design'
 import { Route as BasketRouteImport } from './routes/basket'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AccountRouteImport } from './routes/account'
@@ -55,11 +54,6 @@ const LoginRoute = LoginRouteImport.update({
 const LightboxRoute = LightboxRouteImport.update({
   id: '/lightbox',
   path: '/lightbox',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DesignRoute = DesignRouteImport.update({
-  id: '/design',
-  path: '/design',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BasketRoute = BasketRouteImport.update({
@@ -181,7 +175,6 @@ export interface FileRoutesByFullPath {
   '/account': typeof AccountRoute
   '/admin': typeof AdminRouteWithChildren
   '/basket': typeof BasketRoute
-  '/design': typeof DesignRoute
   '/lightbox': typeof LightboxRoute
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -209,7 +202,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
   '/basket': typeof BasketRoute
-  '/design': typeof DesignRoute
   '/lightbox': typeof LightboxRoute
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -239,7 +231,6 @@ export interface FileRoutesById {
   '/account': typeof AccountRoute
   '/admin': typeof AdminRouteWithChildren
   '/basket': typeof BasketRoute
-  '/design': typeof DesignRoute
   '/lightbox': typeof LightboxRoute
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -270,7 +261,6 @@ export interface FileRouteTypes {
     | '/account'
     | '/admin'
     | '/basket'
-    | '/design'
     | '/lightbox'
     | '/login'
     | '/reset-password'
@@ -298,7 +288,6 @@ export interface FileRouteTypes {
     | '/'
     | '/account'
     | '/basket'
-    | '/design'
     | '/lightbox'
     | '/login'
     | '/reset-password'
@@ -327,7 +316,6 @@ export interface FileRouteTypes {
     | '/account'
     | '/admin'
     | '/basket'
-    | '/design'
     | '/lightbox'
     | '/login'
     | '/reset-password'
@@ -357,7 +345,6 @@ export interface RootRouteChildren {
   AccountRoute: typeof AccountRoute
   AdminRoute: typeof AdminRouteWithChildren
   BasketRoute: typeof BasketRoute
-  DesignRoute: typeof DesignRoute
   LightboxRoute: typeof LightboxRoute
   LoginRoute: typeof LoginRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
@@ -401,13 +388,6 @@ declare module '@tanstack/react-router' {
       path: '/lightbox'
       fullPath: '/lightbox'
       preLoaderRoute: typeof LightboxRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/design': {
-      id: '/design'
-      path: '/design'
-      fullPath: '/design'
-      preLoaderRoute: typeof DesignRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/basket': {
@@ -598,7 +578,6 @@ const rootRouteChildren: RootRouteChildren = {
   AccountRoute: AccountRoute,
   AdminRoute: AdminRouteWithChildren,
   BasketRoute: BasketRoute,
-  DesignRoute: DesignRoute,
   LightboxRoute: LightboxRoute,
   LoginRoute: LoginRoute,
   ResetPasswordRoute: ResetPasswordRoute,
