@@ -12,60 +12,73 @@ import {
 
 import appCss from "../styles.css?url";
 
+const errCss = `
+.bi-err { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #fff; color: #111; padding: 24px; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+.bi-err-inner { max-width: 520px; text-align: center; }
+.bi-err-code { font-size: clamp(96px, 22vw, 200px); font-weight: 900; line-height: 0.82; letter-spacing: -0.04em; margin: 0; color: #111; }
+.bi-err-code span { color: #D75F68; }
+.bi-err-title { font-size: 15px; font-weight: 800; letter-spacing: 0.22em; text-transform: uppercase; margin: 22px 0 0; color: #111; }
+.bi-err-text { font-size: 14px; line-height: 1.6; color: #6b6b6b; margin: 14px 0 0; }
+.bi-err-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 30px; }
+.bi-err-btn { display: inline-flex; align-items: center; justify-content: center; padding: 13px 22px; font-size: 11px; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; text-decoration: none; cursor: pointer; border: 1px solid #111; font-family: inherit; transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease; }
+.bi-err-btn--solid { background: #111; color: #fff; }
+.bi-err-btn--solid:hover { background: #D75F68; border-color: #D75F68; color: #fff; }
+.bi-err-btn--ghost { background: #fff; color: #111; }
+.bi-err-btn--ghost:hover { background: #111; color: #fff; }
+`;
+
 function NotFoundComponent() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-7xl font-bold text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          The page you're looking for doesn't exist or has been moved.
-        </p>
-        <div className="mt-6">
-          <Link
-            to="/"
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            Go home
-          </Link>
+    <>
+      <style dangerouslySetInnerHTML={{ __html: errCss }} />
+      <div className="bi-err">
+        <div className="bi-err-inner">
+          <p className="bi-err-code">4<span>0</span>4</p>
+          <h1 className="bi-err-title">Page not found</h1>
+          <p className="bi-err-text">
+            The page you're looking for doesn't exist or has moved.
+          </p>
+          <div className="bi-err-actions">
+            <Link to="/" className="bi-err-btn bi-err-btn--solid">
+              ← Back to home
+            </Link>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
-
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          This page didn't load
-        </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Something went wrong on our end. You can try refreshing or head back home.
-        </p>
-        <div className="mt-6 flex flex-wrap justify-center gap-2">
-          <button
-            onClick={() => {
-              router.invalidate();
-              reset();
-            }}
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            Try again
-          </button>
-          <a
-            href="/"
-            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
-          >
-            Go home
-          </a>
+    <>
+      <style dangerouslySetInnerHTML={{ __html: errCss }} />
+      <div className="bi-err">
+        <div className="bi-err-inner">
+          <p className="bi-err-code"><span>!</span></p>
+          <h1 className="bi-err-title">Something went wrong</h1>
+          <p className="bi-err-text">
+            This page didn't load. You can try again, or head back home.
+          </p>
+          <div className="bi-err-actions">
+            <button
+              onClick={() => {
+                router.invalidate();
+                reset();
+              }}
+              className="bi-err-btn bi-err-btn--solid"
+            >
+              Try again
+            </button>
+            <a href="/" className="bi-err-btn bi-err-btn--ghost">
+              Back to home
+            </a>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 
