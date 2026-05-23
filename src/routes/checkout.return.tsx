@@ -111,8 +111,8 @@ function CheckoutReturn() {
             <>
               <p className="ret-lede">
                 Your payment was received. Your licensed images are ready to
-                download below. We've also emailed you a link to this page so
-                you can return any time.
+                download below. Bookmark or copy the link below so you can
+                return to this page any time.
               </p>
 
               <div className="ret-bookmark">

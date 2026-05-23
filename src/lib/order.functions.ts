@@ -78,15 +78,10 @@ export const getOrderBySession = createServerFn({ method: "POST" })
       const im = imgMap.get(s.image_id);
       if (!im) continue;
       const tier = s.download_tier || "medium";
-      const previewPath = im.preview_path || im.storage_path;
-      let previewUrl: string | null = null;
-      if (previewPath) {
-        const bucket = im.preview_path ? "featured-images" : "images-private";
-        const { data: signed } = await supabase.storage
-          .from(bucket)
-          .createSignedUrl(previewPath, 60 * 60);
-        previewUrl = signed?.signedUrl ?? null;
-      }
+      // Use the public preview-image route — same one the grid uses. Signed
+      // URLs from the private bucket sometimes 404 on the return page; this
+      // route is cached and always works for public images.
+      const previewUrl = `/api/public/preview-image/${s.image_id}?w=500`;
       const price = Number(s.amount) || TIER_PRICE[tier] || 0;
       total += price;
       items.push({
