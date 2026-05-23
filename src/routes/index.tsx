@@ -1001,7 +1001,7 @@ const PAGE_CSS = `
 
 .curbism-root .footer {
   display: flex; justify-content: space-between; align-items: flex-end;
-  gap: 32px; padding: 48px 40px; background: #fff;
+  gap: 32px; padding: 48px 40px 48px 0; background: #fff;
   border-top: 1px solid #ededed;
 }
 .curbism-root .footer-brand { display: block; }
@@ -1050,7 +1050,7 @@ const PAGE_CSS = `
   .curbism-root .section--apps { min-height: 240px; height: 240px; }
   .curbism-root .apps-row { margin-top: 0; }
   .curbism-root .design-strip { height: 240px; }
-  .curbism-root .footer { flex-direction: column; align-items: flex-start; gap: 26px; padding: 36px 24px; }
+  .curbism-root .footer { flex-direction: column; align-items: flex-start; gap: 26px; padding: 36px 24px 36px 0; }
   .curbism-root .footer-curbism { align-items: flex-start; }
 }
 
