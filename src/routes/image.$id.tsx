@@ -70,8 +70,21 @@ const TIERS: Array<{
 function ImageDetail() {
   const { id } = Route.useParams();
   const { from } = Route.useSearch();
-  const cameFromHome = from === "home";
   const navigate = useNavigate();
+  const router = useRouter();
+  const backLabel =
+    from === "search" ? "BACK TO SEARCH RESULTS"
+    : from === "lightbox" ? "BACK TO LIGHTBOX"
+    : from === "basket" ? "BACK TO BASKET"
+    : from === "image" ? "BACK"
+    : "BACK TO HOME";
+  const handleBack = () => {
+    if (from && typeof window !== "undefined" && window.history.length > 1) {
+      router.history.back();
+    } else {
+      navigate({ to: "/" });
+    }
+  };
   const fetchImage = useServerFn(getPublicImage);
   const [img, setImg] = useState<PublicImageDetail | null>(null);
   const [loading, setLoading] = useState(true);
