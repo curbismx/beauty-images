@@ -16,6 +16,7 @@ import { useMasonryCols } from "@/lib/view-mode";
 import { useSession } from "@/lib/use-session";
 import { StripeBasketCheckout } from "@/components/StripeBasketCheckout";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
+import { useRegionPricing, formatPrice, type Tier } from "@/lib/pricing";
 
 export const Route = createFileRoute("/basket")({
   head: () => ({
@@ -29,16 +30,6 @@ export const Route = createFileRoute("/basket")({
 
 const TIER_LABEL: Record<string, string> = { small: "S", medium: "M", large: "L" };
 const TIER_NAME: Record<string, string> = { small: "Small", medium: "Medium", large: "Large" };
-const TIER_PRICE: Record<string, number> = { small: 150, medium: 275, large: 375 };
-const TIER_PRICE_ID: Record<string, string> = {
-  small: "license_small_usd",
-  medium: "license_medium_usd",
-  large: "license_large_usd",
-};
-
-function fmt(n: number) {
-  return `$${n.toFixed(2)}`;
-}
 
 function useBasketJson(): string {
   return useSyncExternalStore(
