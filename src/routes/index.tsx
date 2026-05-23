@@ -994,8 +994,8 @@ const PAGE_CSS = `
   .curbism-root .appeared-in { padding: 24px 24px 12px; }
   .curbism-root .appeared-in-track img { height: 28px; width: auto; max-width: none; padding-right: 0; margin-right: 25px; }
   .curbism-root .intro-text { padding: 12px 24px 40px; max-width: 100%; }
-  .curbism-root .intro-text h2 { font-size: 16px; }
-  .curbism-root .intro-text p { font-size: 14px; }
+  .curbism-root .intro-text h2 { font-size: clamp(28px, 7.5vw, 46px); }
+  .curbism-root .intro-text p { font-size: clamp(28px, 7.5vw, 46px); }
 }
 
 .curbism-root .footer {
