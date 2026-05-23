@@ -749,6 +749,7 @@ const PAGE_CSS = `
 }
 .curbism-root .hero--search {
   aspect-ratio: 1920 / 1080;
+  background: white;
 }
 .curbism-root .hero--results {
   background: white;
