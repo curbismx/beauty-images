@@ -58,6 +58,7 @@ function BasketPage() {
   const cols = useMasonryCols();
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const { session } = useSession();
+  const router = useRouter();
 
   const checkoutItems = useMemo(() => {
     const counts = new Map<string, number>();
