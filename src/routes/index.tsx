@@ -1001,11 +1001,12 @@ const PAGE_CSS = `
 
 .curbism-root .footer {
   display: flex; justify-content: space-between; align-items: flex-end;
-  gap: 32px; padding: 48px 40px 48px 0; background: #fff;
+  gap: 32px; padding: 48px 40px; background: #fff;
   border-top: 1px solid #ededed;
 }
-.curbism-root .footer-brand { display: block; }
+.curbism-root .footer-brand { display: block; margin-left: -40px; }
 .curbism-root .footer-brand img { height: 28px; width: auto; display: block; }
+.curbism-root .footer-copy, .curbism-root .footer-links { margin-left: 0; }
 .curbism-root .footer-copy {
   margin: 14px 0 0; font-size: 11px; letter-spacing: 0.05em;
   color: #8a8a8a; line-height: 1.6;
