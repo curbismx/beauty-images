@@ -768,6 +768,8 @@ const PAGE_CSS = `
 }
 .curbism-root .hero .bg-img.active { opacity: 1; }
 .curbism-root .hero .bg-img--search { z-index: 1; }
+
+.curbism-root .hero--search .bg-img--search.active { opacity: 0.5; }
 .curbism-root .hero--results .bg-img:not(.bg-img--search) { opacity: 0 !important; }
 .curbism-root .hero--results .bg-img--search.active { opacity: 0.25 !important; }
 
@@ -1033,6 +1035,8 @@ const PAGE_CSS = `
 @media (max-width: 768px) {
   .curbism-root .hero-logo  { top: 40px; left: 0; height: 40px; }
   .curbism-root .hero-title { left: 0; top: 100px; padding-left: 22px; max-width: 60%; font-size: clamp(20px, 5.5vw, 36px); line-height: 1.35; letter-spacing: -0.01em; }
+
+  .curbism-root .hero--search .hero-title { display: none; }
   .curbism-root .hero-search { left: 22px; right: 22px; width: auto; top: auto; bottom: 56px; padding-left: 0; }
   .curbism-root .hero-search input { padding: 12px 14px; font-size: 16px; }
   .curbism-root .hero-counter { bottom: 22px; right: 22px; font-size: 10px; }
