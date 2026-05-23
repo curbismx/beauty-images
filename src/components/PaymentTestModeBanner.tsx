@@ -1,7 +1,7 @@
-const clientToken = import.meta.env.VITE_PAYMENTS_CLIENT_TOKEN;
+import { isStripeTestMode } from "@/lib/stripe";
 
 export function PaymentTestModeBanner() {
-  if (!clientToken?.startsWith("pk_test_")) return null;
+  if (!isStripeTestMode()) return null;
 
   return (
     <div style={{
