@@ -576,7 +576,9 @@ function Index() {
 
         <footer className="footer">
           <div className="footer-main">
-            <div className="footer-brand">BEAUTY IMAGES</div>
+            <div className="footer-brand">
+              <img src="/beauty-images-logo.png" alt="Beauty Images" />
+            </div>
             <p className="footer-copy">
               All images and content © The Beauty Images. All rights reserved.
             </p>
@@ -592,8 +594,7 @@ function Index() {
             target="_blank"
             rel="noopener noreferrer"
           >
-            <span>Designed by</span>
-            <img src="/curbism-logo-red.png" alt="Curbism" />
+            <span>Designed by www.curbism.com</span>
           </a>
         </footer>
       </div>
@@ -1003,10 +1004,8 @@ const PAGE_CSS = `
   gap: 32px; padding: 48px 40px; background: #fff;
   border-top: 1px solid #ededed;
 }
-.curbism-root .footer-brand {
-  font-size: 13px; font-weight: 800; letter-spacing: 0.22em;
-  text-transform: uppercase; color: #111;
-}
+.curbism-root .footer-brand { display: block; }
+.curbism-root .footer-brand img { height: 28px; width: auto; display: block; }
 .curbism-root .footer-copy {
   margin: 14px 0 0; font-size: 11px; letter-spacing: 0.05em;
   color: #8a8a8a; line-height: 1.6;
