@@ -35,6 +35,7 @@ function useLightboxIdsJson(): string {
 function LightboxPage() {
   const idsJson = useLightboxIdsJson();
   const ids: string[] = JSON.parse(idsJson);
+  const router = useRouter();
   const fetchImages = useServerFn(getPublicImagesByIds);
   const [items, setItems] = useState<PublicSearchResult[]>([]);
   const [loading, setLoading] = useState(true);
