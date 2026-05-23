@@ -352,6 +352,7 @@ function renderSimCard(r: PublicSearchResult) {
       key={r.id}
       to="/image/$id"
       params={{ id: r.id }}
+      search={{ from: "image" }}
       className="search-result-card"
     >
       {r.signed_url ? (
