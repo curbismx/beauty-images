@@ -171,9 +171,9 @@ function ImageDetail() {
               {inLightbox ? "IN LIGHTBOX" : "ADD TO LIGHTBOX"}
             </button>
             <span className="img-nav-sep">/</span>
-            <a className="img-nav-link" href="/lightbox">LIGHTBOX</a>
+            <Link className="img-nav-link" to="/lightbox">LIGHTBOX</Link>
             <span className="img-nav-sep">/</span>
-            <a className="img-nav-link" href="/basket">BASKET</a>
+            <Link className="img-nav-link" to="/basket">BASKET</Link>
           </nav>
         </header>
 
