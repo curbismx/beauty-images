@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useEffect, useState, useSyncExternalStore, useCallback, useMemo } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { X, LayoutGrid, Rows3 } from "lucide-react";
@@ -58,6 +58,7 @@ function BasketPage() {
   const cols = useMasonryCols();
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const { session } = useSession();
+  const router = useRouter();
 
   const checkoutItems = useMemo(() => {
     const counts = new Map<string, number>();
@@ -117,7 +118,7 @@ function BasketPage() {
     const r = items.find((x) => x.id === b.id);
     return (
       <div key={`${b.id}-${b.tier}-${idx}`} className="search-result-card">
-        <Link to="/image/$id" params={{ id: b.id }} className="src-link">
+        <Link to="/image/$id" params={{ id: b.id }} search={{ from: "basket" }} className="src-link">
           {r?.signed_url ? (
             <img src={r.signed_url} alt={r.title ?? r.caption ?? ""} loading="lazy" />
           ) : (
@@ -154,10 +155,13 @@ function BasketPage() {
         <Link
           to="/"
           className="lb-back"
-          onClick={() => {
-            try { sessionStorage.setItem("bi_restore_search", "1"); } catch { /* ignore */ }
+          onClick={(e) => {
+            if (typeof window !== "undefined" && window.history.length > 1) {
+              e.preventDefault();
+              router.history.back();
+            }
           }}
-        >← BACK TO SEARCH</Link>
+        >← BACK</Link>
 
         <div className="search-results">
           <div className="search-results-header">

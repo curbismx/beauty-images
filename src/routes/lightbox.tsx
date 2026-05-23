@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useEffect, useState, useSyncExternalStore, useCallback } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Trash2, X, LayoutGrid, Rows3 } from "lucide-react";
@@ -35,6 +35,7 @@ function useLightboxIdsJson(): string {
 function LightboxPage() {
   const idsJson = useLightboxIdsJson();
   const ids: string[] = JSON.parse(idsJson);
+  const router = useRouter();
   const fetchImages = useServerFn(getPublicImagesByIds);
   const [items, setItems] = useState<PublicSearchResult[]>([]);
   const [loading, setLoading] = useState(true);
@@ -77,7 +78,7 @@ function LightboxPage() {
 
   const renderCard = (r: PublicSearchResult) => (
     <div key={r.id} className="search-result-card">
-      <Link to="/image/$id" params={{ id: r.id }} className="src-link">
+      <Link to="/image/$id" params={{ id: r.id }} search={{ from: "lightbox" }} className="src-link">
         {r.signed_url ? (
           <img src={r.signed_url} alt={r.title ?? r.caption ?? ""} loading="lazy" />
         ) : (
@@ -106,10 +107,13 @@ function LightboxPage() {
         <Link
           to="/"
           className="lb-back"
-          onClick={() => {
-            try { sessionStorage.setItem("bi_restore_search", "1"); } catch { /* ignore */ }
+          onClick={(e) => {
+            if (typeof window !== "undefined" && window.history.length > 1) {
+              e.preventDefault();
+              router.history.back();
+            }
           }}
-        >← BACK TO SEARCH</Link>
+        >← BACK</Link>
 
 
         <div className="search-results">

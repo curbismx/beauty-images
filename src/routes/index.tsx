@@ -29,6 +29,7 @@ function renderResultCard(r: PublicSearchResult, onClick: () => void) {
       key={r.id}
       to="/image/$id"
       params={{ id: r.id }}
+      search={{ from: "search" }}
       className="search-result-card"
       onMouseDown={(e) => e.preventDefault()}
       onClick={onClick}

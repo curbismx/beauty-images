@@ -80,9 +80,12 @@ function CheckoutReturn() {
           to="/"
           className="ret-back"
           onClick={() => {
-            try { sessionStorage.setItem("bi_restore_search", "1"); } catch { /* ignore */ }
+            try {
+              sessionStorage.removeItem("bi_restore_search");
+              sessionStorage.removeItem("bi_search_state");
+            } catch { /* ignore */ }
           }}
-        >← BACK TO SEARCH</Link>
+        >← BACK TO HOME</Link>
 
         <div className="ret-wrap">
           <h1 className="ret-h1">

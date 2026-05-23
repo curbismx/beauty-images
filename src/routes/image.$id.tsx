@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, useRouter, Link } from "@tanstack/react-router";
 import { useEffect, useState, useSyncExternalStore } from "react";
 
 import { useServerFn } from "@tanstack/react-start";
@@ -70,8 +70,21 @@ const TIERS: Array<{
 function ImageDetail() {
   const { id } = Route.useParams();
   const { from } = Route.useSearch();
-  const cameFromHome = from === "home";
   const navigate = useNavigate();
+  const router = useRouter();
+  const backLabel =
+    from === "search" ? "BACK TO SEARCH RESULTS"
+    : from === "lightbox" ? "BACK TO LIGHTBOX"
+    : from === "basket" ? "BACK TO BASKET"
+    : from === "image" ? "BACK"
+    : "BACK TO HOME";
+  const handleBack = () => {
+    if (from && typeof window !== "undefined" && window.history.length > 1) {
+      router.history.back();
+    } else {
+      navigate({ to: "/" });
+    }
+  };
   const fetchImage = useServerFn(getPublicImage);
   const [img, setImg] = useState<PublicImageDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -138,47 +151,16 @@ function ImageDetail() {
       <div className="img-root">
         <header className={`img-header${imgReady ? " img-header--ready" : ""}`}>
           <div className="img-header-left">
-            {cameFromHome ? (
-              <button
-                type="button"
-                className="img-back"
-                onClick={() => {
-                  try { sessionStorage.removeItem("bi_restore_search"); sessionStorage.removeItem("bi_search_state"); } catch { /* ignore */ }
-                  navigate({ to: "/" });
-                }}
-              >
-                <svg className="img-back-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="square">
-                  <path d="M19 12H5M11 5l-7 7 7 7" />
-                </svg>
-                <span>BACK TO HOME</span>
-              </button>
-            ) : (
-              <>
-                <button
-                  type="button"
-                  className="img-back"
-                  onClick={() => {
-                    try { sessionStorage.setItem("bi_restore_search", "1"); } catch { /* ignore */ }
-                    navigate({ to: "/" });
-                  }}
-                >
-                  <svg className="img-back-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="square">
-                    <path d="M19 12H5M11 5l-7 7 7 7" />
-                  </svg>
-                  <span>BACK TO SEARCH RESULTS</span>
-                </button>
-                <button
-                  type="button"
-                  className="img-back img-back--home"
-                  onClick={() => {
-                    try { sessionStorage.removeItem("bi_restore_search"); sessionStorage.removeItem("bi_search_state"); } catch { /* ignore */ }
-                    navigate({ to: "/" });
-                  }}
-                >
-                  / BACK TO HOME
-                </button>
-              </>
-            )}
+            <button
+              type="button"
+              className="img-back"
+              onClick={handleBack}
+            >
+              <svg className="img-back-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="square">
+                <path d="M19 12H5M11 5l-7 7 7 7" />
+              </svg>
+              <span>{backLabel}</span>
+            </button>
           </div>
           <nav className="img-header-right">
             <button
@@ -370,6 +352,7 @@ function renderSimCard(r: PublicSearchResult) {
       key={r.id}
       to="/image/$id"
       params={{ id: r.id }}
+      search={{ from: "image" }}
       className="search-result-card"
     >
       {r.signed_url ? (
