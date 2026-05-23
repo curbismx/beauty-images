@@ -16,6 +16,7 @@ import { useMasonryCols } from "@/lib/view-mode";
 import { useSession } from "@/lib/use-session";
 import { StripeBasketCheckout } from "@/components/StripeBasketCheckout";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
+import { useRegionPricing, formatPrice, type Tier } from "@/lib/pricing";
 
 export const Route = createFileRoute("/basket")({
   head: () => ({
@@ -29,16 +30,6 @@ export const Route = createFileRoute("/basket")({
 
 const TIER_LABEL: Record<string, string> = { small: "S", medium: "M", large: "L" };
 const TIER_NAME: Record<string, string> = { small: "Small", medium: "Medium", large: "Large" };
-const TIER_PRICE: Record<string, number> = { small: 150, medium: 275, large: 375 };
-const TIER_PRICE_ID: Record<string, string> = {
-  small: "license_small_usd",
-  medium: "license_medium_usd",
-  large: "license_large_usd",
-};
-
-function fmt(n: number) {
-  return `$${n.toFixed(2)}`;
-}
 
 function useBasketJson(): string {
   return useSyncExternalStore(
@@ -59,16 +50,17 @@ function BasketPage() {
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const { session } = useSession();
   const router = useRouter();
+  const { pricing } = useRegionPricing();
 
   const checkoutItems = useMemo(() => {
     const counts = new Map<string, number>();
     for (const b of basket) {
-      const priceId = TIER_PRICE_ID[b.tier];
-      if (!priceId) continue;
-      counts.set(priceId, (counts.get(priceId) ?? 0) + 1);
+      const p = pricing[b.tier as Tier];
+      if (!p) continue;
+      counts.set(p.priceId, (counts.get(p.priceId) ?? 0) + 1);
     }
     return Array.from(counts.entries()).map(([priceId, quantity]) => ({ priceId, quantity }));
-  }, [basketJson]);
+  }, [basketJson, pricing]);
 
   const checkoutImageIds = useMemo(
     () => Array.from(new Set(basket.map((b) => b.id))),
@@ -112,10 +104,13 @@ function BasketPage() {
     return () => { alive = false; };
   }, [idsKey, fetchImages]);
 
-  const total = basket.reduce((s, b) => s + (TIER_PRICE[b.tier] ?? 0), 0);
+  const total = basket.reduce((s, b) => s + (pricing[b.tier as Tier]?.amount ?? 0), 0);
+  const currencySymbol = pricing.medium.symbol;
+  const fmtTotal = (n: number) => `${currencySymbol}${n.toFixed(2)}`;
 
   const renderCard = useCallback((b: BasketItem, idx: number) => {
     const r = items.find((x) => x.id === b.id);
+    const p = pricing[b.tier as Tier];
     return (
       <div key={`${b.id}-${b.tier}-${idx}`} className="search-result-card">
         <Link to="/image/$id" params={{ id: b.id }} search={{ from: "basket" }} className="src-link">
@@ -141,12 +136,12 @@ function BasketPage() {
           </div>
           <div className="src-row">
             {r?.title && <span className="src-title">{r.title}</span>}
-            <span className="src-price">{fmt(TIER_PRICE[b.tier] ?? 0)}</span>
+            <span className="src-price">{p ? formatPrice(p) : ""}</span>
           </div>
         </figcaption>
       </div>
     );
-  }, [items]);
+  }, [items, pricing]);
 
   return (
     <>
@@ -215,14 +210,14 @@ function BasketPage() {
             <div className="basket-checkout">
               <div className="basket-total">
                 <span className="basket-total-label">TOTAL</span>
-                <span className="basket-total-value">{fmt(total)}</span>
+                <span className="basket-total-value">{fmtTotal(total)}</span>
               </div>
               <button
                 type="button"
                 className="basket-checkout-btn"
                 onClick={() => setCheckoutOpen(true)}
               >
-                CHECKOUT · {fmt(total)}
+                CHECKOUT · {fmtTotal(total)}
               </button>
             </div>
           )}
