@@ -672,45 +672,35 @@ export const setImagePreviewPath = createServerFn({ method: "POST" })
   });
 
 // ---------------------------------------------------------------------------
-// Derivative generation — pre-builds resized copies of every image so the
-// download and search endpoints can serve a ready-made file instead of
-// resizing on the fly. Run once from Admin → Settings.
+// Derivative generation — the admin's browser resizes each image and the
+// resized versions (small / medium / thumbnail) are stored, so the download
+// and search endpoints can serve a ready-made file instead of resizing on the
+// fly. All image processing happens in the browser (no memory or module
+// limits); the server only shuttles bytes. Run from Admin -> Settings.
 // ---------------------------------------------------------------------------
 
-async function resizeToEdge(input: Uint8Array, maxEdge: number, quality = 88): Promise<Uint8Array> {
-  const photon = await import("@cf-wasm/photon/edge-light");
-  const img = photon.PhotonImage.new_from_byteslice(input);
-  try {
-    const w = img.get_width();
-    const h = img.get_height();
-    const longest = Math.max(w, h);
-    if (longest <= maxEdge) {
-      return img.get_bytes_jpeg(quality);
-    }
-    const scale = maxEdge / longest;
-    const nw = Math.max(1, Math.round(w * scale));
-    const nh = Math.max(1, Math.round(h * scale));
-    const resized = photon.resize(img, nw, nh, photon.SamplingFilter.Lanczos3);
-    try {
-      return resized.get_bytes_jpeg(quality);
-    } finally {
-      resized.free();
-    }
-  } finally {
-    img.free();
-  }
-}
-
-const DERIVATIVE_TARGETS: Array<{ folder: string; maxEdge: number; source: "storage" | "preview" }> = [
-  { folder: "medium", maxEdge: 2000, source: "storage" },
-  { folder: "thumb", maxEdge: 500, source: "preview" },
-  { folder: "small", maxEdge: 800, source: "storage" },
-];
 const DERIVED_BUCKET = "images-derived";
 const SOURCE_BUCKET = "images-private";
-const DERIVATIVE_BATCH_SIZE = 6;
+const DERIVATIVE_BATCH_SIZE = 20;
 
-export const generateDerivativesBatch = createServerFn({ method: "POST" })
+function decodeBase64(b64: string): Uint8Array {
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i += 1) bytes[i] = bin.charCodeAt(i);
+  return bytes;
+}
+
+async function encodeBase64(file: Blob): Promise<string> {
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  let bin = "";
+  const CHUNK = 0x8000;
+  for (let i = 0; i < bytes.length; i += CHUNK) {
+    bin += String.fromCharCode(...bytes.subarray(i, i + CHUNK));
+  }
+  return btoa(bin);
+}
+
+export const getDerivativeJobs = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
   .inputValidator(
     z.object({ afterImageNumber: z.number().int().min(0).default(0) }).parse,
@@ -724,77 +714,88 @@ export const generateDerivativesBatch = createServerFn({ method: "POST" })
 
     const { data: rows, error } = await supabase
       .from("images")
-      .select("id, image_number, storage_path, preview_path")
+      .select("id, image_number, preview_path")
       .gt("image_number", data.afterImageNumber)
       .order("image_number", { ascending: true })
       .limit(DERIVATIVE_BATCH_SIZE);
     if (error) throw new Error(error.message);
 
     const images = rows ?? [];
-    if (images.length === 0) {
-      return {
-        done: true,
-        lastImageNumber: data.afterImageNumber,
-        processed: 0,
-        skipped: 0,
-        errors: [] as string[],
-        total: total ?? 0,
-      };
-    }
-
-    let processed = 0;
-    let skipped = 0;
-    const errors: string[] = [];
-    let lastImageNumber = data.afterImageNumber;
-
+    const jobs: Array<{
+      id: string;
+      imageNumber: number;
+      hasPreview: boolean;
+      alreadyDone: boolean;
+    }> = [];
     for (const img of images) {
-      lastImageNumber = img.image_number;
-      try {
-        const { data: existing } = await supabase.storage
-          .from(DERIVED_BUCKET)
-          .list("small", { search: `${img.id}.jpg`, limit: 1 });
-        if (existing && existing.length > 0) {
-          skipped++;
-          continue;
-        }
-
-        const cache: Partial<Record<"storage" | "preview", Uint8Array | null>> = {};
-        const getSource = async (kind: "storage" | "preview"): Promise<Uint8Array | null> => {
-          if (kind in cache) return cache[kind] ?? null;
-          const path = kind === "storage" ? img.storage_path : img.preview_path;
-          if (!path) {
-            cache[kind] = null;
-            return null;
-          }
-          const { data: file } = await supabase.storage.from(SOURCE_BUCKET).download(path);
-          cache[kind] = file ? new Uint8Array(await file.arrayBuffer()) : null;
-          return cache[kind] ?? null;
-        };
-
-        for (const target of DERIVATIVE_TARGETS) {
-          const src = await getSource(target.source);
-          if (!src) continue;
-          const out = await resizeToEdge(src, target.maxEdge);
-          const { error: upErr } = await supabase.storage
-            .from(DERIVED_BUCKET)
-            .upload(`${target.folder}/${img.id}.jpg`, out, {
-              contentType: "image/jpeg",
-              upsert: true,
-            });
-          if (upErr) throw new Error(`${target.folder}: ${upErr.message}`);
-        }
-        processed++;
-      } catch (e) {
-        errors.push(`#${img.image_number}: ${(e as Error).message}`);
-      }
+      const { data: existing } = await supabase.storage
+        .from(DERIVED_BUCKET)
+        .list("small", { search: `${img.id}.jpg`, limit: 1 });
+      jobs.push({
+        id: img.id,
+        imageNumber: img.image_number,
+        hasPreview: !!img.preview_path,
+        alreadyDone: !!(existing && existing.length > 0),
+      });
     }
 
     return {
       done: images.length < DERIVATIVE_BATCH_SIZE,
-      lastImageNumber,
-      processed,
-      skipped,
-      errors,
+      lastImageNumber: images.length
+        ? images[images.length - 1].image_number
+        : data.afterImageNumber,
+      jobs,
       total: total ?? 0,
     };
+  });
+
+export const getImageSource = createServerFn({ method: "POST" })
+  .middleware([requireAdmin])
+  .inputValidator(z.object({ imageId: z.string().uuid() }).parse)
+  .handler(async ({ context, data }) => {
+    const { supabase } = context;
+    const { data: img, error } = await supabase
+      .from("images")
+      .select("storage_path, preview_path")
+      .eq("id", data.imageId)
+      .single();
+    if (error || !img?.storage_path) throw new Error("Image not found");
+
+    const fetchFile = async (path: string | null): Promise<string | null> => {
+      if (!path) return null;
+      const { data: file } = await supabase.storage.from(SOURCE_BUCKET).download(path);
+      return file ? await encodeBase64(file) : null;
+    };
+
+    return {
+      original: await fetchFile(img.storage_path),
+      preview: await fetchFile(img.preview_path),
+    };
+  });
+
+export const storeDerivatives = createServerFn({ method: "POST" })
+  .middleware([requireAdmin])
+  .inputValidator(
+    z.object({
+      imageId: z.string().uuid(),
+      medium: z.string().min(1),
+      thumb: z.string().nullable(),
+      small: z.string().min(1),
+    }).parse,
+  )
+  .handler(async ({ context, data }) => {
+    const { supabase } = context;
+    const put = async (folder: string, b64: string) => {
+      const { error } = await supabase.storage
+        .from(DERIVED_BUCKET)
+        .upload(`${folder}/${data.imageId}.jpg`, decodeBase64(b64), {
+          contentType: "image/jpeg",
+          upsert: true,
+        });
+      if (error) throw new Error(`${folder}: ${error.message}`);
+    };
+    await put("medium", data.medium);
+    if (data.thumb) await put("thumb", data.thumb);
+    await put("small", data.small);
+    return { ok: true };
   });
