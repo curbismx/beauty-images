@@ -21,6 +21,7 @@ import { Route as AccountRouteImport } from './routes/account'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as ImageIdRouteImport } from './routes/image.$id'
+import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
 import { Route as AdminUploadRouteImport } from './routes/admin.upload'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
@@ -29,10 +30,13 @@ import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminLibraryRouteImport } from './routes/admin.library'
 import { Route as AdminFeaturedRouteImport } from './routes/admin.featured'
 import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
+import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as ApiPublicTrackRouteImport } from './routes/api/public/track'
 import { Route as ApiPublicDownloadRouteImport } from './routes/api/public/download'
 import { Route as ApiAdminUploadImageRouteImport } from './routes/api/admin/upload-image'
 import { Route as AdminImageIdRouteImport } from './routes/admin.image.$id'
+import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
+import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
@@ -101,6 +105,11 @@ const ImageIdRoute = ImageIdRouteImport.update({
   path: '/image/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
+  id: '/email/unsubscribe',
+  path: '/email/unsubscribe',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CheckoutReturnRoute = CheckoutReturnRouteImport.update({
   id: '/checkout/return',
   path: '/checkout/return',
@@ -141,6 +150,11 @@ const AdminCustomersRoute = AdminCustomersRouteImport.update({
   path: '/customers',
   getParentRoute: () => AdminRoute,
 } as any)
+const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
+  id: '/lovable/email/suppression',
+  path: '/lovable/email/suppression',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicTrackRoute = ApiPublicTrackRouteImport.update({
   id: '/api/public/track',
   path: '/api/public/track',
@@ -161,6 +175,18 @@ const AdminImageIdRoute = AdminImageIdRouteImport.update({
   path: '/image/$id',
   getParentRoute: () => AdminRoute,
 } as any)
+const LovableEmailTransactionalSendRoute =
+  LovableEmailTransactionalSendRouteImport.update({
+    id: '/lovable/email/transactional/send',
+    path: '/lovable/email/transactional/send',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const LovableEmailTransactionalPreviewRoute =
+  LovableEmailTransactionalPreviewRouteImport.update({
+    id: '/lovable/email/transactional/preview',
+    path: '/lovable/email/transactional/preview',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const LovableEmailQueueProcessRoute =
   LovableEmailQueueProcessRouteImport.update({
     id: '/lovable/email/queue/process',
@@ -220,12 +246,14 @@ export interface FileRoutesByFullPath {
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/upload': typeof AdminUploadRoute
   '/checkout/return': typeof CheckoutReturnRoute
+  '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/image/$id': typeof ImageIdRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/image/$id': typeof AdminImageIdRoute
   '/api/admin/upload-image': typeof ApiAdminUploadImageRoute
   '/api/public/download': typeof ApiPublicDownloadRoute
   '/api/public/track': typeof ApiPublicTrackRoute
+  '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/hooks/keyword-pending': typeof ApiPublicHooksKeywordPendingRoute
   '/api/public/hooks/process-pending': typeof ApiPublicHooksProcessPendingRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -233,6 +261,8 @@ export interface FileRoutesByFullPath {
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
+  '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -252,12 +282,14 @@ export interface FileRoutesByTo {
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/upload': typeof AdminUploadRoute
   '/checkout/return': typeof CheckoutReturnRoute
+  '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/image/$id': typeof ImageIdRoute
   '/admin': typeof AdminIndexRoute
   '/admin/image/$id': typeof AdminImageIdRoute
   '/api/admin/upload-image': typeof ApiAdminUploadImageRoute
   '/api/public/download': typeof ApiPublicDownloadRoute
   '/api/public/track': typeof ApiPublicTrackRoute
+  '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/hooks/keyword-pending': typeof ApiPublicHooksKeywordPendingRoute
   '/api/public/hooks/process-pending': typeof ApiPublicHooksProcessPendingRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -265,6 +297,8 @@ export interface FileRoutesByTo {
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
+  '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -286,12 +320,14 @@ export interface FileRoutesById {
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/upload': typeof AdminUploadRoute
   '/checkout/return': typeof CheckoutReturnRoute
+  '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/image/$id': typeof ImageIdRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/image/$id': typeof AdminImageIdRoute
   '/api/admin/upload-image': typeof ApiAdminUploadImageRoute
   '/api/public/download': typeof ApiPublicDownloadRoute
   '/api/public/track': typeof ApiPublicTrackRoute
+  '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/hooks/keyword-pending': typeof ApiPublicHooksKeywordPendingRoute
   '/api/public/hooks/process-pending': typeof ApiPublicHooksProcessPendingRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -299,6 +335,8 @@ export interface FileRoutesById {
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
+  '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
+  '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -321,12 +359,14 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/upload'
     | '/checkout/return'
+    | '/email/unsubscribe'
     | '/image/$id'
     | '/admin/'
     | '/admin/image/$id'
     | '/api/admin/upload-image'
     | '/api/public/download'
     | '/api/public/track'
+    | '/lovable/email/suppression'
     | '/api/public/hooks/keyword-pending'
     | '/api/public/hooks/process-pending'
     | '/api/public/payments/webhook'
@@ -334,6 +374,8 @@ export interface FileRouteTypes {
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
+    | '/lovable/email/transactional/preview'
+    | '/lovable/email/transactional/send'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -353,12 +395,14 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/upload'
     | '/checkout/return'
+    | '/email/unsubscribe'
     | '/image/$id'
     | '/admin'
     | '/admin/image/$id'
     | '/api/admin/upload-image'
     | '/api/public/download'
     | '/api/public/track'
+    | '/lovable/email/suppression'
     | '/api/public/hooks/keyword-pending'
     | '/api/public/hooks/process-pending'
     | '/api/public/payments/webhook'
@@ -366,6 +410,8 @@ export interface FileRouteTypes {
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
+    | '/lovable/email/transactional/preview'
+    | '/lovable/email/transactional/send'
   id:
     | '__root__'
     | '/'
@@ -386,12 +432,14 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/upload'
     | '/checkout/return'
+    | '/email/unsubscribe'
     | '/image/$id'
     | '/admin/'
     | '/admin/image/$id'
     | '/api/admin/upload-image'
     | '/api/public/download'
     | '/api/public/track'
+    | '/lovable/email/suppression'
     | '/api/public/hooks/keyword-pending'
     | '/api/public/hooks/process-pending'
     | '/api/public/payments/webhook'
@@ -399,6 +447,8 @@ export interface FileRouteTypes {
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
+    | '/lovable/email/transactional/preview'
+    | '/lovable/email/transactional/send'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -413,10 +463,12 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   SignupRoute: typeof SignupRoute
   CheckoutReturnRoute: typeof CheckoutReturnRoute
+  EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   ImageIdRoute: typeof ImageIdRoute
   ApiAdminUploadImageRoute: typeof ApiAdminUploadImageRoute
   ApiPublicDownloadRoute: typeof ApiPublicDownloadRoute
   ApiPublicTrackRoute: typeof ApiPublicTrackRoute
+  LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicHooksKeywordPendingRoute: typeof ApiPublicHooksKeywordPendingRoute
   ApiPublicHooksProcessPendingRoute: typeof ApiPublicHooksProcessPendingRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
@@ -424,6 +476,8 @@ export interface RootRouteChildren {
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
+  LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
+  LovableEmailTransactionalSendRoute: typeof LovableEmailTransactionalSendRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -512,6 +566,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ImageIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/email/unsubscribe': {
+      id: '/email/unsubscribe'
+      path: '/email/unsubscribe'
+      fullPath: '/email/unsubscribe'
+      preLoaderRoute: typeof EmailUnsubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/checkout/return': {
       id: '/checkout/return'
       path: '/checkout/return'
@@ -568,6 +629,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCustomersRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/lovable/email/suppression': {
+      id: '/lovable/email/suppression'
+      path: '/lovable/email/suppression'
+      fullPath: '/lovable/email/suppression'
+      preLoaderRoute: typeof LovableEmailSuppressionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/track': {
       id: '/api/public/track'
       path: '/api/public/track'
@@ -595,6 +663,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/image/$id'
       preLoaderRoute: typeof AdminImageIdRouteImport
       parentRoute: typeof AdminRoute
+    }
+    '/lovable/email/transactional/send': {
+      id: '/lovable/email/transactional/send'
+      path: '/lovable/email/transactional/send'
+      fullPath: '/lovable/email/transactional/send'
+      preLoaderRoute: typeof LovableEmailTransactionalSendRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/transactional/preview': {
+      id: '/lovable/email/transactional/preview'
+      path: '/lovable/email/transactional/preview'
+      fullPath: '/lovable/email/transactional/preview'
+      preLoaderRoute: typeof LovableEmailTransactionalPreviewRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/lovable/email/queue/process': {
       id: '/lovable/email/queue/process'
@@ -686,10 +768,12 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   SignupRoute: SignupRoute,
   CheckoutReturnRoute: CheckoutReturnRoute,
+  EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   ImageIdRoute: ImageIdRoute,
   ApiAdminUploadImageRoute: ApiAdminUploadImageRoute,
   ApiPublicDownloadRoute: ApiPublicDownloadRoute,
   ApiPublicTrackRoute: ApiPublicTrackRoute,
+  LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicHooksKeywordPendingRoute: ApiPublicHooksKeywordPendingRoute,
   ApiPublicHooksProcessPendingRoute: ApiPublicHooksProcessPendingRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
@@ -697,6 +781,8 @@ const rootRouteChildren: RootRouteChildren = {
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
+  LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
+  LovableEmailTransactionalSendRoute: LovableEmailTransactionalSendRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
