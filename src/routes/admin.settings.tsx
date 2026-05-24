@@ -175,6 +175,16 @@ function Settings() {
         <RegeneratePreviewsButton />
       </div>
 
+      <div className="bi-section">
+        <h2 className="bi-section-title">Image sizes</h2>
+        <p className="bi-label" style={{ marginBottom: 12 }}>
+          Pre-generate small, medium and thumbnail versions of every image so
+          downloads and search are instant. Run once — keep this tab open and
+          your computer awake until it finishes.
+        </p>
+        <GenerateDerivativesButton />
+      </div>
+
       <button className="bi-btn">Save</button>
     </>
   );
