@@ -77,16 +77,34 @@ export const Route = createFileRoute("/api/public/preview-image/$id")({
         }
         const sourceBytes = new Uint8Array(await original.arrayBuffer());
 
+        // The in-Worker JPEG decode allocates the whole image as raw pixels in
+        // memory. A normal ~800px preview is well under 1 MB; a much larger
+        // source can exhaust the Worker's memory mid-decode, which kills the
+        // request outright (it cannot be caught) and the thumbnail fails to
+        // load. If the source is that large, skip the resize and serve it
+        // as-is so the thumbnail still loads.
+
+        const MAX_RESIZE_INPUT_BYTES = 2_000_000;
+
         let outBytes: Uint8Array;
         let resizedOk = true;
-        try {
-          outBytes = await resizeJpeg(sourceBytes, width);
-        } catch (e) {
-          // Don't cache failures — caching the full original poisons the
-          // bucket and every later request serves a multi-MB "thumbnail".
-          console.error("Thumbnail resize failed:", e);
-          resizedOk = false;
+
+        if (sourceBytes.byteLength > MAX_RESIZE_INPUT_BYTES) {
+          console.warn(
+            `Preview source too large to resize safely (${sourceBytes.byteLength} bytes) for ${id}; serving as-is`,
+          );
           outBytes = sourceBytes;
+          resizedOk = false;
+        } else {
+          try {
+            outBytes = await resizeJpeg(sourceBytes, width);
+          } catch (e) {
+            // Don't cache failures — caching the full original poisons the
+            // bucket and every later request serves a multi-MB "thumbnail".
+            console.error("Thumbnail resize failed:", e);
+            resizedOk = false;
+            outBytes = sourceBytes;
+          }
         }
 
         if (resizedOk) {
