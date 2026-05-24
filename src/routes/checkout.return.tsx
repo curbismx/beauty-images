@@ -146,7 +146,7 @@ function CheckoutReturn() {
                         <div className="ret-num">
                           #{String(it.image_number).padStart(8, "0")}
                           <span className="ret-tier-name"> · {TIER_NAME[it.tier] ?? it.tier}</span>
-                          <span className="ret-edge"> · {it.tier_max_edge}px</span>
+                          <span className="ret-edge"> · {it.tier_max_edge > 0 ? `${it.tier_max_edge}px` : "highest resolution"}</span>
                         </div>
                         {it.title && <div className="ret-title">{it.title}</div>}
                       </div>
