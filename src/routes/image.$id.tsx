@@ -414,6 +414,7 @@ const CSS = `
   line-height: 0;
   position: relative;
   overflow: hidden;
+  border: 1px solid #2a2a2a;
 }
 
 .wm-mark {
@@ -422,7 +423,7 @@ const CSS = `
   top: 60%;
   transform: translateY(-50%);
   max-height: 70px;
-  max-width: 100%;
+  max-width: 60%;
   height: auto;
   width: auto;
   pointer-events: none;
