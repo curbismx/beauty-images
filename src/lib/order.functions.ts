@@ -4,7 +4,7 @@ import { createClient } from "@supabase/supabase-js";
 const TIER_MAX_EDGE: Record<string, number> = {
   small: 800,
   medium: 2000,
-  large: 5400,
+  large: 0,
 };
 
 const TIER_PRICE: Record<string, number> = { small: 150, medium: 275, large: 375 };
