@@ -98,20 +98,24 @@ export const Route = createFileRoute("/api/public/preview-image/$id")({
         const sourceBytes = new Uint8Array(await original.arrayBuffer());
 
         let outBytes: Uint8Array;
+        let resizedOk = true;
         try {
           outBytes = await resizeJpeg(sourceBytes, width);
         } catch (e) {
-          // If the resize ever fails, fall back to the full image so the grid
-          // still shows something rather than a broken icon.
+          // Don't cache failures — caching the full original poisons the
+          // bucket and every later request serves a multi-MB "thumbnail".
           console.error("Thumbnail resize failed:", e);
+          resizedOk = false;
           outBytes = sourceBytes;
         }
 
-        // Cache for next time (best-effort — a failure here is harmless).
-        await supabase.storage
-          .from(CACHE_BUCKET)
-          .upload(cachePath, outBytes, { contentType: "image/jpeg", upsert: true })
-          .catch((e) => console.error("Thumbnail cache upload failed:", e));
+        if (resizedOk) {
+          // Cache for next time (best-effort — a failure here is harmless).
+          await supabase.storage
+            .from(CACHE_BUCKET)
+            .upload(cachePath, outBytes, { contentType: "image/jpeg", upsert: true })
+            .catch((e) => console.error("Thumbnail cache upload failed:", e));
+        }
 
         return new Response(outBytes as BodyInit, { status: 200, headers: IMG_HEADERS });
       },
