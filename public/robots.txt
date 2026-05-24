@@ -6,8 +6,9 @@ Disallow: /basket
 Disallow: /lightbox
 Disallow: /checkout
 Disallow: /api
+Allow: /api/public/preview-image/
 Disallow: /login
 Disallow: /signup
 Disallow: /reset-password
 
-Sitemap: https://beautyimages.lovable.app/sitemap.xml
+Sitemap: https://beautyimages.com/sitemap.xml
