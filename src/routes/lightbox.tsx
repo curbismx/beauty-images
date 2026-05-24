@@ -140,6 +140,9 @@ function LightboxPage() {
                   <Trash2 size={16} />
                   <span>CLEAR</span>
                 </button>
+                <Link to="/basket" className="srh-checkout">
+                  <span>CHECKOUT</span>
+                </Link>
               </div>
             )}
           </div>
