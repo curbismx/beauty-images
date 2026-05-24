@@ -1,36 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
+import { resizeJpeg } from "@/lib/resize-jpeg.server";
 
 const TIER_MAX_EDGE: Record<string, number> = {
   small: 800,
   medium: 2000,
-  large: 5400,
+  large: 0,
 };
 const TIER_CODE: Record<string, string> = { small: "S", medium: "M", large: "L" };
 
 function getSupabase() {
   return createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
-}
-
-// Resize using jSquash (pure-WASM, reliable on Cloudflare Workers).
-// If maxEdge is 0 (or larger than the source), returns the original bytes
-// unchanged so "large" tier delivers the full resolution.
-async function resizeJpeg(input: Uint8Array, maxEdge: number): Promise<Uint8Array> {
-  const { decode, encode } = await import("@jsquash/jpeg");
-  const resize = (await import("@jsquash/resize")).default;
-
-  const decoded = await decode(input as unknown as ArrayBuffer);
-  const { width: w, height: h } = decoded;
-  const longest = Math.max(w, h);
-  if (maxEdge <= 0 || longest <= maxEdge) {
-    return input; // serve original bytes
-  }
-  const scale = maxEdge / longest;
-  const nw = Math.max(1, Math.round(w * scale));
-  const nh = Math.max(1, Math.round(h * scale));
-  const resized = await resize(decoded, { width: nw, height: nh, method: "lanczos3" });
-  const out = await encode(resized, { quality: 90 });
-  return new Uint8Array(out);
 }
 
 export const Route = createFileRoute("/api/public/download")({
