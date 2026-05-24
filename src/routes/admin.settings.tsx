@@ -216,3 +216,71 @@ function RegeneratePreviewsButton() {
     </div>
   );
 }
+
+function GenerateDerivativesButton() {
+  const runBatch = useServerFn(generateDerivativesBatch);
+  const [running, setRunning] = useState(false);
+  const [doneCount, setDoneCount] = useState(0);
+  const [total, setTotal] = useState(0);
+  const [errors, setErrors] = useState<string[]>([]);
+  const [finished, setFinished] = useState(false);
+
+  const onClick = async () => {
+    if (running) return;
+    if (
+      !confirm(
+        "Generate all image sizes? This works through the whole library and can take a few hours. Keep this tab open and your computer awake until it finishes.",
+      )
+    )
+      return;
+    setRunning(true);
+    setFinished(false);
+    setErrors([]);
+    setDoneCount(0);
+    let cursor = 0;
+    let more = true;
+    let iterations = 0;
+    const allErrors: string[] = [];
+    try {
+      while (more && iterations < 20000) {
+        iterations++;
+        const r = await runBatch({ data: { afterImageNumber: cursor } });
+        cursor = r.lastImageNumber;
+        if (r.total) setTotal(r.total);
+        setDoneCount((n) => n + r.processed + r.skipped);
+        if (r.errors.length) {
+          allErrors.push(...r.errors);
+          setErrors([...allErrors]);
+        }
+        more = !r.done;
+      }
+      setFinished(true);
+    } catch (e) {
+      allErrors.push(`Stopped: ${(e as Error).message}`);
+      setErrors([...allErrors]);
+    } finally {
+      setRunning(false);
+    }
+  };
+
+  return (
+    <div>
+      <button type="button" className="bi-btn" onClick={onClick} disabled={running}>
+        {running
+          ? `Generating… ${doneCount}${total ? ` / ${total}` : ""}`
+          : "Generate all sizes"}
+      </button>
+      {finished && !running && (
+        <div className="bi-label" style={{ marginTop: 12 }}>
+          Finished — {doneCount} image{doneCount === 1 ? "" : "s"} processed.
+        </div>
+      )}
+      {errors.length > 0 && (
+        <div className="bi-label" style={{ marginTop: 12, color: "#D75F68" }}>
+          {errors.length} issue{errors.length === 1 ? "" : "s"}: {errors.slice(0, 5).join("; ")}
+          {errors.length > 5 ? " …" : ""}
+        </div>
+      )}
+    </div>
+  );
+}
