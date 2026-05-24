@@ -402,19 +402,21 @@ const CSS = `
 }
 
 .img-frame {
-  position: relative;
-  display: block;
+  display: inline-block;
   max-width: 100%;
   font-size: 0;
+  line-height: 0;
+  position: relative;
 }
 
 .img-box {
-  display: inline-block;
-  max-width: 100%;
-  line-height: 0;
+  display: block;
   position: relative;
+  line-height: 0;
   overflow: hidden;
   border: 1px solid #2a2a2a;
+  width: fit-content;
+  max-width: 100%;
 }
 
 .wm-mark {
@@ -432,7 +434,7 @@ const CSS = `
 
 .img-el {
   display: block;
-  max-width: min(1000px, 100%);
+  max-width: 100%;
   max-height: 800px;
   width: auto;
   height: auto;
