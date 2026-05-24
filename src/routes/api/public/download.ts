@@ -6,8 +6,41 @@ const TIER_MAX_EDGE: Record<string, number> = { small: 800, medium: 2000, large:
 // Full tier word used in the download filename.
 const TIER_LABEL: Record<string, string> = { small: "SMALL", medium: "MEDIUM", large: "LARGE" };
 
+// Cache namespace. The "dl/" prefix is deliberate: an earlier version of this
+// endpoint could cache full-size files under the bare "{id}/{tier}.jpg" path;
+// the new prefix sidesteps any of those stale entries.
+const CACHE_PREFIX = "dl";
+
 function getSupabase() {
   return createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+}
+
+// Resize a JPEG to a longest-edge cap, in-process via the Photon WASM image
+// library. No external service or Cloudflare feature is required. Throws if
+// the source cannot be decoded — callers fall back to the original file.
+async function resizeToEdge(input: Uint8Array, maxEdge: number, quality = 90): Promise<Uint8Array> {
+  const photon = await import("@cf-wasm/photon/edge-light");
+  const img = photon.PhotonImage.new_from_byteslice(input);
+  try {
+    const w = img.get_width();
+    const h = img.get_height();
+    const longest = Math.max(w, h);
+    if (longest <= maxEdge) {
+      // Source already within the cap — just re-encode as JPEG.
+      return img.get_bytes_jpeg(quality);
+    }
+    const scale = maxEdge / longest;
+    const nw = Math.max(1, Math.round(w * scale));
+    const nh = Math.max(1, Math.round(h * scale));
+    const resized = photon.resize(img, nw, nh, photon.SamplingFilter.Lanczos3);
+    try {
+      return resized.get_bytes_jpeg(quality);
+    } finally {
+      resized.free();
+    }
+  } finally {
+    img.free();
+  }
 }
 
 export const Route = createFileRoute("/api/public/download")({
@@ -86,7 +119,7 @@ export const Route = createFileRoute("/api/public/download")({
           return new Uint8Array(await original.arrayBuffer());
         };
 
-        // LARGE tier = the untouched original. No resize needed.
+        // LARGE tier = the untouched original. No resize, no WASM loaded.
         if (maxEdge <= 0) {
           const bytes = await downloadOriginal();
           if (!bytes) return new Response("Source missing", { status: 404 });
@@ -95,7 +128,7 @@ export const Route = createFileRoute("/api/public/download")({
         }
 
         // SMALL / MEDIUM: serve a cached derivative if one already exists.
-        const cachePath = `${imageId}/${tier}.jpg`;
+        const cachePath = `${CACHE_PREFIX}/${imageId}/${tier}.jpg`;
         const { data: cached } = await supabase.storage
           .from("images-derived")
           .download(cachePath);
@@ -104,40 +137,21 @@ export const Route = createFileRoute("/api/public/download")({
           return serve(new Uint8Array(await cached.arrayBuffer()));
         }
 
-        // No cached derivative yet. Resize the original at Cloudflare's edge
-        // via the cf.image fetch option, so the heavy image decoding never
-        // runs inside this Worker's limited memory (the previous in-Worker
-        // resize exhausted memory on large originals and failed).
-        let outBytes: Uint8Array | null = null;
-        const { data: signed } = await supabase.storage
-          .from("images-private")
-          .createSignedUrl(image.storage_path, 120);
+        // Not cached yet — fetch the original and resize it in-process.
+        const original = await downloadOriginal();
+        if (!original) {
+          return new Response("Source missing", { status: 404 });
+        }
 
-        if (signed?.signedUrl) {
-          try {
-            const resized = await fetch(signed.signedUrl, {
-              cf: {
-                image: {
-                  width: maxEdge,
-                  height: maxEdge,
-                  fit: "scale-down",
-                  format: "jpeg",
-                  quality: 90,
-                },
-              },
-            } as any);
-            if (resized.ok) {
-              outBytes = new Uint8Array(await resized.arrayBuffer());
-            } else {
-              console.error(`Edge resize HTTP ${resized.status} for ${imageId} (${tier})`);
-            }
-          } catch (e) {
-            console.error(`Edge resize failed for ${imageId} (${tier}):`, e);
-          }
+        let outBytes: Uint8Array | null = null;
+        try {
+          outBytes = await resizeToEdge(original, maxEdge);
+        } catch (e) {
+          console.error(`Resize failed for ${imageId} (${tier}):`, e);
         }
 
         if (outBytes) {
-          // Cache the derivative so every later download of this tier is instant.
+          // Cache the resized derivative so later downloads are instant.
           await supabase.storage
             .from("images-derived")
             .upload(cachePath, outBytes, { contentType: "image/jpeg", upsert: true })
@@ -146,14 +160,12 @@ export const Route = createFileRoute("/api/public/download")({
           return serve(outBytes);
         }
 
-        // Edge resize unavailable — fall back to the full-resolution original
-        // so the buyer always gets a usable file. Not cached, so a later
-        // request can still produce the correct smaller tier.
+        // Resize failed (e.g. an unusual source file) — fall back to the
+        // full-resolution original so the buyer always gets a usable file.
+        // Not cached, so a later request can still produce the smaller tier.
         console.warn(`Serving full original as fallback for ${imageId} (${tier})`);
-        const fallback = await downloadOriginal();
-        if (!fallback) return new Response("Source missing", { status: 404 });
         bumpCount();
-        return serve(fallback);
+        return serve(original);
       },
     },
   },
