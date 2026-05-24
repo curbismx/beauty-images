@@ -20,29 +20,25 @@ function getSupabase() {
   );
 }
 
-// Resize a JPEG so its longest edge is at most maxEdge. If the source is
-// already small enough it is just re-encoded. Photon ships as a WASM module
-// that must be imported lazily.
+// Resize a JPEG so its longest edge is at most maxEdge. Uses jSquash, which
+// ships pure-WASM builds that run reliably on Cloudflare Workers.
 async function resizeJpeg(input: Uint8Array, maxEdge: number): Promise<Uint8Array> {
-  const photon = await import("@cf-wasm/photon/edge-light");
-  const img = photon.PhotonImage.new_from_byteslice(input);
-  const w = img.get_width();
-  const h = img.get_height();
+  const { decode } = await import("@jsquash/jpeg");
+  const { encode } = await import("@jsquash/jpeg");
+  const resize = (await import("@jsquash/resize")).default;
+
+  const decoded = await decode(input as unknown as ArrayBuffer);
+  const { width: w, height: h } = decoded;
   const longest = Math.max(w, h);
-  let out: Uint8Array;
-  if (longest <= maxEdge) {
-    out = img.get_bytes_jpeg(80);
-  } else {
+  let target = decoded;
+  if (longest > maxEdge) {
     const scale = maxEdge / longest;
     const nw = Math.max(1, Math.round(w * scale));
     const nh = Math.max(1, Math.round(h * scale));
-    // SamplingFilter.Lanczos3 = 5 in @cf-wasm/photon
-    const resized = photon.resize(img, nw, nh, 5);
-    out = resized.get_bytes_jpeg(80);
-    resized.free();
+    target = await resize(decoded, { width: nw, height: nh, method: "lanczos3" });
   }
-  img.free();
-  return out;
+  const out = await encode(target, { quality: 78 });
+  return new Uint8Array(out);
 }
 
 export const Route = createFileRoute("/api/public/preview-image/$id")({
