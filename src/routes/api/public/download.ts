@@ -12,27 +12,25 @@ function getSupabase() {
   return createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
 }
 
+// Resize using jSquash (pure-WASM, reliable on Cloudflare Workers).
+// If maxEdge is 0 (or larger than the source), returns the original bytes
+// unchanged so "large" tier delivers the full resolution.
 async function resizeJpeg(input: Uint8Array, maxEdge: number): Promise<Uint8Array> {
-  // Dynamic import — @cf-wasm/photon ships a WASM module that must be loaded lazily.
-  const photon = await import("@cf-wasm/photon/edge-light");
-  const img = photon.PhotonImage.new_from_byteslice(input);
-  const w = img.get_width();
-  const h = img.get_height();
+  const { decode, encode } = await import("@jsquash/jpeg");
+  const resize = (await import("@jsquash/resize")).default;
+
+  const decoded = await decode(input as unknown as ArrayBuffer);
+  const { width: w, height: h } = decoded;
   const longest = Math.max(w, h);
-  let outBytes: Uint8Array;
-  if (longest <= maxEdge) {
-    outBytes = img.get_bytes_jpeg(90);
-  } else {
-    const scale = maxEdge / longest;
-    const nw = Math.max(1, Math.round(w * scale));
-    const nh = Math.max(1, Math.round(h * scale));
-    // SamplingFilter.Lanczos3 = 5 in @cf-wasm/photon
-    const resized = photon.resize(img, nw, nh, 5);
-    outBytes = resized.get_bytes_jpeg(90);
-    resized.free();
+  if (maxEdge <= 0 || longest <= maxEdge) {
+    return input; // serve original bytes
   }
-  img.free();
-  return outBytes;
+  const scale = maxEdge / longest;
+  const nw = Math.max(1, Math.round(w * scale));
+  const nh = Math.max(1, Math.round(h * scale));
+  const resized = await resize(decoded, { width: nw, height: nh, method: "lanczos3" });
+  const out = await encode(resized, { quality: 90 });
+  return new Uint8Array(out);
 }
 
 export const Route = createFileRoute("/api/public/download")({
