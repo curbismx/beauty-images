@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { type StripeEnv, verifyWebhook } from "@/lib/stripe.server";
+import { sendTransactionalEmail } from "@/lib/email/send-transactional.server";
 
 let _supabase: SupabaseClient | null = null;
 function getSupabase(): SupabaseClient {
@@ -14,6 +15,65 @@ function getSupabase(): SupabaseClient {
 }
 
 const TIER_FROM_CODE: Record<string, string> = { s: "small", m: "medium", l: "large" };
+const ROOT_DOMAIN = "beautyimages.com";
+
+async function sendOrderConfirmationEmail(
+  sessionId: string,
+  recipientEmail: string,
+) {
+  const supabase = getSupabase();
+
+  // Pull the order rows we just inserted to build the email summary
+  const { data: sales } = await supabase
+    .from("sales")
+    .select("image_id, download_tier, amount, currency")
+    .eq("stripe_session_id", sessionId);
+
+  if (!sales || sales.length === 0) return;
+
+  const imageIds = Array.from(new Set(sales.map((s: any) => s.image_id).filter(Boolean))) as string[];
+  const { data: images } = await supabase
+    .from("images")
+    .select("id, image_number, title")
+    .in("id", imageIds);
+
+  const imgMap = new Map<string, any>();
+  for (const im of images ?? []) imgMap.set(im.id, im);
+
+  let total = 0;
+  const items = sales.map((s: any) => {
+    const im = imgMap.get(s.image_id);
+    const price = Number(s.amount) || 0;
+    total += price;
+    return {
+      image_number: im?.image_number,
+      title: im?.title,
+      tier: s.download_tier || "medium",
+      price,
+    };
+  });
+
+  const currency = (sales[0] as any).currency || "GBP";
+  const downloadUrl = `https://${ROOT_DOMAIN}/checkout/return?session_id=${encodeURIComponent(sessionId)}`;
+
+  const result = await sendTransactionalEmail({
+    supabase,
+    templateName: "order-confirmation",
+    recipientEmail,
+    idempotencyKey: `order-confirm-${sessionId}`,
+    templateData: {
+      siteName: "BEAUTYIMAGES",
+      downloadUrl,
+      total,
+      currency,
+      items,
+    },
+  });
+
+  if (!result.success) {
+    console.warn("Order confirmation email not sent", { sessionId, reason: result.reason });
+  }
+}
 
 async function handleCheckoutCompleted(session: any) {
   const userId = session.metadata?.userId || null;
@@ -73,11 +133,23 @@ async function handleCheckoutCompleted(session: any) {
       stripe_session_id: sessionId,
     });
     if (error) console.error("Failed to insert sale row:", error);
-    return;
+  } else {
+    const { error } = await getSupabase().from("sales").insert(rows);
+    if (error) console.error("Failed to insert sales rows:", error);
   }
 
-  const { error } = await getSupabase().from("sales").insert(rows);
-  if (error) console.error("Failed to insert sales rows:", error);
+  // Send order confirmation email (best-effort — never block the webhook ack)
+  const recipientEmail: string | undefined =
+    session.customer_details?.email || session.customer_email;
+  if (recipientEmail) {
+    try {
+      await sendOrderConfirmationEmail(sessionId, recipientEmail);
+    } catch (err) {
+      console.error("Order confirmation email error", err);
+    }
+  } else {
+    console.warn("No recipient email on Stripe session, skipping confirmation", { sessionId });
+  }
 }
 
 async function handleWebhook(req: Request, env: StripeEnv) {
