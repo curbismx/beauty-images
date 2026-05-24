@@ -57,9 +57,9 @@ const TIERS: Array<{
   {
     id: "large",
     label: "Large",
-    sub: "5400 px max width",
+    sub: "Highest resolution",
     description:
-      "A Large image delivers an image with maximum edge 5400px as a JPG download. These images will be suited to for full-page print, posters, billboards and high-end advertising campaigns. Digital rights will last for 12 months worldwide license.",
+      "A Large image delivers the highest available resolution as a JPG download. These images will be suited to for full-page print, posters, billboards and high-end advertising campaigns. Digital rights will last for 12 months worldwide license.",
   },
 
 ];
