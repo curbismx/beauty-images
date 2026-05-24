@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
+import { resizeJpeg } from "@/lib/resize-jpeg.server";
 
 // Allowed thumbnail widths. The grid requests w=500; any other value (or no
 // param) serves the full stored preview. An allowlist means arbitrary ?w
@@ -18,27 +19,6 @@ function getSupabase() {
     process.env.SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
   );
-}
-
-// Resize a JPEG so its longest edge is at most maxEdge. Uses jSquash, which
-// ships pure-WASM builds that run reliably on Cloudflare Workers.
-async function resizeJpeg(input: Uint8Array, maxEdge: number): Promise<Uint8Array> {
-  const { decode } = await import("@jsquash/jpeg");
-  const { encode } = await import("@jsquash/jpeg");
-  const resize = (await import("@jsquash/resize")).default;
-
-  const decoded = await decode(input as unknown as ArrayBuffer);
-  const { width: w, height: h } = decoded;
-  const longest = Math.max(w, h);
-  let target = decoded;
-  if (longest > maxEdge) {
-    const scale = maxEdge / longest;
-    const nw = Math.max(1, Math.round(w * scale));
-    const nh = Math.max(1, Math.round(h * scale));
-    target = await resize(decoded, { width: nw, height: nh, method: "lanczos3" });
-  }
-  const out = await encode(target, { quality: 78 });
-  return new Uint8Array(out);
 }
 
 export const Route = createFileRoute("/api/public/preview-image/$id")({
