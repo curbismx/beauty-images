@@ -95,20 +95,24 @@ export const Route = createFileRoute("/api/public/download")({
             return new Response("Source missing", { status: 404 });
           }
           const sourceBytes = new Uint8Array(await original.arrayBuffer());
+          let resizedOk = true;
           try {
             outBytes = await resizeJpeg(sourceBytes, maxEdge);
           } catch (e) {
-            console.error("Resize failed, returning original:", e);
-            outBytes = sourceBytes;
+            // Never fall back to the original — caching it would poison the
+            // tier cache and ship a full-resolution file to a Small/Medium buyer.
+            console.error("Resize failed:", e);
+            return new Response("Image processing failed, please try again", { status: 500 });
           }
-          // Cache for next time (best-effort).
-          await supabase.storage
-            .from("images-derived")
-            .upload(cachePath, outBytes, {
-              contentType: "image/jpeg",
-              upsert: true,
-            })
-            .catch((e) => console.error("Cache upload failed:", e));
+          if (resizedOk) {
+            await supabase.storage
+              .from("images-derived")
+              .upload(cachePath, outBytes, {
+                contentType: "image/jpeg",
+                upsert: true,
+              })
+              .catch((e) => console.error("Cache upload failed:", e));
+          }
         }
 
         // Bump download counter (best-effort, fire-and-forget).
