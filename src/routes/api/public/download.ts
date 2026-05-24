@@ -99,10 +99,12 @@ export const Route = createFileRoute("/api/public/download")({
           try {
             outBytes = await resizeJpeg(sourceBytes, maxEdge);
           } catch (e) {
-            // Never fall back to the original — caching it would poison the
-            // tier cache and ship a full-resolution file to a Small/Medium buyer.
-            console.error("Resize failed:", e);
-            return new Response("Image processing failed, please try again", { status: 500 });
+            // Resize failed — fall back to the full-resolution original so the
+            // buyer always gets a usable file. Do NOT cache this under the tier
+            // path (that would poison future requests for the smaller tier).
+            console.error(`Resize failed for image ${imageId} tier ${tier}, serving original:`, e);
+            outBytes = sourceBytes;
+            resizedOk = false;
           }
           if (resizedOk) {
             await supabase.storage
