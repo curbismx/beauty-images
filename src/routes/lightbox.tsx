@@ -247,6 +247,15 @@ const CSS = `
   transition: background 0.2s ease, color 0.2s ease;
 }
 .search-results-header .srh-lightbox:hover { background: #D75F68; color: #fff; border-color: #D75F68; }
+.search-results-header .srh-checkout {
+  display: inline-flex; align-items: center; gap: 8px;
+  height: 38px; padding: 0 18px; background: #111; color: #fff; border: 1px solid #111;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.2em;
+  text-decoration: none; text-transform: uppercase; cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+.search-results-header .srh-checkout:hover { background: #D75F68; border-color: #D75F68; }
 .search-results-header .srp-meta { color: #999; font-weight: 900; }
 
 .search-results-status {
