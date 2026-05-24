@@ -218,18 +218,60 @@ function RegeneratePreviewsButton() {
 }
 
 function GenerateDerivativesButton() {
-  const runBatch = useServerFn(generateDerivativesBatch);
+  const fetchJobs = useServerFn(getDerivativeJobs);
+  const fetchSource = useServerFn(getImageSource);
+  const storeJob = useServerFn(storeDerivatives);
   const [running, setRunning] = useState(false);
   const [doneCount, setDoneCount] = useState(0);
   const [total, setTotal] = useState(0);
   const [errors, setErrors] = useState<string[]>([]);
   const [finished, setFinished] = useState(false);
 
+  const b64ToBlob = (b64: string): Blob => {
+    const bin = atob(b64);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i += 1) bytes[i] = bin.charCodeAt(i);
+    return new Blob([bytes], { type: "image/jpeg" });
+  };
+
+  const resizeToBase64 = async (
+    blob: Blob,
+    maxEdge: number,
+    quality: number,
+  ): Promise<string> => {
+    const bitmap = await createImageBitmap(blob, { imageOrientation: "from-image" });
+    const longest = Math.max(bitmap.width, bitmap.height);
+    const scale = longest > maxEdge ? maxEdge / longest : 1;
+    const w = Math.max(1, Math.round(bitmap.width * scale));
+    const h = Math.max(1, Math.round(bitmap.height * scale));
+    const canvas = document.createElement("canvas");
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("Canvas unavailable");
+    ctx.drawImage(bitmap, 0, 0, w, h);
+    bitmap.close();
+    const out: Blob = await new Promise((resolve, reject) => {
+      canvas.toBlob(
+        (b) => (b ? resolve(b) : reject(new Error("Encode failed"))),
+        "image/jpeg",
+        quality,
+      );
+    });
+    const dataUrl: string = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result));
+      reader.onerror = () => reject(new Error("Read failed"));
+      reader.readAsDataURL(out);
+    });
+    return dataUrl.split(",")[1];
+  };
+
   const onClick = async () => {
     if (running) return;
     if (
       !confirm(
-        "Generate all image sizes? This works through the whole library and can take a few hours. Keep this tab open and your computer awake until it finishes.",
+        "Generate all image sizes? Your browser will resize every image - this can take a few hours. Keep this tab open and your computer awake until it finishes.",
       )
     )
       return;
@@ -239,20 +281,35 @@ function GenerateDerivativesButton() {
     setDoneCount(0);
     let cursor = 0;
     let more = true;
-    let iterations = 0;
+    let guard = 0;
     const allErrors: string[] = [];
     try {
-      while (more && iterations < 20000) {
-        iterations++;
-        const r = await runBatch({ data: { afterImageNumber: cursor } });
-        cursor = r.lastImageNumber;
-        if (r.total) setTotal(r.total);
-        setDoneCount((n) => n + r.processed + r.skipped);
-        if (r.errors.length) {
-          allErrors.push(...r.errors);
-          setErrors([...allErrors]);
+      while (more && guard < 100000) {
+        guard += 1;
+        const batch = await fetchJobs({ data: { afterImageNumber: cursor } });
+        if (batch.total) setTotal(batch.total);
+        cursor = batch.lastImageNumber;
+        for (const job of batch.jobs) {
+          try {
+            if (!job.alreadyDone) {
+              const src = await fetchSource({ data: { imageId: job.id } });
+              if (!src.original) throw new Error("master file missing");
+              const originalBlob = b64ToBlob(src.original);
+              const medium = await resizeToBase64(originalBlob, 2000, 0.88);
+              const small = await resizeToBase64(originalBlob, 800, 0.88);
+              let thumb: string | null = null;
+              if (src.preview) {
+                thumb = await resizeToBase64(b64ToBlob(src.preview), 500, 0.82);
+              }
+              await storeJob({ data: { imageId: job.id, medium, small, thumb } });
+            }
+            setDoneCount((n) => n + 1);
+          } catch (e) {
+            allErrors.push(`#${job.imageNumber}: ${(e as Error).message}`);
+            setErrors([...allErrors]);
+          }
         }
-        more = !r.done;
+        more = !batch.done;
       }
       setFinished(true);
     } catch (e) {
@@ -272,7 +329,7 @@ function GenerateDerivativesButton() {
       </button>
       {finished && !running && (
         <div className="bi-label" style={{ marginTop: 12 }}>
-          Finished — {doneCount} image{doneCount === 1 ? "" : "s"} processed.
+          Finished — {doneCount} image{doneCount === 1 ? "" : "s"} done.
         </div>
       )}
       {errors.length > 0 && (
