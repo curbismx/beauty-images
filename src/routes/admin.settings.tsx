@@ -271,7 +271,7 @@ function GenerateDerivativesButton() {
     if (running) return;
     if (
       !confirm(
-        "Generate all image sizes? Your browser will resize every image - this can take a few hours. Keep this tab open and your computer awake until it finishes.",
+        "Generate all image sizes? Your browser will resize every image - this can take a while. Keep this tab open and your computer awake until it finishes.",
       )
     )
       return;
@@ -283,31 +283,40 @@ function GenerateDerivativesButton() {
     let more = true;
     let guard = 0;
     const allErrors: string[] = [];
+    const CONCURRENCY = 5;
+    const processJob = async (job: {
+      id: string;
+      imageNumber: number;
+      hasPreview: boolean;
+      alreadyDone: boolean;
+    }) => {
+      try {
+        if (!job.alreadyDone) {
+          const src = await fetchSource({ data: { imageId: job.id } });
+          if (!src.original) throw new Error("master file missing");
+          const originalBlob = b64ToBlob(src.original);
+          const medium = await resizeToBase64(originalBlob, 2000, 0.88);
+          const small = await resizeToBase64(originalBlob, 800, 0.88);
+          let thumb: string | null = null;
+          if (src.preview) {
+            thumb = await resizeToBase64(b64ToBlob(src.preview), 500, 0.82);
+          }
+          await storeJob({ data: { imageId: job.id, medium, small, thumb } });
+        }
+        setDoneCount((n) => n + 1);
+      } catch (e) {
+        allErrors.push(`#${job.imageNumber}: ${(e as Error).message}`);
+        setErrors([...allErrors]);
+      }
+    };
     try {
       while (more && guard < 100000) {
         guard += 1;
         const batch = await fetchJobs({ data: { afterImageNumber: cursor } });
         if (batch.total) setTotal(batch.total);
         cursor = batch.lastImageNumber;
-        for (const job of batch.jobs) {
-          try {
-            if (!job.alreadyDone) {
-              const src = await fetchSource({ data: { imageId: job.id } });
-              if (!src.original) throw new Error("master file missing");
-              const originalBlob = b64ToBlob(src.original);
-              const medium = await resizeToBase64(originalBlob, 2000, 0.88);
-              const small = await resizeToBase64(originalBlob, 800, 0.88);
-              let thumb: string | null = null;
-              if (src.preview) {
-                thumb = await resizeToBase64(b64ToBlob(src.preview), 500, 0.82);
-              }
-              await storeJob({ data: { imageId: job.id, medium, small, thumb } });
-            }
-            setDoneCount((n) => n + 1);
-          } catch (e) {
-            allErrors.push(`#${job.imageNumber}: ${(e as Error).message}`);
-            setErrors([...allErrors]);
-          }
+        for (let i = 0; i < batch.jobs.length; i += CONCURRENCY) {
+          await Promise.all(batch.jobs.slice(i, i + CONCURRENCY).map(processJob));
         }
         more = !batch.done;
       }
@@ -328,7 +337,7 @@ function GenerateDerivativesButton() {
           : "Generate all sizes"}
       </button>
       {finished && !running && (
-        <div className="bi-label" style={{ marginTop: 12 }}>
+        <div className="bi-label" style={{ marginTop: 12, color: "#0a0" }}>
           Finished — {doneCount} image{doneCount === 1 ? "" : "s"} done.
         </div>
       )}
