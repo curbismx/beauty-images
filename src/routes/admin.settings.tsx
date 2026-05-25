@@ -353,3 +353,133 @@ function GenerateDerivativesButton() {
     </div>
   );
 }
+
+function RetryDerivativesButton() {
+  const fetchJobsByNumbers = useServerFn(getJobsByNumbers);
+  const fetchSource = useServerFn(getImageSource);
+  const storeJob = useServerFn(storeDerivatives);
+  const [numbersText, setNumbersText] = useState("");
+  const [running, setRunning] = useState(false);
+  const [result, setResult] = useState("");
+
+  const b64ToBlob = (b64: string): Blob => {
+    const bin = atob(b64);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i += 1) bytes[i] = bin.charCodeAt(i);
+    return new Blob([bytes], { type: "image/jpeg" });
+  };
+
+  const resizeToBase64 = async (
+    blob: Blob,
+    maxEdge: number,
+    quality: number,
+  ): Promise<string> => {
+    const bitmap = await createImageBitmap(blob, { imageOrientation: "from-image" });
+    const longest = Math.max(bitmap.width, bitmap.height);
+    const scale = longest > maxEdge ? maxEdge / longest : 1;
+    const w = Math.max(1, Math.round(bitmap.width * scale));
+    const h = Math.max(1, Math.round(bitmap.height * scale));
+    const canvas = document.createElement("canvas");
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("Canvas unavailable");
+    ctx.drawImage(bitmap, 0, 0, w, h);
+    bitmap.close();
+    const out: Blob = await new Promise((resolve, reject) => {
+      canvas.toBlob(
+        (b) => (b ? resolve(b) : reject(new Error("Encode failed"))),
+        "image/jpeg",
+        quality,
+      );
+    });
+    const dataUrl: string = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result));
+      reader.onerror = () => reject(new Error("Read failed"));
+      reader.readAsDataURL(out);
+    });
+    return dataUrl.split(",")[1];
+  };
+
+  const processOne = async (job: { id: string; hasPreview: boolean }) => {
+    const src = await fetchSource({ data: { imageId: job.id } });
+    if (!src.original) throw new Error("master file missing");
+    const originalBlob = b64ToBlob(src.original);
+    const medium = await resizeToBase64(originalBlob, 2000, 0.88);
+    const small = await resizeToBase64(originalBlob, 800, 0.88);
+    let thumb: string | null = null;
+    if (src.preview) {
+      thumb = await resizeToBase64(b64ToBlob(src.preview), 500, 0.82);
+    }
+    await storeJob({ data: { imageId: job.id, medium, small, thumb } });
+  };
+
+  const onClick = async () => {
+    if (running) return;
+    const numbers = numbersText
+      .split(/[^0-9]+/)
+      .map((s) => parseInt(s, 10))
+      .filter((n) => Number.isFinite(n) && n > 0);
+    if (numbers.length === 0) {
+      setResult("Enter one or more image numbers first.");
+      return;
+    }
+    setRunning(true);
+    setResult("Working…");
+    try {
+      const jobs = await fetchJobsByNumbers({ data: { imageNumbers: numbers } });
+      let ok = 0;
+      const failed: string[] = [];
+      for (const job of jobs) {
+        let lastErr = "";
+        let success = false;
+        for (let attempt = 0; attempt < 3 && !success; attempt += 1) {
+          try {
+            await processOne(job);
+            success = true;
+          } catch (e) {
+            lastErr = (e as Error).message;
+          }
+        }
+        if (success) ok += 1;
+        else failed.push(`#${job.imageNumber}: ${lastErr}`);
+        setResult(`Working… ${ok + failed.length} of ${jobs.length}`);
+      }
+      const found = jobs.map((j) => j.imageNumber);
+      const missing = numbers.filter((n) => !found.includes(n));
+      let msg = `Done — ${ok} fixed`;
+      if (failed.length) msg += `; ${failed.length} still failing: ${failed.join("; ")}`;
+      if (missing.length) msg += `. Not found: ${missing.join(", ")}`;
+      setResult(msg);
+    } catch (e) {
+      setResult(`Stopped: ${(e as Error).message}`);
+    } finally {
+      setRunning(false);
+    }
+  };
+
+  return (
+    <div>
+      <label className="bi-label" style={{ display: "block", marginBottom: 8 }}>
+        Retry specific images (paste image numbers, separated by spaces or commas)
+      </label>
+      <input
+        className="bi-input"
+        value={numbersText}
+        onChange={(e) => setNumbersText(e.target.value)}
+        placeholder="e.g. 1490047, 1490062, 1510017"
+        disabled={running}
+        style={{ marginBottom: 8 }}
+      />
+      <button type="button" className="bi-btn" onClick={onClick} disabled={running}>
+        {running ? "Retrying…" : "Retry these images"}
+      </button>
+      {result && (
+        <div className="bi-label" style={{ marginTop: 12 }}>
+          {result}
+        </div>
+      )}
+    </div>
+  );
+}
