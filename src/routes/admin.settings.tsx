@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { PageHeader } from "./admin";
 import { useAuth } from "@/lib/use-auth";
 import { supabase } from "@/integrations/supabase/client";
-import { regenerateAllPreviews, getDerivativeJobs, getImageSource, storeDerivatives } from "@/lib/images.functions";
+import { regenerateAllPreviews, getDerivativeJobs, getImageSource, storeDerivatives, getJobsByNumbers } from "@/lib/images.functions";
 
 export const Route = createFileRoute("/admin/settings")({
   component: Settings,
