@@ -183,6 +183,9 @@ function Settings() {
           your computer awake until it finishes.
         </p>
         <GenerateDerivativesButton />
+        <div style={{ marginTop: 24 }}>
+          <RetryDerivativesButton />
+        </div>
       </div>
 
       <button className="bi-btn">Save</button>
