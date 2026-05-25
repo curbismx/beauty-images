@@ -173,7 +173,12 @@ function ImageDetail() {
             <span className="img-nav-sep">/</span>
             <Link className="img-nav-link" to="/lightbox">LIGHTBOX</Link>
             <span className="img-nav-sep">/</span>
-            <Link className="img-nav-link" to="/basket">BASKET</Link>
+            <Link className="img-nav-link" to="/basket">
+              BASKET
+              {basketCount > 0 && (
+                <span className="img-nav-count">{basketCount}</span>
+              )}
+            </Link>
           </nav>
         </header>
 
