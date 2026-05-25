@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import { type StripeEnv, verifyWebhook } from "@/lib/stripe.server";
+import { type StripeEnv, verifyWebhook, createStripeClient } from "@/lib/stripe.server";
 import { sendTransactionalEmail } from "@/lib/email/send-transactional.server";
 
 let _supabase: SupabaseClient | null = null;
@@ -75,7 +75,7 @@ async function sendOrderConfirmationEmail(
   }
 }
 
-async function handleCheckoutCompleted(session: any) {
+async function handleCheckoutCompleted(session: any, env: StripeEnv) {
   const userId = session.metadata?.userId || null;
   const imageIds: string[] = session.metadata?.imageIds
     ? String(session.metadata.imageIds).split(",").filter(Boolean)
@@ -96,16 +96,58 @@ async function handleCheckoutCompleted(session: any) {
   const paymentId = session.payment_intent || session.id;
   const sessionId = session.id;
 
+  // Idempotency: Stripe may deliver the same event more than once. If this
+  // session already has sales rows, this is a duplicate — skip it entirely.
+  const { data: already } = await getSupabase()
+    .from("sales")
+    .select("id")
+    .eq("stripe_session_id", sessionId)
+    .limit(1);
+  if (already && already.length > 0) {
+    console.log("Webhook already processed, skipping duplicate:", sessionId);
+    return;
+  }
+
+  // Even split is only a fallback; the accurate per-tier price is taken from
+  // the actual charged line items below.
   const pricePerLine = tierPairs.length > 0
     ? amountTotal / tierPairs.length
     : (imageIds.length > 0 ? amountTotal / imageIds.length : amountTotal);
+
+  // Build tier -> per-image price from the real Stripe line items, so a
+  // mixed-tier basket records the correct amount on each licence row.
+  const unitByTier: Record<string, number> = {};
+  try {
+    const stripe = createStripeClient(env);
+    const lineItems = await stripe.checkout.sessions.listLineItems(sessionId, {
+      limit: 100,
+      expand: ["data.price"],
+    });
+    for (const li of lineItems.data) {
+      const lookup = String((li.price as any)?.lookup_key || "").toLowerCase();
+      const tier = lookup.includes("small")
+        ? "small"
+        : lookup.includes("medium")
+          ? "medium"
+          : lookup.includes("large")
+            ? "large"
+            : null;
+      const qty = li.quantity || 1;
+      if (tier && qty > 0) {
+        unitByTier[tier] = (li.amount_total ?? 0) / 100 / qty;
+      }
+    }
+  } catch (e) {
+    console.error("Could not load line items for per-tier pricing:", e);
+  }
+  const amountForTier = (tier: string) => unitByTier[tier] ?? pricePerLine;
 
   // Prefer one row per (image, tier) line so each licence is independent.
   const rows = tierPairs.length > 0
     ? tierPairs.map((p) => ({
         image_id: p.id,
         user_id: userId,
-        amount: pricePerLine,
+        amount: amountForTier(p.tier),
         currency,
         status: "completed" as const,
         stripe_payment_id: paymentId,
@@ -115,7 +157,7 @@ async function handleCheckoutCompleted(session: any) {
     : imageIds.map((image_id) => ({
         image_id,
         user_id: userId,
-        amount: pricePerLine,
+        amount: amountForTier("medium"),
         currency,
         status: "completed" as const,
         stripe_payment_id: paymentId,
@@ -157,8 +199,7 @@ async function handleWebhook(req: Request, env: StripeEnv) {
 
   switch (event.type) {
     case "checkout.session.completed":
-    case "transaction.completed":
-      await handleCheckoutCompleted(event.data.object);
+      await handleCheckoutCompleted(event.data.object, env);
       break;
     default:
       console.log("Unhandled event:", event.type);
