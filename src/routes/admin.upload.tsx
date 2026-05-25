@@ -13,6 +13,7 @@ import {
   deleteUploadErrors,
   resolveUploadError,
   deleteImages,
+  storeDerivatives,
 } from "@/lib/images.functions";
 import { UploadErrorCard, uploadErrorGridStyle } from "@/components/UploadErrorCard";
 
@@ -198,6 +199,57 @@ function Upload() {
     });
   }, []);
 
+  const storeDerivativesFn = useServerFn(storeDerivatives);
+
+  const resizeToBase64 = useCallback(
+    async (blob: Blob, maxEdge: number, quality: number): Promise<string> => {
+      const bitmap = await createImageBitmap(blob, { imageOrientation: "from-image" });
+      const longest = Math.max(bitmap.width, bitmap.height);
+      const scale = longest > maxEdge ? maxEdge / longest : 1;
+      const w = Math.max(1, Math.round(bitmap.width * scale));
+      const h = Math.max(1, Math.round(bitmap.height * scale));
+      const canvas = document.createElement("canvas");
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("Canvas unavailable");
+      ctx.drawImage(bitmap, 0, 0, w, h);
+      bitmap.close();
+      const out: Blob = await new Promise((resolve, reject) => {
+        canvas.toBlob(
+          (b) => (b ? resolve(b) : reject(new Error("Encode failed"))),
+          "image/jpeg",
+          quality,
+        );
+      });
+      const dataUrl: string = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result));
+        reader.onerror = () => reject(new Error("Read failed"));
+        reader.readAsDataURL(out);
+      });
+      return dataUrl.split(",")[1];
+    },
+    [],
+  );
+
+  const generateDerivatives = useCallback(
+    async (imageId: string, file: File) => {
+      for (let attempt = 0; attempt < 3; attempt += 1) {
+        try {
+          const medium = await resizeToBase64(file, 2000, 0.88);
+          const small = await resizeToBase64(file, 800, 0.88);
+          const thumb = await resizeToBase64(file, 500, 0.82);
+          await storeDerivativesFn({ data: { imageId, medium, small, thumb } });
+          return;
+        } catch (e) {
+          if (attempt === 2) console.error("derivative generation failed", imageId, e);
+        }
+      }
+    },
+    [resizeToBase64, storeDerivativesFn],
+  );
+
   const processOne = useCallback(
     async (item: QueueItem): Promise<boolean> => {
       const file = item.file;
@@ -217,7 +269,7 @@ function Upload() {
           body,
         });
         const result = (await response.json().catch(() => null)) as
-          | { ok: true; imageNumber: number }
+          | { ok: true; imageNumber: number; id: string }
           | { ok: false; message?: string }
           | null;
 
@@ -230,6 +282,8 @@ function Upload() {
           return false;
         }
 
+        await generateDerivatives(result.id, file);
+
         updateItem(item.id, { status: "done", imageNumber: result.imageNumber });
         return true;
       } catch (e) {
@@ -237,7 +291,7 @@ function Upload() {
         return false;
       }
     },
-    [updateItem],
+    [updateItem, generateDerivatives],
   );
 
   const drainPipeline = useCallback(async () => {

@@ -130,14 +130,14 @@ export const Route = createFileRoute("/api/admin/upload-image")({
           const { data: inserted, error: insertErr } = await supabaseAdmin
             .from("images")
             .insert({ filename, storage_path: storagePath, image_number: imageNumber })
-            .select("image_number")
+            .select("id, image_number")
             .single();
           if (insertErr) {
             await saveUploadError(insertErr.message, storagePath);
             return json({ ok: false, message: insertErr.message });
           }
 
-          return json({ ok: true, imageNumber: inserted.image_number });
+          return json({ ok: true, imageNumber: inserted.image_number, id: inserted.id });
         } catch (error) {
           const message = error instanceof Error ? error.message : "Upload failed";
           const status = message === "Unauthorized" ? 401 : 500;
