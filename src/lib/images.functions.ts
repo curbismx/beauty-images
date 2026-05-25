@@ -799,3 +799,25 @@ export const storeDerivatives = createServerFn({ method: "POST" })
     await put("small", data.small);
     return { ok: true };
   });
+
+// Returns derivative jobs for a specific set of image_numbers — used by the
+// "retry specific images" tool. alreadyDone is false so callers always redo them.
+export const getJobsByNumbers = createServerFn({ method: "POST" })
+  .middleware([requireAdmin])
+  .inputValidator(
+    z.object({ imageNumbers: z.array(z.number().int()).min(1).max(200) }).parse,
+  )
+  .handler(async ({ context, data }) => {
+    const { supabase } = context;
+    const { data: rows, error } = await supabase
+      .from("images")
+      .select("id, image_number, preview_path")
+      .in("image_number", data.imageNumbers);
+    if (error) throw new Error(error.message);
+    return (rows ?? []).map((img) => ({
+      id: img.id as string,
+      imageNumber: img.image_number as number,
+      hasPreview: !!img.preview_path,
+      alreadyDone: false,
+    }));
+  });
