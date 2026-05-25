@@ -109,7 +109,9 @@ function ImageDetail() {
     () => JSON.stringify(getBasket()),
     () => "[]",
   );
-  const inBasket = (JSON.parse(basketJson) as BasketItem[]).some(
+  const basketItems = JSON.parse(basketJson) as BasketItem[];
+  const basketCount = basketItems.length;
+  const inBasket = basketItems.some(
     (x) => x.id === id && x.tier === tier,
   );
 
