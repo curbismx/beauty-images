@@ -390,6 +390,7 @@ const CSS = `
 .img-back--home:hover { opacity: 1; }
 .img-nav-link { color: #fff; font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; font-weight: 700; text-decoration: none; opacity: 0.85; transition: opacity 0.2s ease, color 0.2s ease; }
 .img-nav-link:hover { opacity: 1; color: #D75F68; }
+.img-nav-count { display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px; padding: 0 5px; margin-left: 8px; background: #D75F68; color: #fff; font-size: 10px; letter-spacing: 0; font-weight: 800; border-radius: 9px; vertical-align: middle; }
 .img-nav-sep { color: #fff; opacity: 0.45; font-size: 11px; }
 
 /* Image stage (single column) */
