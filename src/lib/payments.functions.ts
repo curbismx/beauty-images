@@ -92,13 +92,11 @@ export const createBasketCheckoutSession = createServerFn({ method: "POST" })
     const session = await stripe.checkout.sessions.create({
       line_items,
       mode: "payment",
-      ui_mode: "embedded_page",
+      ui_mode: "embedded",
       return_url: data.returnUrl,
       ...(customerId && { customer: customerId }),
       payment_intent_data: { description },
-      managed_payments: { enabled: true },
       metadata: {
-        managed_payments: "true",
         ...(data.userId && { userId: data.userId }),
         ...(data.imageIds && data.imageIds.length > 0 && {
           imageIds: data.imageIds.slice(0, 50).join(","),
