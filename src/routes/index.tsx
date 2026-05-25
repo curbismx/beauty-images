@@ -176,6 +176,18 @@ function Index() {
         requestAnimationFrame(() => {
           requestAnimationFrame(() => window.scrollTo(0, restoreY));
         });
+      } else if (typeof window !== "undefined" && window.innerWidth < 768) {
+        // On mobile, snap results to the top of the viewport so the user
+        // doesn't land partway down the page below the hero.
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            const el = resultsRef.current;
+            if (el) {
+              const top = el.getBoundingClientRect().top + window.scrollY;
+              window.scrollTo(0, top);
+            }
+          });
+        });
       }
     } catch {
       setResults([]);
