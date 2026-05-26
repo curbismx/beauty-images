@@ -915,7 +915,6 @@ const PAGE_CSS = `
 }
 
 .curbism-root .hero-account {
-  position: absolute; top: 36px; right: 36px; z-index: 5;
   color: #D75F68; text-decoration: none;
   font-size: 12px; font-weight: 800; letter-spacing: 0.2em; text-transform: uppercase;
   line-height: 1;
@@ -923,6 +922,41 @@ const PAGE_CSS = `
   transition: opacity 0.15s ease;
 }
 .curbism-root .hero-account:hover { opacity: 0.7; }
+
+.curbism-root .hero-nav {
+  position: absolute; top: 36px; right: 36px; z-index: 5;
+  display: inline-flex; align-items: center; gap: 22px;
+}
+.curbism-root .hero-menu-toggle {
+  display: none;
+  position: absolute; top: 22px; right: 22px; z-index: 6;
+  width: 40px; height: 40px; padding: 0;
+  background: transparent; border: none; cursor: pointer;
+  color: #D75F68; font-size: 36px; line-height: 1; font-weight: 300;
+  font-family: inherit;
+  transition: transform 0.2s ease;
+}
+.curbism-root .hero-menu-toggle.is-open { transform: rotate(45deg); }
+.curbism-root .hero-mobile-menu { position: fixed; inset: 0; z-index: 50; }
+.curbism-root .hero-mobile-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.85); border: none; cursor: pointer; }
+.curbism-root .hero-mobile-panel {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px;
+  padding: 24px;
+}
+.curbism-root .hmm-link {
+  background: transparent; border: none; padding: 0; font-family: inherit; cursor: pointer;
+  color: #fff; text-decoration: none;
+  font-size: 18px; font-weight: 800; letter-spacing: 0.22em; text-transform: uppercase;
+  display: inline-flex; align-items: center; gap: 10px;
+}
+.curbism-root .hmm-link:hover { color: #D75F68; }
+.curbism-root .hmm-count {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 22px; height: 22px; padding: 0 6px;
+  background: #D75F68; color: #fff;
+  font-size: 11px; font-weight: 800; letter-spacing: 0; border-radius: 11px;
+}
 
 
 
