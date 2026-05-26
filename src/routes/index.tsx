@@ -551,7 +551,6 @@ function Index() {
               aria-label="Submit search"
               disabled={!searchValue.trim() || searching}
               onMouseDown={(e) => e.preventDefault()}
-              onTouchStart={(e) => e.preventDefault()}
             >
               <svg
                 width="20"
