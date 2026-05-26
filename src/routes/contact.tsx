@@ -91,8 +91,11 @@ function ContactPage() {
         <div className="bi-contact-inner">
           <h1>Contact</h1>
           <p className="intro">
-            Any queries or support issues please contact us direct through the management company{' '}
-            <a href="mailto:mail@curbism.com">mail@curbism.com</a> or fill in the form below.
+            Any queries or support issues please contact us direct through the management company
+            <span className="mgmt-block">CURBISM</span>
+            <span className="mgmt-block"><a href="https://www.curbism.com" target="_blank" rel="noopener noreferrer">www.curbism.com</a></span>
+            <span className="mgmt-block"><a href="mailto:mail@curbism.com">mail@curbism.com</a></span>
+            <span className="mgmt-block" style={{ marginTop: 12 }}>or fill in the form below.</span>
           </p>
           <form onSubmit={onSubmit}>
             <div>
