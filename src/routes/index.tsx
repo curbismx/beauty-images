@@ -551,6 +551,7 @@ function Index() {
               aria-label="Submit search"
               disabled={!searchValue.trim() || searching}
               onMouseDown={(e) => e.preventDefault()}
+              onTouchStart={(e) => e.preventDefault()}
             >
               <svg
                 width="20"
@@ -598,8 +599,7 @@ function Index() {
                 type="button"
                 className="intro-cta"
                 onClick={() => {
-                  searchInputRef.current?.focus();
-                  searchInputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+                  focusMobileSearch(true);
                 }}
               >
                 SEARCH NOW
