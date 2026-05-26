@@ -981,7 +981,7 @@ const PAGE_CSS = `
 .curbism-root .hero-search {
   position: absolute;
   left: 36px;
-  top: calc(140px + clamp(28px, 5vw, 64px) * 3 + 147px);
+  top: calc(140px + clamp(28px, 5vw, 64px) * 3 + 72px);
   width: calc(50% - 36px);
   z-index: 4;
 }
