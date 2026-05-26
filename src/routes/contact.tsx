@@ -84,38 +84,64 @@ function ContactPage() {
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: css }} />
-      <div className="bi-contact">
-        <Link to="/" className="bi-contact-logo" aria-label="Beauty Images — home">
-          <img src="/beauty-logo.png" alt="Beauty Images" />
-        </Link>
-        <div className="bi-contact-inner">
-          <h1>Contact</h1>
-          <p className="intro">
-            Any queries or support issues please contact us direct through the management company
-            <span className="mgmt-block">CURBISM</span>
-            <span className="mgmt-block"><a href="https://www.curbism.com" target="_blank" rel="noopener noreferrer">www.curbism.com</a></span>
-            <span className="mgmt-block"><a href="mailto:mail@curbism.com">mail@curbism.com</a></span>
-            <span className="mgmt-block" style={{ marginTop: 12 }}>or fill in the form below.</span>
-          </p>
-          <form onSubmit={onSubmit}>
-            <div>
-              <label htmlFor="c-name">Name</label>
-              <input id="c-name" type="text" value={name} onChange={(e) => setName(e.target.value)} required maxLength={100} />
-            </div>
-            <div>
-              <label htmlFor="c-email">Email</label>
-              <input id="c-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required maxLength={255} />
-            </div>
-            <div>
-              <label htmlFor="c-message">Message</label>
-              <textarea id="c-message" value={message} onChange={(e) => setMessage(e.target.value)} required maxLength={2000} />
-            </div>
-            {error && <div className="msg-err">{error}</div>}
-            {ok && <div className="msg-ok">Thanks — your message has been sent. We'll get back to you shortly.</div>}
-            <button type="submit" disabled={busy}>{busy ? 'Sending…' : 'Send message'}</button>
-          </form>
-          <Link to="/" className="back">← Back to home</Link>
+      <div className="bi-contact-page">
+        <div className="bi-contact">
+          <Link to="/" className="bi-contact-logo" aria-label="Beauty Images — home">
+            <img src="/beauty-logo.png" alt="Beauty Images" />
+          </Link>
+          <div className="bi-contact-inner">
+            <h1>Contact</h1>
+            <p className="intro">
+              Any queries or support issues please contact us direct through the management company
+              <span className="mgmt-block">CURBISM</span>
+              <span className="mgmt-block"><a href="https://www.curbism.com" target="_blank" rel="noopener noreferrer">www.curbism.com</a></span>
+              <span className="mgmt-block"><a href="mailto:mail@curbism.com">mail@curbism.com</a></span>
+              <span className="mgmt-block" style={{ marginTop: 12 }}>or fill in the form below.</span>
+            </p>
+            <form onSubmit={onSubmit}>
+              <div>
+                <label htmlFor="c-name">Name</label>
+                <input id="c-name" type="text" value={name} onChange={(e) => setName(e.target.value)} required maxLength={100} />
+              </div>
+              <div>
+                <label htmlFor="c-email">Email</label>
+                <input id="c-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required maxLength={255} />
+              </div>
+              <div>
+                <label htmlFor="c-message">Message</label>
+                <textarea id="c-message" value={message} onChange={(e) => setMessage(e.target.value)} required maxLength={2000} />
+              </div>
+              {error && <div className="msg-err">{error}</div>}
+              {ok && <div className="msg-ok">Thanks — your message has been sent. We'll get back to you shortly.</div>}
+              <button type="submit" disabled={busy}>{busy ? 'Sending…' : 'Send message'}</button>
+            </form>
+            <Link to="/" className="back">← Back to home</Link>
+          </div>
         </div>
+
+        <footer className="bi-contact-footer">
+          <div className="cf-main">
+            <div className="cf-brand">
+              <img src="/beauty-images-logo.png" alt="Beauty Images" />
+            </div>
+            <p className="cf-copy">
+              All images and content © The Beauty Images. All rights reserved.
+            </p>
+            <nav className="cf-links">
+              <Link to="/privacy">Privacy Policy</Link>
+              <span className="cf-dot">·</span>
+              <Link to="/licence">Licence Agreement</Link>
+            </nav>
+          </div>
+          <a
+            className="cf-curbism"
+            href="https://www.curbism.com"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span>Designed by www.curbism.com</span>
+          </a>
+        </footer>
       </div>
     </>
   )
