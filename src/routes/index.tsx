@@ -269,6 +269,27 @@ function Index() {
     window.scrollTo(0, lock.scrollY);
   };
 
+  const focusMobileSearch = (scrollToHero = false) => {
+    const input = searchInputRef.current;
+    if (!input) return;
+
+    if (!isMobileViewport()) {
+      input.focus();
+      input.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+
+    if (scrollToHero) {
+      const heroTop = heroRef.current?.getBoundingClientRect().top ?? 0;
+      window.scrollTo({ top: window.scrollY + heroTop, behavior: "auto" });
+    }
+
+    lockMobileSearchScroll();
+    setSearchFocused(true);
+    input.focus({ preventScroll: true });
+    requestAnimationFrame(placeMobileSearch);
+  };
+
   // Preload the search hero image so it can fade in smoothly on first focus.
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -511,11 +532,15 @@ function Index() {
               placeholder="SEARCH"
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
-              onPointerDown={() => {
-                lockMobileSearchScroll();
+              onPointerDown={(e) => {
+                if (!isMobileViewport()) return;
+                e.preventDefault();
+                focusMobileSearch();
               }}
-              onTouchStart={() => {
-                lockMobileSearchScroll();
+              onTouchStart={(e) => {
+                if (!isMobileViewport()) return;
+                e.preventDefault();
+                focusMobileSearch();
               }}
               onFocus={() => {
                 lockMobileSearchScroll();
@@ -577,8 +602,7 @@ function Index() {
                 type="button"
                 className="intro-cta"
                 onClick={() => {
-                  searchInputRef.current?.focus();
-                  searchInputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+                  focusMobileSearch(true);
                 }}
               >
                 SEARCH NOW
@@ -1255,6 +1279,12 @@ const PAGE_CSS = `
 @media (max-width: 768px) {
   .curbism-root .hero--search { aspect-ratio: 1920 / 1080; }
   .curbism-root .hero--results { aspect-ratio: 1920 / 1080; }
+  .curbism-root .hero--search,
+  .curbism-root .hero--results,
+  .curbism-root .hero--search .bg-img,
+  .curbism-root .hero--results .bg-img {
+    transition-duration: 0s;
+  }
   .curbism-root .hero-logo  { top: 40px; left: 0; height: 40px; }
   .curbism-root .hero-title { left: 0; top: 100px; padding-left: 22px; max-width: 60%; font-size: clamp(20px, 5.5vw, 36px); line-height: 1.35; letter-spacing: -0.01em; }
 
