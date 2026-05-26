@@ -1259,16 +1259,15 @@ const PAGE_CSS = `
   .curbism-root .hero-title { left: 0; top: 100px; padding-left: 22px; max-width: 60%; font-size: clamp(20px, 5.5vw, 36px); line-height: 1.35; letter-spacing: -0.01em; }
 
   .curbism-root .hero--search .hero-title { display: none; }
-  .curbism-root .hero-search { left: 22px; right: 22px; width: auto; top: auto; bottom: 56px; padding-left: 0; }
+  .curbism-root .hero-search { left: 22px; right: 22px; width: auto; top: auto; bottom: 16px; padding-left: 0; }
   .curbism-root .hero-search input { padding: 12px 14px; font-size: 16px; }
-  /* Only pin while the mobile keyboard is active; results use the normal in-hero position. */
   .curbism-root .hero--search-pinned .hero-search {
-    position: fixed;
-    top: var(--mobile-search-top, 98px);
+    position: absolute;
+    top: auto;
     left: 22px;
     right: 22px;
-    bottom: auto;
-    z-index: 1000;
+    bottom: 16px;
+    z-index: 5;
   }
   .curbism-root .hero-counter { bottom: 22px; right: 22px; font-size: 10px; }
   .curbism-root .hero-nav { top: 22px; right: 22px; }
