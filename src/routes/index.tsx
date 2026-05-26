@@ -308,6 +308,9 @@ function Index() {
   const submitSearch = async (qOverride?: string, restoreY?: number) => {
     const q = (qOverride ?? searchValue).trim();
     if (!q) return;
+    searchInputRef.current?.blur();
+    setSearchFocused(false);
+    releaseMobileSearchScroll();
     setSubmittedQuery(q);
     setSearching(true);
     setPage(1);
@@ -455,7 +458,7 @@ function Index() {
         {/* HERO */}
         <section
           ref={heroRef}
-          className={`hero${searchActive ? " hero--search" : ""}${submittedQuery && searchValue.length > 0 ? " hero--results" : ""}${restoringSearch ? " hero--instant" : ""}`}
+          className={`hero${searchActive ? " hero--search" : ""}${searchFocused ? " hero--search-pinned" : ""}${submittedQuery && searchValue.length > 0 ? " hero--results" : ""}${restoringSearch ? " hero--instant" : ""}`}
         >
           {HERO_IMAGES.map((src, i) => (
             <img
@@ -1252,8 +1255,8 @@ const PAGE_CSS = `
   .curbism-root .hero--search .hero-title { display: none; }
   .curbism-root .hero-search { left: 22px; right: 22px; width: auto; top: auto; bottom: 56px; padding-left: 0; }
   .curbism-root .hero-search input { padding: 12px 14px; font-size: 16px; }
-  /* When searching on mobile, keep the bar in frame without covering the logo. */
-  .curbism-root .hero--search .hero-search {
+  /* Only pin while the mobile keyboard is active; results use the normal in-hero position. */
+  .curbism-root .hero--search-pinned .hero-search {
     position: fixed;
     top: var(--mobile-search-top, 98px);
     left: 22px;
