@@ -4,7 +4,7 @@
 export const SITE_URL = "https://beautyimages.com";
 export const SITE_NAME = "Beauty Images";
 export const BRAND_TAGLINE =
-  "Exclusive rights-managed beauty photography for advertising and editorial — real people, real photography, no AI.";
+  "A curated library of premium beauty photography for creative and editorial work. License high-quality images for commercial use — quick, direct, online.";
 
 /** Absolute URL on the canonical domain. Pass any path that starts with "/". */
 export function abs(path: string): string {
