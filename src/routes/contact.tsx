@@ -16,7 +16,8 @@ export const Route = createFileRoute('/contact')({
 })
 
 const css = `
-.bi-contact { min-height: 100vh; background: #fff; color: #111; font-family: 'Inter', system-ui, -apple-system, sans-serif; position: relative; padding: 140px 24px 80px; }
+.bi-contact-page { min-height: 100vh; background: #fff; color: #111; font-family: 'Inter', system-ui, -apple-system, sans-serif; position: relative; display: flex; flex-direction: column; }
+.bi-contact { position: relative; padding: 140px 24px 80px; flex: 1 1 auto; }
 .bi-contact-logo { position: absolute; top: 40px; left: 0; height: 40px; }
 .bi-contact-logo img { height: 100%; width: auto; display: block; }
 .bi-contact-inner { max-width: 560px; margin: 0 auto; }
@@ -24,6 +25,7 @@ const css = `
 .bi-contact p.intro { font-size: 14px; line-height: 1.7; color: #444; margin: 0 0 32px; }
 .bi-contact p.intro a { color: #D75F68; text-decoration: none; font-weight: 700; }
 .bi-contact p.intro a:hover { text-decoration: underline; }
+.bi-contact p.intro .mgmt-block { display: block; margin-top: 4px; }
 .bi-contact form { display: flex; flex-direction: column; gap: 14px; }
 .bi-contact label { font-size: 10px; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; color: #111; }
 .bi-contact input, .bi-contact textarea { width: 100%; background: #fff; color: #111; border: 1px solid #111; padding: 12px 14px; font-size: 14px; border-radius: 0; outline: none; font-family: inherit; }
@@ -36,7 +38,20 @@ const css = `
 .bi-contact .msg-err { color: #D75F68; font-size: 13px; font-weight: 700; }
 .bi-contact .back { display: inline-block; margin-top: 40px; font-size: 11px; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; color: #111; text-decoration: none; }
 .bi-contact .back:hover { color: #D75F68; }
-@media (max-width: 768px) { .bi-contact { padding: 110px 22px 60px; } .bi-contact-logo { top: 40px; height: 36px; } }
+
+/* Footer */
+.bi-contact-footer { border-top: 1px solid #111; }
+.bi-contact-footer .cf-main { display: flex; align-items: center; justify-content: space-between; padding: 32px 36px; gap: 24px; flex-wrap: wrap; }
+.bi-contact-footer .cf-brand { display: block; margin-left: -40px; }
+.bi-contact-footer .cf-brand img { height: 28px; width: auto; display: block; }
+.bi-contact-footer .cf-copy { font-size: 11px; letter-spacing: 0.06em; color: #999; margin: 0; }
+.bi-contact-footer .cf-links { display: flex; align-items: center; gap: 10px; font-size: 11px; letter-spacing: 0.06em; }
+.bi-contact-footer .cf-links a { color: #111; text-decoration: none; transition: color 0.15s ease; }
+.bi-contact-footer .cf-links a:hover { color: #D75F68; }
+.bi-contact-footer .cf-dot { color: #ccc; }
+.bi-contact-footer .cf-curbism { display: flex; align-items: center; justify-content: flex-end; padding: 0 36px 24px; font-size: 11px; letter-spacing: 0.06em; color: #999; text-decoration: none; transition: color 0.15s ease; }
+.bi-contact-footer .cf-curbism:hover { color: #D75F68; }
+@media (max-width: 768px) { .bi-contact { padding: 110px 22px 60px; } .bi-contact-logo { top: 40px; height: 36px; } .bi-contact-footer .cf-main { flex-direction: column; align-items: flex-start; gap: 26px; padding: 36px 24px; } .bi-contact-footer .cf-brand { margin-left: -24px; } .bi-contact-footer .cf-curbism { align-items: flex-start; padding: 0 24px 24px; } }
 `
 
 function ContactPage() {
