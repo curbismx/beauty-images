@@ -1250,11 +1250,10 @@ const PAGE_CSS = `
   .curbism-root .hero--search .hero-title { display: none; }
   .curbism-root .hero-search { left: 22px; right: 22px; width: auto; top: auto; bottom: 56px; padding-left: 0; }
   .curbism-root .hero-search input { padding: 12px 14px; font-size: 16px; }
-  /* When searching on mobile, pin the search bar to the top of the viewport
-     so it stays visible above the on-screen keyboard. */
+  /* When searching on mobile, keep the bar in frame without covering the logo. */
   .curbism-root .hero--search .hero-search {
     position: fixed;
-    top: 12px;
+    top: var(--mobile-search-top, 98px);
     left: 22px;
     right: 22px;
     bottom: auto;
