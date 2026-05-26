@@ -269,6 +269,27 @@ function Index() {
     window.scrollTo(0, lock.scrollY);
   };
 
+  const focusMobileSearch = (scrollToHero = false) => {
+    const input = searchInputRef.current;
+    if (!input) return;
+
+    if (!isMobileViewport()) {
+      input.focus();
+      input.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+
+    if (scrollToHero) {
+      const heroTop = heroRef.current?.getBoundingClientRect().top ?? 0;
+      window.scrollTo({ top: window.scrollY + heroTop, behavior: "auto" });
+    }
+
+    lockMobileSearchScroll();
+    setSearchFocused(true);
+    input.focus({ preventScroll: true });
+    requestAnimationFrame(placeMobileSearch);
+  };
+
   // Preload the search hero image so it can fade in smoothly on first focus.
   useEffect(() => {
     if (typeof window === "undefined") return;
