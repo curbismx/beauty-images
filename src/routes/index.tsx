@@ -1295,7 +1295,7 @@ const PAGE_CSS = `
     top: auto;
     left: 22px;
     right: 22px;
-    bottom: 16px;
+    bottom: 56px;
     z-index: 5;
   }
   .curbism-root .hero-counter { bottom: 22px; right: 22px; font-size: 10px; }
