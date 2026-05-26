@@ -24,8 +24,101 @@ import {
 import { useViewMode, useMasonryCols } from "@/lib/view-mode";
 import { useRegionPricing, formatPrice, type Tier } from "@/lib/pricing";
 import { LayoutGrid, Rows3 } from "lucide-react";
+import { SITE_URL, SITE_NAME, abs, breadcrumbJsonLd } from "@/lib/seo";
 
 export const Route = createFileRoute("/image/$id")({
+  // Loader fetches the image server-side so head() can build accurate
+  // titles, descriptions, og:image, and ImageObject JSON-LD for SEO.
+  // The component still has its own client useEffect fetch as a fallback
+  // (e.g. when navigating client-side without revisiting the loader).
+  loader: async ({ params }) => {
+    try {
+      const img = await getPublicImage({ data: { id: params.id } });
+      return { img };
+    } catch {
+      return { img: null as PublicImageDetail | null };
+    }
+  },
+  head: ({ params, loaderData }) => {
+    const img = loaderData?.img ?? null;
+    const url = `${SITE_URL}/image/${params.id}`;
+    const previewAbs = abs(`/api/public/preview-image/${params.id}`);
+    const titleText = img?.title?.trim() || (img ? `Beauty image #${String(img.image_number).padStart(8, "0")}` : "Beauty image");
+    const pageTitle = `${titleText} — Beauty Images`;
+    const descBase = (img?.caption?.trim() || img?.title?.trim() || "Exclusive rights-managed beauty photograph") + ".";
+    const desc = `${descBase} Real photography, no AI. Licence direct from Beauty Images for advertising and editorial use.`;
+
+    const meta: Array<Record<string, string>> = [
+      { title: pageTitle },
+      { name: "description", content: desc },
+      { property: "og:title", content: pageTitle },
+      { property: "og:description", content: desc },
+      { property: "og:type", content: "article" },
+      { property: "og:url", content: url },
+      { property: "og:image", content: previewAbs },
+      { name: "twitter:image", content: previewAbs },
+    ];
+    if (img?.keywords && img.keywords.length > 0) {
+      meta.push({ name: "keywords", content: img.keywords.join(", ") });
+    }
+
+    const scripts: Array<{ type: string; children: string }> = [];
+
+    if (img) {
+      // ImageObject — this is the schema that earns Google's "Licensable"
+      // badge in Google Images and routes buyers straight to the licence page.
+      const imageObject: Record<string, unknown> = {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        contentUrl: previewAbs,
+        thumbnailUrl: abs(`/api/public/preview-image/${params.id}?w=500`),
+        name: titleText,
+        description: img.caption || titleText,
+        creator: { "@type": "Organization", name: SITE_NAME },
+        copyrightHolder: { "@type": "Organization", name: SITE_NAME },
+        copyrightNotice: `© ${SITE_NAME}`,
+        creditText: SITE_NAME,
+        license: `${SITE_URL}/licence`,
+        acquireLicensePage: url,
+        ...(img.keywords && img.keywords.length > 0 ? { keywords: img.keywords.join(", ") } : {}),
+      };
+      scripts.push({ type: "application/ld+json", children: JSON.stringify(imageObject) });
+
+      // Product + 3 Offers for the licence tiers. Currency uses GBP as the
+      // canonical price (the per-region currency is resolved client-side).
+      const product = {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        name: pageTitle,
+        image: previewAbs,
+        description: desc,
+        sku: img.id,
+        brand: { "@type": "Brand", name: SITE_NAME },
+        offers: [
+          { "@type": "Offer", name: "Small licence", price: "95.00", priceCurrency: "GBP", url, availability: "https://schema.org/InStock" },
+          { "@type": "Offer", name: "Medium licence", price: "195.00", priceCurrency: "GBP", url, availability: "https://schema.org/InStock" },
+          { "@type": "Offer", name: "Large licence", price: "275.00", priceCurrency: "GBP", url, availability: "https://schema.org/InStock" },
+        ],
+      };
+      scripts.push({ type: "application/ld+json", children: JSON.stringify(product) });
+
+      // Breadcrumbs: Home → Images → this image.
+      scripts.push({
+        type: "application/ld+json",
+        children: JSON.stringify(breadcrumbJsonLd([
+          ["Home", "/"],
+          ["Collections", "/collections"],
+          [titleText, `/image/${params.id}`],
+        ])),
+      });
+    }
+
+    return {
+      meta,
+      links: [{ rel: "canonical", href: url }],
+      scripts,
+    };
+  },
   component: ImageDetail,
   validateSearch: (search: Record<string, unknown>): { from?: string } => ({
     from: typeof search.from === "string" ? search.from : undefined,
