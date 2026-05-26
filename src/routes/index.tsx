@@ -5,21 +5,73 @@ import { Layers, LayoutGrid, Rows3, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { searchPublicImages, getImageIdsByNumbers, type PublicSearchResult } from "@/lib/search.functions";
 import { getLightbox, subscribeLightbox } from "@/lib/lightbox";
+import { getBasket, subscribeBasket } from "@/lib/basket";
 import { useViewMode, useMasonryCols } from "@/lib/view-mode";
 import { useSession } from "@/lib/use-session";
 
-function AccountLink() {
+function HeaderNav() {
   const { session, loading } = useSession();
+  const [open, setOpen] = useState(false);
+  const lbCount = useSyncExternalStore(subscribeLightbox, () => getLightbox().length, () => 0);
+  const basketCount = useSyncExternalStore(subscribeBasket, () => getBasket().length, () => 0);
+
+  const close = () => setOpen(false);
+  const onSignOut = async () => {
+    await supabase.auth.signOut();
+    close();
+  };
+
   if (loading) return null;
-  if (session) {
-    return (
-      <Link to="/account" className="hero-account" aria-label="Account">
-        <User size={18} strokeWidth={2} />
-      </Link>
-    );
-  }
+
   return (
-    <Link to="/login" className="hero-account">Log in</Link>
+    <>
+      {/* Desktop links */}
+      <div className="hero-nav hero-nav--desktop">
+        <Link to="/contact" className="hero-account">Contact</Link>
+        {session ? (
+          <Link to="/account" className="hero-account" aria-label="Account">
+            <User size={18} strokeWidth={2} />
+          </Link>
+        ) : (
+          <Link to="/login" className="hero-account">Log in</Link>
+        )}
+      </div>
+
+      {/* Mobile toggle */}
+      <button
+        type="button"
+        className={`hero-menu-toggle${open ? " is-open" : ""}`}
+        aria-label={open ? "Close menu" : "Open menu"}
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+      >
+        <span aria-hidden>+</span>
+      </button>
+
+      {/* Mobile overlay */}
+      {open && (
+        <div className="hero-mobile-menu" role="dialog" aria-modal="true">
+          <button type="button" className="hero-mobile-backdrop" aria-label="Close menu" onClick={close} />
+          <nav className="hero-mobile-panel">
+            <Link to="/contact" className="hmm-link" onClick={close}>Contact</Link>
+            {session ? (
+              <>
+                <Link to="/account" className="hmm-link" onClick={close}>Account</Link>
+                <button type="button" className="hmm-link hmm-link--btn" onClick={onSignOut}>Log out</button>
+              </>
+            ) : (
+              <Link to="/login" className="hmm-link" onClick={close}>Log in</Link>
+            )}
+            <Link to="/lightbox" className="hmm-link" onClick={close}>
+              Lightbox{lbCount > 0 && <span className="hmm-count">{lbCount}</span>}
+            </Link>
+            <Link to="/basket" className="hmm-link" onClick={close}>
+              Basket{basketCount > 0 && <span className="hmm-count">{basketCount}</span>}
+            </Link>
+          </nav>
+        </div>
+      )}
+    </>
   );
 }
 
