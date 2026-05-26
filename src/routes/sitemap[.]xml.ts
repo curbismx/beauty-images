@@ -1,18 +1,30 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { SITE_URL, COLLECTIONS } from "@/lib/seo";
 
-// A sitemap file may contain at most 50,000 URLs. One slot is the homepage;
-// the rest are public image pages. If the library ever grows past this, the
-// sitemap will need splitting into a sitemap index.
+// A sitemap file may contain at most 50,000 URLs.
 const MAX_URLS = 50000;
 const DB_PAGE_SIZE = 1000;
+
+// Static public routes to advertise (in addition to per-image pages).
+const STATIC_PATHS = [
+  "/",
+  "/about",
+  "/licensing",
+  "/real-photography-no-ai",
+  "/collections",
+  "/contact",
+  "/licence",
+  "/privacy",
+  ...COLLECTIONS.map((c) => `/collections/${c.slug}`),
+];
 
 export const Route = createFileRoute("/sitemap.xml")({
   server: {
     handlers: {
-      GET: async ({ request }) => {
-        const origin = new URL(request.url).origin;
-        const urls: string[] = [`${origin}/`];
+      GET: async () => {
+        const origin = SITE_URL;
+        const urls: string[] = STATIC_PATHS.map((p) => `${origin}${p}`);
 
         try {
           // Supabase returns at most 1000 rows per query, so page through
