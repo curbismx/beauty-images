@@ -91,7 +91,7 @@ function renderResultCard(r: PublicSearchResult, onClick: () => void) {
       onClick={onClick}
     >
       {r.signed_url ? (
-        <img src={r.signed_url} alt={r.title ?? r.caption ?? ""} loading="lazy" />
+        <img src={r.signed_url} alt={r.title ?? r.caption ?? "Rights-managed beauty photograph from Beauty Images"} loading="lazy" />
       ) : (
         <div className="search-result-fallback" />
       )}
