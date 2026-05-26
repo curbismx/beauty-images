@@ -1139,7 +1139,9 @@ const PAGE_CSS = `
   .curbism-root .hero-search { left: 22px; right: 22px; width: auto; top: auto; bottom: 56px; padding-left: 0; }
   .curbism-root .hero-search input { padding: 12px 14px; font-size: 16px; }
   .curbism-root .hero-counter { bottom: 22px; right: 22px; font-size: 10px; }
-  .curbism-root .hero-account { top: 22px; right: 22px; }
+  .curbism-root .hero-nav { top: 22px; right: 22px; }
+  .curbism-root .hero-nav--desktop { display: none; }
+  .curbism-root .hero-menu-toggle { display: inline-flex; align-items: center; justify-content: center; }
   .curbism-root .section { min-height: 380px; }
   .curbism-root .section--apps { min-height: 460px; }
   .curbism-root .section-label { bottom: 16px; left: 24px; font-size: 10px; }
