@@ -1145,6 +1145,10 @@ const PAGE_CSS = `
 .curbism-root .footer-curbism:hover img { opacity: 0.6; }
 
 @media (max-width: 1024px) {
+  .curbism-root .hero-nav--desktop { display: none; }
+  .curbism-root .hero-menu-toggle { display: inline-flex; align-items: center; justify-content: center; }
+}
+@media (max-width: 768px) {
   .curbism-root .hero-logo  { top: 40px; left: 0; height: 40px; }
   .curbism-root .hero-title { left: 0; top: 100px; padding-left: 22px; max-width: 60%; font-size: clamp(20px, 5.5vw, 36px); line-height: 1.35; letter-spacing: -0.01em; }
 
