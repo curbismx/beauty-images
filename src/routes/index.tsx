@@ -53,21 +53,25 @@ function HeaderNav() {
         <div className="hero-mobile-menu" role="dialog" aria-modal="true">
           <button type="button" className="hero-mobile-backdrop" aria-label="Close menu" onClick={close} />
           <nav className="hero-mobile-panel">
-            <Link to="/contact" className="hmm-link" onClick={close}>Contact</Link>
-            {session ? (
-              <>
-                <Link to="/account" className="hmm-link" onClick={close}>Account</Link>
-                <button type="button" className="hmm-link hmm-link--btn" onClick={onSignOut}>Log out</button>
-              </>
-            ) : (
-              <Link to="/login" className="hmm-link" onClick={close}>Log in</Link>
-            )}
-            <Link to="/lightbox" className="hmm-link" onClick={close}>
-              Lightbox{lbCount > 0 && <span className="hmm-count">{lbCount}</span>}
-            </Link>
-            <Link to="/basket" className="hmm-link" onClick={close}>
-              Basket{basketCount > 0 && <span className="hmm-count">{basketCount}</span>}
-            </Link>
+            <div className="hmm-main">
+              <Link to="/contact" className="hmm-link" onClick={close}>Contact</Link>
+              <Link to="/lightbox" className="hmm-link" onClick={close}>
+                Lightbox{lbCount > 0 && <span className="hmm-count">{lbCount}</span>}
+              </Link>
+              <Link to="/basket" className="hmm-link" onClick={close}>
+                Basket{basketCount > 0 && <span className="hmm-count">{basketCount}</span>}
+              </Link>
+            </div>
+            <div className="hmm-auth">
+              {session ? (
+                <>
+                  <Link to="/account" className="hmm-link" onClick={close}>Account</Link>
+                  <button type="button" className="hmm-link hmm-link--btn" onClick={onSignOut}>Log out</button>
+                </>
+              ) : (
+                <Link to="/login" className="hmm-link" onClick={close}>Log in</Link>
+              )}
+            </div>
           </nav>
         </div>
       )}
