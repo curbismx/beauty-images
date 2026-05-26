@@ -1193,11 +1193,11 @@ const PAGE_CSS = `
      so it stays visible above the on-screen keyboard. */
   .curbism-root .hero--search .hero-search {
     position: fixed;
-    top: 76px;
+    top: 12px;
     left: 22px;
     right: 22px;
     bottom: auto;
-    z-index: 60;
+    z-index: 1000;
   }
   .curbism-root .hero-counter { bottom: 22px; right: 22px; font-size: 10px; }
   .curbism-root .hero-nav { top: 22px; right: 22px; }
