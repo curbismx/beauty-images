@@ -91,7 +91,7 @@ function renderResultCard(r: PublicSearchResult, onClick: () => void) {
       onClick={onClick}
     >
       {r.signed_url ? (
-        <img src={r.signed_url} alt={r.title ?? r.caption ?? ""} loading="lazy" />
+        <img src={r.signed_url} alt={r.title ?? r.caption ?? "Rights-managed beauty photograph from Beauty Images"} loading="lazy" />
       ) : (
         <div className="search-result-fallback" />
       )}
@@ -104,22 +104,28 @@ function renderResultCard(r: PublicSearchResult, onClick: () => void) {
 }
 
 
+import { SITE_URL, BRAND_TAGLINE, abs, websiteJsonLd } from "@/lib/seo";
+
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "BEAUTYIMAGES" },
-      {
-        name: "description",
-        content: "BEAUTYIMAGES — photography.",
-      },
-      { property: "og:title", content: "BEAUTYIMAGES" },
-      {
-        property: "og:description",
-        content: "BEAUTYIMAGES — photography.",
-      },
+      { title: "Beauty Images — Exclusive Rights-Managed Beauty Photography" },
+      { name: "description", content: BRAND_TAGLINE },
+      { property: "og:title", content: "Beauty Images — Exclusive Rights-Managed Beauty Photography" },
+      { property: "og:description", content: BRAND_TAGLINE },
       { property: "og:type", content: "website" },
-      { property: "og:image", content: "/hero-1.jpg" },
-      { name: "twitter:image", content: "/hero-1.jpg" },
+      { property: "og:url", content: SITE_URL + "/" },
+      { property: "og:image", content: abs("/hero-1.jpg") },
+      { name: "twitter:image", content: abs("/hero-1.jpg") },
+    ],
+    links: [
+      { rel: "canonical", href: SITE_URL + "/" },
+    ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify(websiteJsonLd()),
+      },
     ],
   }),
   component: Index,

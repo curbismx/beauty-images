@@ -4,6 +4,12 @@ import { AuthProvider, useAuth } from "@/lib/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/admin")({
+  head: () => ({
+    meta: [
+      { title: "Admin — Beauty Images" },
+      { name: "robots", content: "noindex,nofollow" },
+    ],
+  }),
   component: AdminLayoutRoot,
 });
 

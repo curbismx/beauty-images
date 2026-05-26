@@ -4,8 +4,12 @@ export const Route = createFileRoute("/licence")({
   head: () => ({
     meta: [
       { title: "Licence Agreement — Beauty Images" },
-      { name: "description", content: "The terms governing the rights-managed licensing of images from Beauty Images." },
+      { name: "description", content: "The full terms governing rights-managed licensing of images from Beauty Images — Small, Medium and Large licence tiers, worldwide 12-month digital rights." },
+      { property: "og:title", content: "Licence Agreement — Beauty Images" },
+      { property: "og:description", content: "The full terms governing rights-managed licensing of images from Beauty Images." },
+      { property: "og:url", content: "https://beautyimages.com/licence" },
     ],
+    links: [{ rel: "canonical", href: "https://beautyimages.com/licence" }],
   }),
   component: LicencePage,
 });

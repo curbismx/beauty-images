@@ -5,7 +5,7 @@ import { lovable } from "@/integrations/lovable";
 import { authPageCss } from "@/lib/auth-css";
 
 export const Route = createFileRoute("/signup")({
-  head: () => ({ meta: [{ title: "Sign up — BEAUTYIMAGES" }] }),
+  head: () => ({ meta: [{ title: "Sign up — Beauty Images" }, { name: "robots", content: "noindex,nofollow" }] }),
   component: SignupPage,
 });
 

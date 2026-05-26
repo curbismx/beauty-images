@@ -21,8 +21,9 @@ import { useRegionPricing, formatPrice, type Tier } from "@/lib/pricing";
 export const Route = createFileRoute("/basket")({
   head: () => ({
     meta: [
-      { title: "Basket — BEAUTYIMAGES" },
+      { title: "Basket — Beauty Images" },
       { name: "description", content: "Your selected images and licences." },
+      { name: "robots", content: "noindex,nofollow" },
     ],
   }),
   component: BasketPage,

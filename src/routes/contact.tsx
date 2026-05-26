@@ -6,11 +6,13 @@ import { submitContactForm } from '@/lib/contact.functions'
 export const Route = createFileRoute('/contact')({
   head: () => ({
     meta: [
-      { title: 'Contact — BEAUTYIMAGES' },
-      { name: 'description', content: 'Contact BEAUTYIMAGES for queries, licensing and support.' },
-      { property: 'og:title', content: 'Contact — BEAUTYIMAGES' },
-      { property: 'og:description', content: 'Contact BEAUTYIMAGES for queries, licensing and support.' },
+      { title: 'Contact — Beauty Images' },
+      { name: 'description', content: 'Get in touch with Beauty Images for image licensing, rights enquiries, custom briefs and editorial requests.' },
+      { property: 'og:title', content: 'Contact — Beauty Images' },
+      { property: 'og:description', content: 'Get in touch with Beauty Images for image licensing, rights enquiries, custom briefs and editorial requests.' },
+      { property: 'og:url', content: 'https://beautyimages.com/contact' },
     ],
+    links: [{ rel: 'canonical', href: 'https://beautyimages.com/contact' }],
   }),
   component: ContactPage,
 })

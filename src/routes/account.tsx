@@ -5,7 +5,7 @@ import { useSession } from "@/lib/use-session";
 import { authPageCss } from "@/lib/auth-css";
 
 export const Route = createFileRoute("/account")({
-  head: () => ({ meta: [{ title: "Account — BEAUTYIMAGES" }] }),
+  head: () => ({ meta: [{ title: "Account — Beauty Images" }, { name: "robots", content: "noindex,nofollow" }] }),
   component: AccountPage,
 });
 

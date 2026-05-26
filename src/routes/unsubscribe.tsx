@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/unsubscribe")({
+  head: () => ({ meta: [{ title: "Unsubscribe — Beauty Images" }, { name: "robots", content: "noindex,nofollow" }] }),
   validateSearch: (search: Record<string, unknown>): { token?: string } => ({
     token: typeof search.token === "string" ? search.token : undefined,
   }),

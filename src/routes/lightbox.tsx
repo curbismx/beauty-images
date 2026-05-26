@@ -17,8 +17,9 @@ import { useViewMode, useMasonryCols } from "@/lib/view-mode";
 export const Route = createFileRoute("/lightbox")({
   head: () => ({
     meta: [
-      { title: "Lightbox — BEAUTYIMAGES" },
+      { title: "Lightbox — Beauty Images" },
       { name: "description", content: "Your saved images for review." },
+      { name: "robots", content: "noindex,nofollow" },
     ],
   }),
   component: LightboxPage,

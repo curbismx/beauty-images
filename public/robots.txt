@@ -12,3 +12,4 @@ Disallow: /signup
 Disallow: /reset-password
 
 Sitemap: https://beautyimages.com/sitemap.xml
+Sitemap: https://beautyimages.com/image-sitemap.xml
