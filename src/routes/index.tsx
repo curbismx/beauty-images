@@ -5,21 +5,73 @@ import { Layers, LayoutGrid, Rows3, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { searchPublicImages, getImageIdsByNumbers, type PublicSearchResult } from "@/lib/search.functions";
 import { getLightbox, subscribeLightbox } from "@/lib/lightbox";
+import { getBasket, subscribeBasket } from "@/lib/basket";
 import { useViewMode, useMasonryCols } from "@/lib/view-mode";
 import { useSession } from "@/lib/use-session";
 
-function AccountLink() {
+function HeaderNav() {
   const { session, loading } = useSession();
+  const [open, setOpen] = useState(false);
+  const lbCount = useSyncExternalStore(subscribeLightbox, () => getLightbox().length, () => 0);
+  const basketCount = useSyncExternalStore(subscribeBasket, () => getBasket().length, () => 0);
+
+  const close = () => setOpen(false);
+  const onSignOut = async () => {
+    await supabase.auth.signOut();
+    close();
+  };
+
   if (loading) return null;
-  if (session) {
-    return (
-      <Link to="/account" className="hero-account" aria-label="Account">
-        <User size={18} strokeWidth={2} />
-      </Link>
-    );
-  }
+
   return (
-    <Link to="/login" className="hero-account">Log in</Link>
+    <>
+      {/* Desktop links */}
+      <div className="hero-nav hero-nav--desktop">
+        <Link to="/contact" className="hero-account">Contact</Link>
+        {session ? (
+          <Link to="/account" className="hero-account" aria-label="Account">
+            <User size={18} strokeWidth={2} />
+          </Link>
+        ) : (
+          <Link to="/login" className="hero-account">Log in</Link>
+        )}
+      </div>
+
+      {/* Mobile toggle */}
+      <button
+        type="button"
+        className={`hero-menu-toggle${open ? " is-open" : ""}`}
+        aria-label={open ? "Close menu" : "Open menu"}
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+      >
+        <span aria-hidden>+</span>
+      </button>
+
+      {/* Mobile overlay */}
+      {open && (
+        <div className="hero-mobile-menu" role="dialog" aria-modal="true">
+          <button type="button" className="hero-mobile-backdrop" aria-label="Close menu" onClick={close} />
+          <nav className="hero-mobile-panel">
+            <Link to="/contact" className="hmm-link" onClick={close}>Contact</Link>
+            {session ? (
+              <>
+                <Link to="/account" className="hmm-link" onClick={close}>Account</Link>
+                <button type="button" className="hmm-link hmm-link--btn" onClick={onSignOut}>Log out</button>
+              </>
+            ) : (
+              <Link to="/login" className="hmm-link" onClick={close}>Log in</Link>
+            )}
+            <Link to="/lightbox" className="hmm-link" onClick={close}>
+              Lightbox{lbCount > 0 && <span className="hmm-count">{lbCount}</span>}
+            </Link>
+            <Link to="/basket" className="hmm-link" onClick={close}>
+              Basket{basketCount > 0 && <span className="hmm-count">{basketCount}</span>}
+            </Link>
+          </nav>
+        </div>
+      )}
+    </>
   );
 }
 
@@ -328,7 +380,7 @@ function Index() {
           <div className="hero-zone hero-zone--left" aria-label="Previous image" onClick={goPrev} />
           <div className="hero-zone hero-zone--right" aria-label="Next image" onClick={goNext} />
 
-          <AccountLink />
+          <HeaderNav />
 
 
           <button
@@ -863,7 +915,6 @@ const PAGE_CSS = `
 }
 
 .curbism-root .hero-account {
-  position: absolute; top: 36px; right: 36px; z-index: 5;
   color: #D75F68; text-decoration: none;
   font-size: 12px; font-weight: 800; letter-spacing: 0.2em; text-transform: uppercase;
   line-height: 1;
@@ -871,6 +922,41 @@ const PAGE_CSS = `
   transition: opacity 0.15s ease;
 }
 .curbism-root .hero-account:hover { opacity: 0.7; }
+
+.curbism-root .hero-nav {
+  position: absolute; top: 36px; right: 36px; z-index: 5;
+  display: inline-flex; align-items: center; gap: 22px;
+}
+.curbism-root .hero-menu-toggle {
+  display: none;
+  position: absolute; top: 22px; right: 22px; z-index: 6;
+  width: 40px; height: 40px; padding: 0;
+  background: transparent; border: none; cursor: pointer;
+  color: #D75F68; font-size: 36px; line-height: 1; font-weight: 300;
+  font-family: inherit;
+  transition: transform 0.2s ease;
+}
+.curbism-root .hero-menu-toggle.is-open { transform: rotate(45deg); }
+.curbism-root .hero-mobile-menu { position: fixed; inset: 0; z-index: 50; }
+.curbism-root .hero-mobile-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.85); border: none; cursor: pointer; }
+.curbism-root .hero-mobile-panel {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px;
+  padding: 24px;
+}
+.curbism-root .hmm-link {
+  background: transparent; border: none; padding: 0; font-family: inherit; cursor: pointer;
+  color: #fff; text-decoration: none;
+  font-size: 18px; font-weight: 800; letter-spacing: 0.22em; text-transform: uppercase;
+  display: inline-flex; align-items: center; gap: 10px;
+}
+.curbism-root .hmm-link:hover { color: #D75F68; }
+.curbism-root .hmm-count {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 22px; height: 22px; padding: 0 6px;
+  background: #D75F68; color: #fff;
+  font-size: 11px; font-weight: 800; letter-spacing: 0; border-radius: 11px;
+}
 
 
 
@@ -1053,7 +1139,9 @@ const PAGE_CSS = `
   .curbism-root .hero-search { left: 22px; right: 22px; width: auto; top: auto; bottom: 56px; padding-left: 0; }
   .curbism-root .hero-search input { padding: 12px 14px; font-size: 16px; }
   .curbism-root .hero-counter { bottom: 22px; right: 22px; font-size: 10px; }
-  .curbism-root .hero-account { top: 22px; right: 22px; }
+  .curbism-root .hero-nav { top: 22px; right: 22px; }
+  .curbism-root .hero-nav--desktop { display: none; }
+  .curbism-root .hero-menu-toggle { display: inline-flex; align-items: center; justify-content: center; }
   .curbism-root .section { min-height: 380px; }
   .curbism-root .section--apps { min-height: 460px; }
   .curbism-root .section-label { bottom: 16px; left: 24px; font-size: 10px; }
