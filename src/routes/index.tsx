@@ -373,8 +373,11 @@ function Index() {
   };
 
   // Restore previous search immediately when arriving back from /image/:id.
-  // Keep this effect one-shot; adding unstable function deps can cancel the
-  // in-flight restore after setSearching(true), leaving the page stuck on SEARCHING.
+  // This effect is one-shot: restoreConsumedRef guarantees the fetch runs only
+  // once, even under React StrictMode's mount/unmount/mount double-invoke.
+  // It deliberately has NO cleanup `alive` flag — a cleanup that flipped
+  // `alive` to false was skipping the final `setSearching(false)`, which left
+  // the page stuck on "SEARCHING…" and never rendered the restored results.
   useEffect(() => {
     if (typeof window === "undefined" || !restoreState?.q || restoreConsumedRef.current) return;
     restoreConsumedRef.current = true;
@@ -401,7 +404,6 @@ function Index() {
       requestAnimationFrame(() => requestAnimationFrame(restoreScroll));
       return;
     }
-    let alive = true;
     const q = restoreState.q.trim();
     if (typeof restoreState.seed === "number") {
       searchSeedRef.current = restoreState.seed;
@@ -409,19 +411,16 @@ function Index() {
     setSearching(true);
     runSearch({ data: { q, limit: 50000, seed: searchSeedRef.current } })
       .then((r) => {
-        if (!alive) return;
         setResults(r);
         restoreScroll();
       })
       .catch(() => {
-        if (!alive) return;
         setResults([]);
         setRestoringSearch(false);
       })
-      .finally(() => alive && setSearching(false));
-    return () => {
-      alive = false;
-    };
+      .finally(() => {
+        setSearching(false);
+      });
   }, [restoreState]);
 
   const saveSearchState = () => {
