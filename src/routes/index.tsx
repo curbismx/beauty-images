@@ -532,14 +532,12 @@ function Index() {
               placeholder="SEARCH"
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
-              onPointerDown={(e) => {
+              onPointerDown={() => {
                 if (!isMobileViewport()) return;
-                e.preventDefault();
                 focusMobileSearch();
               }}
-              onTouchStart={(e) => {
+              onTouchStart={() => {
                 if (!isMobileViewport()) return;
-                e.preventDefault();
                 focusMobileSearch();
               }}
               onFocus={() => {
