@@ -53,21 +53,25 @@ function HeaderNav() {
         <div className="hero-mobile-menu" role="dialog" aria-modal="true">
           <button type="button" className="hero-mobile-backdrop" aria-label="Close menu" onClick={close} />
           <nav className="hero-mobile-panel">
-            <Link to="/contact" className="hmm-link" onClick={close}>Contact</Link>
-            {session ? (
-              <>
-                <Link to="/account" className="hmm-link" onClick={close}>Account</Link>
-                <button type="button" className="hmm-link hmm-link--btn" onClick={onSignOut}>Log out</button>
-              </>
-            ) : (
-              <Link to="/login" className="hmm-link" onClick={close}>Log in</Link>
-            )}
-            <Link to="/lightbox" className="hmm-link" onClick={close}>
-              Lightbox{lbCount > 0 && <span className="hmm-count">{lbCount}</span>}
-            </Link>
-            <Link to="/basket" className="hmm-link" onClick={close}>
-              Basket{basketCount > 0 && <span className="hmm-count">{basketCount}</span>}
-            </Link>
+            <div className="hmm-main">
+              <Link to="/contact" className="hmm-link" onClick={close}>Contact</Link>
+              <Link to="/lightbox" className="hmm-link" onClick={close}>
+                Lightbox{lbCount > 0 && <span className="hmm-count">{lbCount}</span>}
+              </Link>
+              <Link to="/basket" className="hmm-link" onClick={close}>
+                Basket{basketCount > 0 && <span className="hmm-count">{basketCount}</span>}
+              </Link>
+            </div>
+            <div className="hmm-auth">
+              {session ? (
+                <>
+                  <Link to="/account" className="hmm-link" onClick={close}>Account</Link>
+                  <button type="button" className="hmm-link hmm-link--btn" onClick={onSignOut}>Log out</button>
+                </>
+              ) : (
+                <Link to="/login" className="hmm-link" onClick={close}>Log in</Link>
+              )}
+            </div>
           </nav>
         </div>
       )}
@@ -929,20 +933,29 @@ const PAGE_CSS = `
 }
 .curbism-root .hero-menu-toggle {
   display: none;
-  position: absolute; top: 22px; right: 22px; z-index: 6;
+  position: fixed; top: 22px; right: 22px; z-index: 6;
   width: 40px; height: 40px; padding: 0;
   background: transparent; border: none; cursor: pointer;
   color: #D75F68; font-size: 36px; line-height: 1; font-weight: 300;
   font-family: inherit;
   transition: transform 0.2s ease;
 }
-.curbism-root .hero-menu-toggle.is-open { transform: rotate(45deg); }
+.curbism-root .hero-menu-toggle.is-open { transform: rotate(45deg); z-index: 52; }
 .curbism-root .hero-mobile-menu { position: fixed; inset: 0; z-index: 50; }
 .curbism-root .hero-mobile-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.85); border: none; cursor: pointer; }
 .curbism-root .hero-mobile-panel {
   position: absolute; inset: 0;
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px;
-  padding: 24px;
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+  padding: 100px 24px 40px;
+}
+.curbism-root .hmm-main {
+  display: flex; flex-direction: column; align-items: center; gap: 28px;
+}
+.curbism-root .hmm-auth {
+  display: flex; flex-direction: column; align-items: center; gap: 20px;
+  margin-top: auto; padding-top: 40px;
+  border-top: 1px solid rgba(255,255,255,0.15);
+  width: 100%;
 }
 .curbism-root .hmm-link {
   background: transparent; border: none; padding: 0; font-family: inherit; cursor: pointer;
