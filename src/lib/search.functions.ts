@@ -137,7 +137,23 @@ export const searchPublicImages = createServerFn({ method: "POST" })
       .sort((a, b) => a.key - b.key)
       .flatMap((x) => x.s.rows);
 
-    const limited = ordered.slice(0, data.limit);
+    // Push NUDE/NUDES images into the second half of results, unless the
+    // searcher explicitly used one of those keywords.
+    const searcherWantsNude = terms.some((t) => t === "nude" || t === "nudes");
+    let finalOrdered = ordered;
+    if (!searcherWantsNude) {
+      const isNude = (r: (typeof ordered)[number]) =>
+        ((r.keywords ?? []) as string[]).some((k) => {
+          const lk = k.toLowerCase();
+          return lk === "nude" || lk === "nudes";
+        });
+      const safe = ordered.filter((r) => !isNude(r));
+      const nude = ordered.filter(isNude);
+      const half = Math.ceil(ordered.length / 2);
+      finalOrdered = [...safe.slice(0, half), ...safe.slice(half), ...nude];
+    }
+
+    const limited = finalOrdered.slice(0, data.limit);
 
     return limited.map((r) => ({
       id: r.id,
