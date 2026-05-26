@@ -103,11 +103,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:description", content: BRAND_TAGLINE },
       // NOTE: do NOT set og:image / twitter:image at the root — TanStack
       // concatenates `meta` and the root value would override every leaf.
-      { name: "description", content: "A curated library of premium beauty photography for creative and editorial work. License high-quality images for commercial use — quick, direct, online." },
-      { property: "og:description", content: "A curated library of premium beauty photography for creative and editorial work. License high-quality images for commercial use — quick, direct, online." },
-      { name: "twitter:description", content: "A curated library of premium beauty photography for creative and editorial work. License high-quality images for commercial use — quick, direct, online." },
-      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/t9caevFjIeROTaRfNhFkOijLiZC2/social-images/social-1779797093694-beautyimagessocial.webp" },
-      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/t9caevFjIeROTaRfNhFkOijLiZC2/social-images/social-1779797093694-beautyimagessocial.webp" },
+      { property: "og:image", content: "https://beautyimages.com/beautyimagessocial.jpg" },
+      { name: "twitter:image", content: "https://beautyimages.com/beautyimagessocial.jpg" },
     ],
     links: [
       { rel: "icon", type: "image/png", href: "/favicon.png" },
