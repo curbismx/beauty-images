@@ -1276,6 +1276,12 @@ const PAGE_CSS = `
 @media (max-width: 768px) {
   .curbism-root .hero--search { aspect-ratio: 1920 / 1080; }
   .curbism-root .hero--results { aspect-ratio: 1920 / 1080; }
+  .curbism-root .hero--search,
+  .curbism-root .hero--results,
+  .curbism-root .hero--search .bg-img,
+  .curbism-root .hero--results .bg-img {
+    transition-duration: 0s;
+  }
   .curbism-root .hero-logo  { top: 40px; left: 0; height: 40px; }
   .curbism-root .hero-title { left: 0; top: 100px; padding-left: 22px; max-width: 60%; font-size: clamp(20px, 5.5vw, 36px); line-height: 1.35; letter-spacing: -0.01em; }
 
