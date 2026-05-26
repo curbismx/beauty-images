@@ -109,14 +109,14 @@ import { SITE_URL, BRAND_TAGLINE, abs, websiteJsonLd } from "@/lib/seo";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Beauty Images — Exclusive Rights-Managed Beauty Photography" },
+      { title: "Premium Beauty Photography Licensing | Beauty Images" },
       { name: "description", content: BRAND_TAGLINE },
-      { property: "og:title", content: "Beauty Images — Exclusive Rights-Managed Beauty Photography" },
+      { property: "og:title", content: "Premium Beauty Photography Licensing | Beauty Images" },
       { property: "og:description", content: BRAND_TAGLINE },
       { property: "og:type", content: "website" },
       { property: "og:url", content: SITE_URL + "/" },
-      { property: "og:image", content: abs("/hero-1.jpg") },
-      { name: "twitter:image", content: abs("/hero-1.jpg") },
+      { property: "og:image", content: abs("/beautyimagessocial.jpg") },
+      { name: "twitter:image", content: abs("/beautyimagessocial.jpg") },
     ],
     links: [
       { rel: "canonical", href: SITE_URL + "/" },
