@@ -412,7 +412,12 @@ function Index() {
               placeholder="SEARCH"
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
-              onFocus={() => setSearchFocused(true)}
+              onFocus={() => {
+                setSearchFocused(true);
+                if (typeof window !== "undefined" && window.innerWidth <= 768) {
+                  window.scrollTo({ top: 0, behavior: "auto" });
+                }
+              }}
               onBlur={() => setSearchFocused(false)}
               aria-label="Search images"
             />
