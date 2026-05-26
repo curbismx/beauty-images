@@ -380,7 +380,7 @@ function Index() {
           <div className="hero-zone hero-zone--left" aria-label="Previous image" onClick={goPrev} />
           <div className="hero-zone hero-zone--right" aria-label="Next image" onClick={goNext} />
 
-          <AccountLink />
+          <HeaderNav />
 
 
           <button
