@@ -105,9 +105,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       // concatenates `meta` and the root value would override every leaf.
       { property: "og:image", content: "https://beautyimages.com/beautyimagessocial.jpg" },
       { name: "twitter:image", content: "https://beautyimages.com/beautyimagessocial.jpg" },
+      { name: "apple-mobile-web-app-title", content: "Beauty Images" },
     ],
     links: [
       { rel: "icon", type: "image/png", href: "/favicon.png" },
+      { rel: "apple-touch-icon", href: "/favicon.png" },
+      { rel: "manifest", href: "/manifest.json" },
       { rel: "stylesheet", href: appCss },
       {
         rel: "stylesheet",
