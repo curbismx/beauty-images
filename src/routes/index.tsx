@@ -185,28 +185,51 @@ function Index() {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const heroRef = useRef<HTMLElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
+  const mobileSearchBaseTopRef = useRef<number | null>(null);
+  const mobileSearchLockRef = useRef<{
+    scrollY: number;
+    position: string;
+    top: string;
+    left: string;
+    right: string;
+    width: string;
+    overflow: string;
+  } | null>(null);
   const lbCount = useSyncExternalStore(
     subscribeLightbox,
     () => getLightbox().length,
     () => 0,
   );
 
-  // Preload the search hero image so it can fade in smoothly on first focus.
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const img = new Image();
-    img.src = "/hero-search.jpg";
-  }, []);
+  const isMobileViewport = () => typeof window !== "undefined" && window.innerWidth <= 768;
 
-  // On mobile, lock body scroll while the search bar is focused so iOS Safari
-  // can't scroll the pinned search bar out of view when the keyboard opens.
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (window.innerWidth > 768) return;
-    if (!searchFocused) return;
+  const placeMobileSearch = () => {
+    if (!isMobileViewport()) return;
+    const form = heroRef.current?.querySelector(".hero-search") as HTMLElement | null;
+    if (!form) return;
+    const rect = form.getBoundingClientRect();
+    if (mobileSearchBaseTopRef.current === null) {
+      mobileSearchBaseTopRef.current = rect.top;
+    }
+    const logo = heroRef.current?.querySelector(".hero-logo") as HTMLElement | null;
+    const logoBottom = logo?.getBoundingClientRect().bottom ?? 82;
+    const viewport = window.visualViewport;
+    const viewportTop = viewport?.offsetTop ?? 0;
+    const viewportHeight = viewport?.height ?? window.innerHeight;
+    const formHeight = rect.height || 48;
+    const minTop = Math.max(logoBottom + 18, viewportTop + 12);
+    const maxTop = Math.max(minTop, viewportTop + viewportHeight - formHeight - 18);
+    const top = Math.min(Math.max(mobileSearchBaseTopRef.current, minTop), maxTop);
+    document.documentElement.style.setProperty("--mobile-search-top", `${Math.round(top)}px`);
+  };
+
+  const lockMobileSearchScroll = () => {
+    if (!isMobileViewport() || mobileSearchLockRef.current) return;
+    placeMobileSearch();
     const scrollY = window.scrollY;
     const body = document.body;
-    const prev = {
+    mobileSearchLockRef.current = {
+      scrollY,
       position: body.style.position,
       top: body.style.top,
       left: body.style.left,
@@ -220,14 +243,48 @@ function Index() {
     body.style.right = "0";
     body.style.width = "100%";
     body.style.overflow = "hidden";
+    requestAnimationFrame(placeMobileSearch);
+  };
+
+  const releaseMobileSearchScroll = () => {
+    if (typeof window === "undefined") return;
+    const lock = mobileSearchLockRef.current;
+    mobileSearchLockRef.current = null;
+    mobileSearchBaseTopRef.current = null;
+    document.documentElement.style.removeProperty("--mobile-search-top");
+    if (!lock) return;
+    const body = document.body;
+    body.style.position = lock.position;
+    body.style.top = lock.top;
+    body.style.left = lock.left;
+    body.style.right = lock.right;
+    body.style.width = lock.width;
+    body.style.overflow = lock.overflow;
+    window.scrollTo(0, lock.scrollY);
+  };
+
+  // Preload the search hero image so it can fade in smoothly on first focus.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const img = new Image();
+    img.src = "/hero-search.jpg";
+  }, []);
+
+  // On mobile, lock the page before/while the keyboard opens and keep the
+  // search box below the logo, moving it only as much as needed to remain visible.
+  useEffect(() => {
+    if (!searchFocused) return;
+    lockMobileSearchScroll();
+    placeMobileSearch();
+    const viewport = window.visualViewport;
+    window.addEventListener("resize", placeMobileSearch);
+    viewport?.addEventListener("resize", placeMobileSearch);
+    viewport?.addEventListener("scroll", placeMobileSearch);
     return () => {
-      body.style.position = prev.position;
-      body.style.top = prev.top;
-      body.style.left = prev.left;
-      body.style.right = prev.right;
-      body.style.width = prev.width;
-      body.style.overflow = prev.overflow;
-      window.scrollTo(0, scrollY);
+      window.removeEventListener("resize", placeMobileSearch);
+      viewport?.removeEventListener("resize", placeMobileSearch);
+      viewport?.removeEventListener("scroll", placeMobileSearch);
+      releaseMobileSearchScroll();
     };
   }, [searchFocused]);
 
