@@ -1052,6 +1052,12 @@ const PAGE_CSS = `
   font-weight: 900; letter-spacing: -0.04em; line-height: 0.95; text-transform: uppercase;
   pointer-events: none;
 }
+
+/* Hide the hero title once search is active — at every width (desktop + mobile) —
+   so the search box can never overlap it. */
+
+.curbism-root .hero--search .hero-title { display: none; }
+
 .curbism-root .hero-counter {
   position: absolute; bottom: 36px; right: 36px; z-index: 3;
   color: rgba(255, 255, 255, 0.55);
