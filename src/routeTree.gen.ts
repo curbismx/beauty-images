@@ -13,18 +13,24 @@ import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as RealPhotographyNoAiRouteImport } from './routes/real-photography-no-ai'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LightboxRouteImport } from './routes/lightbox'
+import { Route as LicensingRouteImport } from './routes/licensing'
 import { Route as LicenceRouteImport } from './routes/licence'
+import { Route as ImageSitemapDotxmlRouteImport } from './routes/image-sitemap[.]xml'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as CollectionsRouteImport } from './routes/collections'
 import { Route as BasketRouteImport } from './routes/basket'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AccountRouteImport } from './routes/account'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as ImageIdRouteImport } from './routes/image.$id'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
+import { Route as CollectionsSlugRouteImport } from './routes/collections.$slug'
 import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
 import { Route as AdminUploadRouteImport } from './routes/admin.upload'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
@@ -68,6 +74,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
   path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RealPhotographyNoAiRoute = RealPhotographyNoAiRouteImport.update({
+  id: '/real-photography-no-ai',
+  path: '/real-photography-no-ai',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
@@ -83,14 +94,29 @@ const LightboxRoute = LightboxRouteImport.update({
   path: '/lightbox',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LicensingRoute = LicensingRouteImport.update({
+  id: '/licensing',
+  path: '/licensing',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LicenceRoute = LicenceRouteImport.update({
   id: '/licence',
   path: '/licence',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ImageSitemapDotxmlRoute = ImageSitemapDotxmlRouteImport.update({
+  id: '/image-sitemap.xml',
+  path: '/image-sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CollectionsRoute = CollectionsRouteImport.update({
+  id: '/collections',
+  path: '/collections',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BasketRoute = BasketRouteImport.update({
@@ -106,6 +132,11 @@ const AdminRoute = AdminRouteImport.update({
 const AccountRoute = AccountRouteImport.update({
   id: '/account',
   path: '/account',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -127,6 +158,11 @@ const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
   id: '/email/unsubscribe',
   path: '/email/unsubscribe',
   getParentRoute: () => rootRouteImport,
+} as any)
+const CollectionsSlugRoute = CollectionsSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => CollectionsRoute,
 } as any)
 const CheckoutReturnRoute = CheckoutReturnRouteImport.update({
   id: '/checkout/return',
@@ -247,14 +283,19 @@ const ApiPublicHooksKeywordPendingRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/account': typeof AccountRoute
   '/admin': typeof AdminRouteWithChildren
   '/basket': typeof BasketRoute
+  '/collections': typeof CollectionsRouteWithChildren
   '/contact': typeof ContactRoute
+  '/image-sitemap.xml': typeof ImageSitemapDotxmlRoute
   '/licence': typeof LicenceRoute
+  '/licensing': typeof LicensingRoute
   '/lightbox': typeof LightboxRoute
   '/login': typeof LoginRoute
   '/privacy': typeof PrivacyRoute
+  '/real-photography-no-ai': typeof RealPhotographyNoAiRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -267,6 +308,7 @@ export interface FileRoutesByFullPath {
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/upload': typeof AdminUploadRoute
   '/checkout/return': typeof CheckoutReturnRoute
+  '/collections/$slug': typeof CollectionsSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/image/$id': typeof ImageIdRoute
   '/admin/': typeof AdminIndexRoute
@@ -287,13 +329,18 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/account': typeof AccountRoute
   '/basket': typeof BasketRoute
+  '/collections': typeof CollectionsRouteWithChildren
   '/contact': typeof ContactRoute
+  '/image-sitemap.xml': typeof ImageSitemapDotxmlRoute
   '/licence': typeof LicenceRoute
+  '/licensing': typeof LicensingRoute
   '/lightbox': typeof LightboxRoute
   '/login': typeof LoginRoute
   '/privacy': typeof PrivacyRoute
+  '/real-photography-no-ai': typeof RealPhotographyNoAiRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -306,6 +353,7 @@ export interface FileRoutesByTo {
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/upload': typeof AdminUploadRoute
   '/checkout/return': typeof CheckoutReturnRoute
+  '/collections/$slug': typeof CollectionsSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/image/$id': typeof ImageIdRoute
   '/admin': typeof AdminIndexRoute
@@ -327,14 +375,19 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/account': typeof AccountRoute
   '/admin': typeof AdminRouteWithChildren
   '/basket': typeof BasketRoute
+  '/collections': typeof CollectionsRouteWithChildren
   '/contact': typeof ContactRoute
+  '/image-sitemap.xml': typeof ImageSitemapDotxmlRoute
   '/licence': typeof LicenceRoute
+  '/licensing': typeof LicensingRoute
   '/lightbox': typeof LightboxRoute
   '/login': typeof LoginRoute
   '/privacy': typeof PrivacyRoute
+  '/real-photography-no-ai': typeof RealPhotographyNoAiRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -347,6 +400,7 @@ export interface FileRoutesById {
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/upload': typeof AdminUploadRoute
   '/checkout/return': typeof CheckoutReturnRoute
+  '/collections/$slug': typeof CollectionsSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/image/$id': typeof ImageIdRoute
   '/admin/': typeof AdminIndexRoute
@@ -369,14 +423,19 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/about'
     | '/account'
     | '/admin'
     | '/basket'
+    | '/collections'
     | '/contact'
+    | '/image-sitemap.xml'
     | '/licence'
+    | '/licensing'
     | '/lightbox'
     | '/login'
     | '/privacy'
+    | '/real-photography-no-ai'
     | '/reset-password'
     | '/signup'
     | '/sitemap.xml'
@@ -389,6 +448,7 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/upload'
     | '/checkout/return'
+    | '/collections/$slug'
     | '/email/unsubscribe'
     | '/image/$id'
     | '/admin/'
@@ -409,13 +469,18 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/about'
     | '/account'
     | '/basket'
+    | '/collections'
     | '/contact'
+    | '/image-sitemap.xml'
     | '/licence'
+    | '/licensing'
     | '/lightbox'
     | '/login'
     | '/privacy'
+    | '/real-photography-no-ai'
     | '/reset-password'
     | '/signup'
     | '/sitemap.xml'
@@ -428,6 +493,7 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/upload'
     | '/checkout/return'
+    | '/collections/$slug'
     | '/email/unsubscribe'
     | '/image/$id'
     | '/admin'
@@ -448,14 +514,19 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/about'
     | '/account'
     | '/admin'
     | '/basket'
+    | '/collections'
     | '/contact'
+    | '/image-sitemap.xml'
     | '/licence'
+    | '/licensing'
     | '/lightbox'
     | '/login'
     | '/privacy'
+    | '/real-photography-no-ai'
     | '/reset-password'
     | '/signup'
     | '/sitemap.xml'
@@ -468,6 +539,7 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/upload'
     | '/checkout/return'
+    | '/collections/$slug'
     | '/email/unsubscribe'
     | '/image/$id'
     | '/admin/'
@@ -489,14 +561,19 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AboutRoute: typeof AboutRoute
   AccountRoute: typeof AccountRoute
   AdminRoute: typeof AdminRouteWithChildren
   BasketRoute: typeof BasketRoute
+  CollectionsRoute: typeof CollectionsRouteWithChildren
   ContactRoute: typeof ContactRoute
+  ImageSitemapDotxmlRoute: typeof ImageSitemapDotxmlRoute
   LicenceRoute: typeof LicenceRoute
+  LicensingRoute: typeof LicensingRoute
   LightboxRoute: typeof LightboxRoute
   LoginRoute: typeof LoginRoute
   PrivacyRoute: typeof PrivacyRoute
+  RealPhotographyNoAiRoute: typeof RealPhotographyNoAiRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SignupRoute: typeof SignupRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -549,6 +626,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/real-photography-no-ai': {
+      id: '/real-photography-no-ai'
+      path: '/real-photography-no-ai'
+      fullPath: '/real-photography-no-ai'
+      preLoaderRoute: typeof RealPhotographyNoAiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/privacy': {
       id: '/privacy'
       path: '/privacy'
@@ -570,6 +654,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LightboxRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/licensing': {
+      id: '/licensing'
+      path: '/licensing'
+      fullPath: '/licensing'
+      preLoaderRoute: typeof LicensingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/licence': {
       id: '/licence'
       path: '/licence'
@@ -577,11 +668,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LicenceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/image-sitemap.xml': {
+      id: '/image-sitemap.xml'
+      path: '/image-sitemap.xml'
+      fullPath: '/image-sitemap.xml'
+      preLoaderRoute: typeof ImageSitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/contact': {
       id: '/contact'
       path: '/contact'
       fullPath: '/contact'
       preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/collections': {
+      id: '/collections'
+      path: '/collections'
+      fullPath: '/collections'
+      preLoaderRoute: typeof CollectionsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/basket': {
@@ -603,6 +708,13 @@ declare module '@tanstack/react-router' {
       path: '/account'
       fullPath: '/account'
       preLoaderRoute: typeof AccountRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -632,6 +744,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/email/unsubscribe'
       preLoaderRoute: typeof EmailUnsubscribeRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/collections/$slug': {
+      id: '/collections/$slug'
+      path: '/$slug'
+      fullPath: '/collections/$slug'
+      preLoaderRoute: typeof CollectionsSlugRouteImport
+      parentRoute: typeof CollectionsRoute
     }
     '/checkout/return': {
       id: '/checkout/return'
@@ -816,16 +935,33 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
+interface CollectionsRouteChildren {
+  CollectionsSlugRoute: typeof CollectionsSlugRoute
+}
+
+const CollectionsRouteChildren: CollectionsRouteChildren = {
+  CollectionsSlugRoute: CollectionsSlugRoute,
+}
+
+const CollectionsRouteWithChildren = CollectionsRoute._addFileChildren(
+  CollectionsRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AboutRoute: AboutRoute,
   AccountRoute: AccountRoute,
   AdminRoute: AdminRouteWithChildren,
   BasketRoute: BasketRoute,
+  CollectionsRoute: CollectionsRouteWithChildren,
   ContactRoute: ContactRoute,
+  ImageSitemapDotxmlRoute: ImageSitemapDotxmlRoute,
   LicenceRoute: LicenceRoute,
+  LicensingRoute: LicensingRoute,
   LightboxRoute: LightboxRoute,
   LoginRoute: LoginRoute,
   PrivacyRoute: PrivacyRoute,
+  RealPhotographyNoAiRoute: RealPhotographyNoAiRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SignupRoute: SignupRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
