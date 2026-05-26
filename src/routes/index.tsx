@@ -502,11 +502,15 @@ function Index() {
               placeholder="SEARCH"
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
+              onPointerDown={() => {
+                lockMobileSearchScroll();
+              }}
+              onTouchStart={() => {
+                lockMobileSearchScroll();
+              }}
               onFocus={() => {
+                lockMobileSearchScroll();
                 setSearchFocused(true);
-                if (typeof window !== "undefined" && window.innerWidth <= 768) {
-                  window.scrollTo({ top: 0, behavior: "auto" });
-                }
               }}
               onBlur={() => setSearchFocused(false)}
               aria-label="Search images"
