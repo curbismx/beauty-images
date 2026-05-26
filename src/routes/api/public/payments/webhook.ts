@@ -199,6 +199,7 @@ async function handleWebhook(req: Request, env: StripeEnv) {
 
   switch (event.type) {
     case "checkout.session.completed":
+    case "transaction.completed":
       await handleCheckoutCompleted(event.data.object, env);
       break;
     default:
