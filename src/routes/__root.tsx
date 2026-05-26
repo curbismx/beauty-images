@@ -82,33 +82,40 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   );
 }
 
+import { SITE_NAME, BRAND_TAGLINE, organizationJsonLd } from "@/lib/seo";
+
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   head: () => ({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "CURBISM Workspace is a brutalist portfolio website showcasing photography and bold typography." },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "CURBISM Workspace is a brutalist portfolio website showcasing photography and bold typography." },
+      // Root-level title/description are defaults; every public leaf route
+      // overrides them with bespoke copy via its own head().
+      { title: "Beauty Images — Rights-Managed Beauty Photography" },
+      { name: "description", content: BRAND_TAGLINE },
+      { name: "theme-color", content: "#000000" },
+      { property: "og:site_name", content: SITE_NAME },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
-      { name: "twitter:title", content: "Lovable App" },
-      { name: "twitter:description", content: "CURBISM Workspace is a brutalist portfolio website showcasing photography and bold typography." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/8039cc29-e92a-4261-854b-69c831523762/id-preview-db1ccd8a--ffd54b53-1237-4d4e-8429-044a901aabd6.lovable.app-1779132524496.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/8039cc29-e92a-4261-854b-69c831523762/id-preview-db1ccd8a--ffd54b53-1237-4d4e-8429-044a901aabd6.lovable.app-1779132524496.png" },
+      { property: "og:title", content: "Beauty Images — Rights-Managed Beauty Photography" },
+      { property: "og:description", content: BRAND_TAGLINE },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Beauty Images — Rights-Managed Beauty Photography" },
+      { name: "twitter:description", content: BRAND_TAGLINE },
+      // NOTE: do NOT set og:image / twitter:image at the root — TanStack
+      // concatenates `meta` and the root value would override every leaf.
     ],
     links: [
       { rel: "icon", type: "image/png", href: "/favicon.png" },
-      {
-        rel: "stylesheet",
-        href: appCss,
-      },
+      { rel: "stylesheet", href: appCss },
       {
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Barlow+Condensed:wght@400;500;600;700;800;900&display=swap",
+      },
+    ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify(organizationJsonLd()),
       },
     ],
   }),
