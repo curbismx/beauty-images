@@ -10,7 +10,10 @@ export const Route = createFileRoute("/checkout/return")({
     session_id: typeof search.session_id === "string" ? search.session_id : undefined,
   }),
   head: () => ({
-    meta: [{ title: "Your downloads — BEAUTYIMAGES" }],
+    meta: [
+      { title: "Your downloads — Beauty Images" },
+      { name: "robots", content: "noindex,nofollow" },
+    ],
   }),
   component: CheckoutReturn,
 });

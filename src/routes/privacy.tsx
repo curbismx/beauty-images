@@ -5,7 +5,11 @@ export const Route = createFileRoute("/privacy")({
     meta: [
       { title: "Privacy Policy — Beauty Images" },
       { name: "description", content: "How Beauty Images collects, uses and protects your personal information." },
+      { property: "og:title", content: "Privacy Policy — Beauty Images" },
+      { property: "og:description", content: "How Beauty Images collects, uses and protects your personal information." },
+      { property: "og:url", content: "https://beautyimages.com/privacy" },
     ],
+    links: [{ rel: "canonical", href: "https://beautyimages.com/privacy" }],
   }),
   component: PrivacyPage,
 });
