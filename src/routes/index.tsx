@@ -373,7 +373,8 @@ function Index() {
   };
 
   // Restore previous search immediately when arriving back from /image/:id.
-  // The saved result rows avoid replaying the home -> search transition and network search.
+  // Keep this effect one-shot; adding unstable function deps can cancel the
+  // in-flight restore after setSearching(true), leaving the page stuck on SEARCHING.
   useEffect(() => {
     if (typeof window === "undefined" || !restoreState?.q || restoreConsumedRef.current) return;
     restoreConsumedRef.current = true;
@@ -421,7 +422,7 @@ function Index() {
     return () => {
       alive = false;
     };
-  }, [restoreState, runSearch]);
+  }, [restoreState]);
 
   const saveSearchState = () => {
     try {
@@ -446,6 +447,7 @@ function Index() {
     if (suppressNextHeroClick) {
       justClosedSearchRef.current = true;
     }
+    releaseMobileSearchScroll();
     try {
       sessionStorage.removeItem("bi_search_state");
       sessionStorage.removeItem("bi_restore_search");
@@ -457,7 +459,11 @@ function Index() {
     setResults([]);
     setSearchFocused(false);
     setCurrent(0);
-    window.scrollTo(0, 0);
+    if (isMobileViewport()) {
+      requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: "smooth" }));
+    } else {
+      window.scrollTo(0, 0);
+    }
   };
 
   // Click outside the search box (and outside search results) returns home.
