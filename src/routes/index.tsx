@@ -132,18 +132,18 @@ export const Route = createFileRoute("/")({
 });
 
 const HERO_IMAGES = [
-  "/hero-01.jpg",
-  "/hero-02.jpg",
-  "/hero-03.jpg",
-  "/hero-04.jpg",
-  "/hero-05.jpg",
-  "/hero-06.jpg",
-  "/hero-07.jpg",
-  "/hero-08.jpg",
-  "/hero-09.jpg",
-  "/hero-10.jpg",
-  "/hero-11.jpg",
-  "/hero-12.jpg",
+  "/hero-H01.jpg",
+  "/hero-H02.jpg",
+  "/hero-H03.jpg",
+  "/hero-H04.jpg",
+  "/hero-H05.jpg",
+  "/hero-H06.jpg",
+  "/hero-H07.jpg",
+  "/hero-H08.jpg",
+  "/hero-H09.jpg",
+  "/hero-H10.jpg",
+  "/hero-H11.jpg",
+  "/hero-H12.jpg",
 ];
 
 type SavedSearchState = {
