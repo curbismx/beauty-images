@@ -13,6 +13,9 @@ export type VisitorRow = {
   path: string | null;
   first_seen_at: string;
   last_seen_at: string;
+  pages?: string[];
+  pageCount?: number;
+  durationSeconds?: number;
 };
 
 export type CountryCount = { country: string; count: number };
@@ -120,8 +123,52 @@ export const getVisitors = createServerFn({ method: "GET" })
       .map(([country, ips]) => ({ country, count: ips.size }))
       .sort((a, b) => b.count - a.count);
 
+    // Enrich recent visitors with their page views (count, list, duration),
+    // grouped by ip + day to match the existing per-day visitor model.
+    const recentRows = (recent ?? []) as VisitorRow[];
+    const recentIps = Array.from(new Set(recentRows.map((r) => r.ip)));
+    const pvByKey = new Map<string, { path: string | null; at: string }[]>();
+    if (recentIps.length) {
+      const { data: pvs } = await supabase
+        .from("page_views")
+        .select("ip, path, created_at")
+        .in("ip", recentIps)
+        .order("created_at", { ascending: true })
+        .limit(8000);
+      for (const pv of (pvs ?? []) as {
+        ip: string;
+        path: string | null;
+        created_at: string;
+      }[]) {
+        const day = pv.created_at.slice(0, 10);
+        const key = `${pv.ip}|${day}`;
+        if (!pvByKey.has(key)) pvByKey.set(key, []);
+        pvByKey.get(key)!.push({ path: pv.path, at: pv.created_at });
+      }
+    }
+    const recentEnriched: VisitorRow[] = recentRows.map((r) => {
+      const list = pvByKey.get(`${r.ip}|${r.visit_date}`) ?? [];
+      let durationSeconds = 0;
+      if (list.length >= 2) {
+        durationSeconds = Math.max(
+          0,
+          Math.round(
+            (new Date(list[list.length - 1].at).getTime() -
+              new Date(list[0].at).getTime()) /
+              1000,
+          ),
+        );
+      }
+      return {
+        ...r,
+        pages: list.map((x) => x.path ?? "—"),
+        pageCount: list.length,
+        durationSeconds,
+      };
+    });
+
     const result: VisitorStats = {
-      recent: (recent ?? []) as VisitorRow[],
+      recent: recentEnriched,
       todayCount: todaySet.size,
       weekCount: weekSet.size,
       monthCount: monthSet.size,
