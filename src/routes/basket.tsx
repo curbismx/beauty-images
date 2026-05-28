@@ -17,6 +17,7 @@ import { useSession } from "@/lib/use-session";
 import { StripeBasketCheckout } from "@/components/StripeBasketCheckout";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { useRegionPricing, formatPrice, type Tier } from "@/lib/pricing";
+import { validateAgentCode } from "@/lib/agents.functions";
 
 export const Route = createFileRoute("/basket")({
   head: () => ({
@@ -52,6 +53,46 @@ function BasketPage() {
   const { session } = useSession();
   const router = useRouter();
   const { pricing } = useRegionPricing();
+
+  const validateCode = useServerFn(validateAgentCode);
+  const [refInput, setRefInput] = useState("");
+  const [agentCode, setAgentCode] = useState<string | null>(null);
+  const [discountPct, setDiscountPct] = useState(0);
+  const [agentName, setAgentName] = useState<string | null>(null);
+  const [refStatus, setRefStatus] = useState<"idle" | "checking" | "ok" | "bad">("idle");
+
+  const applyCode = useCallback(async () => {
+    const code = refInput.trim().toUpperCase();
+    if (!/^[A-Z0-9]{3,8}$/.test(code)) {
+      setRefStatus("bad");
+      return;
+    }
+    setRefStatus("checking");
+    try {
+      const r = await validateCode({ data: { code } });
+      if (r.valid) {
+        setAgentCode(r.code);
+        setDiscountPct(r.discountPct);
+        setAgentName(r.agentName);
+        setRefStatus("ok");
+      } else {
+        setAgentCode(null);
+        setDiscountPct(0);
+        setAgentName(null);
+        setRefStatus("bad");
+      }
+    } catch {
+      setRefStatus("bad");
+    }
+  }, [refInput, validateCode]);
+
+  const clearCode = useCallback(() => {
+    setAgentCode(null);
+    setDiscountPct(0);
+    setAgentName(null);
+    setRefInput("");
+    setRefStatus("idle");
+  }, []);
 
   const checkoutItems = useMemo(() => {
     const counts = new Map<string, number>();
@@ -105,7 +146,9 @@ function BasketPage() {
     return () => { alive = false; };
   }, [idsKey, fetchImages]);
 
-  const total = basket.reduce((s, b) => s + (pricing[b.tier as Tier]?.amount ?? 0), 0);
+  const subtotal = basket.reduce((s, b) => s + (pricing[b.tier as Tier]?.amount ?? 0), 0);
+  const discountValue = agentCode ? subtotal * (discountPct / 100) : 0;
+  const total = subtotal - discountValue;
   const currencySymbol = pricing.medium.symbol;
   const fmtTotal = (n: number) => `${currencySymbol}${n.toFixed(2)}`;
 
@@ -209,6 +252,18 @@ function BasketPage() {
 
           {!loading && basket.length > 0 && (
             <div className="basket-checkout">
+              {agentCode && (
+                <div className="basket-line">
+                  <span>SUBTOTAL</span>
+                  <span>{fmtTotal(subtotal)}</span>
+                </div>
+              )}
+              {agentCode && (
+                <div className="basket-line basket-line--save">
+                  <span>DISCOUNT · {discountPct}%</span>
+                  <span>−{fmtTotal(discountValue)}</span>
+                </div>
+              )}
               <div className="basket-total">
                 <span className="basket-total-label">TOTAL</span>
                 <span className="basket-total-value">{fmtTotal(total)}</span>
@@ -220,6 +275,53 @@ function BasketPage() {
               >
                 CHECKOUT · {fmtTotal(total)}
               </button>
+
+              <div className="basket-referral">
+                {refStatus === "ok" && agentCode ? (
+                  <div className="basket-ref-applied">
+                    <span>
+                      ✓ CODE {agentCode} APPLIED — {discountPct}% OFF
+                      {agentName ? ` · ${agentName.toUpperCase()}` : ""}. YOU SAVE {fmtTotal(discountValue)}.
+                    </span>
+                    <button type="button" className="basket-ref-clear" onClick={clearCode}>
+                      REMOVE
+                    </button>
+                  </div>
+                ) : (
+                  <div className="basket-ref-form">
+                    <label className="basket-ref-label">REFERRAL CODE</label>
+                    <div className="basket-ref-inputrow">
+                      <input
+                        className="basket-ref-input"
+                        value={refInput}
+                        onChange={(e) => {
+                          setRefInput(e.target.value.toUpperCase());
+                          if (refStatus === "bad") setRefStatus("idle");
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") applyCode();
+                        }}
+                        placeholder="E.G. WHSK"
+                        maxLength={8}
+                        autoCapitalize="characters"
+                        autoCorrect="off"
+                        spellCheck={false}
+                      />
+                      <button
+                        type="button"
+                        className="basket-ref-apply"
+                        onClick={applyCode}
+                        disabled={refStatus === "checking"}
+                      >
+                        {refStatus === "checking" ? "…" : "ENTER"}
+                      </button>
+                    </div>
+                    {refStatus === "bad" && (
+                      <div className="basket-ref-error">CODE NOT RECOGNISED</div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>
@@ -251,6 +353,7 @@ function BasketPage() {
                   imageTiers={checkoutImageTiers}
                   customerEmail={session?.user?.email ?? undefined}
                   userId={session?.user?.id}
+                  agentCode={agentCode ?? undefined}
                 />
               </div>
             </div>
@@ -397,6 +500,53 @@ const CSS = `
 }
 .basket-checkout-btn:hover { background: #b94e56; }
 .basket-checkout-btn:active { transform: translateY(1px); }
+
+/* Subtotal / discount lines */
+.basket-line {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 16px;
+  width: min(360px, 100%);
+  font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  color: #777; font-variant-numeric: tabular-nums;
+}
+.basket-line--save { color: #2e7d32; }
+
+/* Referral code box */
+.basket-referral { width: min(360px, 100%); margin-top: 6px; }
+.basket-ref-label {
+  display: block; font-size: 10px; font-weight: 700; letter-spacing: 0.25em;
+  text-transform: uppercase; color: #999; margin-bottom: 8px;
+}
+.basket-ref-inputrow { display: flex; gap: 8px; }
+.basket-ref-input {
+  flex: 1; min-width: 0; height: 38px; padding: 0 12px;
+  border: 1px solid #111; background: #fff; color: #111;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 13px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase;
+  outline: none;
+}
+.basket-ref-input:focus { border-color: #D75F68; }
+.basket-ref-apply {
+  height: 38px; padding: 0 16px; border: 1px solid #111; background: #111; color: #fff;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase;
+  cursor: pointer; transition: background 0.2s ease;
+}
+.basket-ref-apply:hover { background: #D75F68; border-color: #D75F68; }
+.basket-ref-apply:disabled { opacity: 0.5; cursor: default; }
+.basket-ref-error {
+  margin-top: 8px; font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; color: #D75F68;
+}
+.basket-ref-applied {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 12px 14px; border: 1px solid #2e7d32; background: #f1f8f1;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #2e7d32;
+}
+.basket-ref-clear {
+  flex-shrink: 0; border: 0; background: none; color: #2e7d32; cursor: pointer;
+  font-family: inherit; font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; text-decoration: underline;
+}
 
 /* Modal (reused from lightbox styling) */
 .lb-modal-backdrop {
