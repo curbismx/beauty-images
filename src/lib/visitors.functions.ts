@@ -177,3 +177,73 @@ export const getVisitors = createServerFn({ method: "GET" })
     };
     return result;
   });
+
+// Paginated recent-visitors feed for the dashboard "Load more" button.
+// Cursor is the last_seen_at of the last row returned; pass it back as `before`
+// to fetch the next (older) page.
+export const getRecentVisitors = createServerFn({ method: "GET" })
+  .middleware([requireAdmin])
+  .inputValidator((data: { before?: string | null; limit?: number }) => {
+    const limit = Math.min(Math.max(Number(data?.limit) || 30, 1), 100);
+    const before =
+      data?.before && typeof data.before === "string" ? data.before : null;
+    return { before, limit };
+  })
+  .handler(async ({ context, data }): Promise<{ rows: VisitorRow[]; nextCursor: string | null }> => {
+    const { supabase } = context;
+
+    let q = supabase
+      .from("visitors")
+      .select("*")
+      .order("last_seen_at", { ascending: false })
+      .limit(data.limit);
+    if (data.before) q = q.lt("last_seen_at", data.before);
+
+    const { data: rows } = await q;
+    const list = (rows ?? []) as VisitorRow[];
+
+    // Enrich with page views (count, list, duration), grouped by ip + day.
+    const ips = Array.from(new Set(list.map((r) => r.ip)));
+    const pvByKey = new Map<string, { path: string | null; at: string }[]>();
+    if (ips.length) {
+      const { data: pvs } = await supabase
+        .from("page_views")
+        .select("ip, path, created_at")
+        .in("ip", ips)
+        .order("created_at", { ascending: true })
+        .limit(8000);
+      for (const pv of (pvs ?? []) as {
+        ip: string;
+        path: string | null;
+        created_at: string;
+      }[]) {
+        const day = pv.created_at.slice(0, 10);
+        const key = `${pv.ip}|${day}`;
+        if (!pvByKey.has(key)) pvByKey.set(key, []);
+        pvByKey.get(key)!.push({ path: pv.path, at: pv.created_at });
+      }
+    }
+
+    const enriched: VisitorRow[] = list.map((r) => {
+      const l = pvByKey.get(`${r.ip}|${r.visit_date}`) ?? [];
+      let durationSeconds = 0;
+      if (l.length >= 2) {
+        durationSeconds = Math.max(
+          0,
+          Math.round(
+            (new Date(l[l.length - 1].at).getTime() - new Date(l[0].at).getTime()) / 1000,
+          ),
+        );
+      }
+      return {
+        ...r,
+        pages: l.map((x) => x.path ?? "—"),
+        pageCount: l.length,
+        durationSeconds,
+      };
+    });
+
+    const nextCursor =
+      enriched.length === data.limit ? enriched[enriched.length - 1].last_seen_at : null;
+    return { rows: enriched, nextCursor };
+  });
