@@ -28,6 +28,8 @@ import { Route as AccountRouteImport } from './routes/account'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as StoreSplatRouteImport } from './routes/store.$'
+import { Route as ShopSplatRouteImport } from './routes/shop.$'
 import { Route as ImageIdRouteImport } from './routes/image.$id'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as CollectionsSlugRouteImport } from './routes/collections.$slug'
@@ -149,6 +151,16 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminRoute,
+} as any)
+const StoreSplatRoute = StoreSplatRouteImport.update({
+  id: '/store/$',
+  path: '/store/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShopSplatRoute = ShopSplatRouteImport.update({
+  id: '/shop/$',
+  path: '/shop/$',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ImageIdRoute = ImageIdRouteImport.update({
   id: '/image/$id',
@@ -318,6 +330,8 @@ export interface FileRoutesByFullPath {
   '/collections/$slug': typeof CollectionsSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/image/$id': typeof ImageIdRoute
+  '/shop/$': typeof ShopSplatRoute
+  '/store/$': typeof StoreSplatRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/image/$id': typeof AdminImageIdRoute
   '/api/admin/upload-image': typeof ApiAdminUploadImageRoute
@@ -364,6 +378,8 @@ export interface FileRoutesByTo {
   '/collections/$slug': typeof CollectionsSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/image/$id': typeof ImageIdRoute
+  '/shop/$': typeof ShopSplatRoute
+  '/store/$': typeof StoreSplatRoute
   '/admin': typeof AdminIndexRoute
   '/admin/image/$id': typeof AdminImageIdRoute
   '/api/admin/upload-image': typeof ApiAdminUploadImageRoute
@@ -412,6 +428,8 @@ export interface FileRoutesById {
   '/collections/$slug': typeof CollectionsSlugRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/image/$id': typeof ImageIdRoute
+  '/shop/$': typeof ShopSplatRoute
+  '/store/$': typeof StoreSplatRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/image/$id': typeof AdminImageIdRoute
   '/api/admin/upload-image': typeof ApiAdminUploadImageRoute
@@ -461,6 +479,8 @@ export interface FileRouteTypes {
     | '/collections/$slug'
     | '/email/unsubscribe'
     | '/image/$id'
+    | '/shop/$'
+    | '/store/$'
     | '/admin/'
     | '/admin/image/$id'
     | '/api/admin/upload-image'
@@ -507,6 +527,8 @@ export interface FileRouteTypes {
     | '/collections/$slug'
     | '/email/unsubscribe'
     | '/image/$id'
+    | '/shop/$'
+    | '/store/$'
     | '/admin'
     | '/admin/image/$id'
     | '/api/admin/upload-image'
@@ -554,6 +576,8 @@ export interface FileRouteTypes {
     | '/collections/$slug'
     | '/email/unsubscribe'
     | '/image/$id'
+    | '/shop/$'
+    | '/store/$'
     | '/admin/'
     | '/admin/image/$id'
     | '/api/admin/upload-image'
@@ -593,6 +617,8 @@ export interface RootRouteChildren {
   CheckoutReturnRoute: typeof CheckoutReturnRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   ImageIdRoute: typeof ImageIdRoute
+  ShopSplatRoute: typeof ShopSplatRoute
+  StoreSplatRoute: typeof StoreSplatRoute
   ApiAdminUploadImageRoute: typeof ApiAdminUploadImageRoute
   ApiPublicDownloadRoute: typeof ApiPublicDownloadRoute
   ApiPublicTrackRoute: typeof ApiPublicTrackRoute
@@ -742,6 +768,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
+    }
+    '/store/$': {
+      id: '/store/$'
+      path: '/store/$'
+      fullPath: '/store/$'
+      preLoaderRoute: typeof StoreSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shop/$': {
+      id: '/shop/$'
+      path: '/shop/$'
+      fullPath: '/shop/$'
+      preLoaderRoute: typeof ShopSplatRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/image/$id': {
       id: '/image/$id'
@@ -990,6 +1030,8 @@ const rootRouteChildren: RootRouteChildren = {
   CheckoutReturnRoute: CheckoutReturnRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   ImageIdRoute: ImageIdRoute,
+  ShopSplatRoute: ShopSplatRoute,
+  StoreSplatRoute: StoreSplatRoute,
   ApiAdminUploadImageRoute: ApiAdminUploadImageRoute,
   ApiPublicDownloadRoute: ApiPublicDownloadRoute,
   ApiPublicTrackRoute: ApiPublicTrackRoute,
@@ -1007,13 +1049,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
