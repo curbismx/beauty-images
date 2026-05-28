@@ -1,3 +1,4 @@
+-------------
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -327,7 +328,7 @@ function RecentVisitors({ rows }: { rows: VisitorRow[] }) {
         const isOpen = open === v.id;
         return (
           <li key={v.id} className="dash-visit">
-            <button
+            <div
               className="dash-visit-row"
               onClick={() => canExpand && setOpen(isOpen ? null : v.id)}
               style={{ cursor: canExpand ? "pointer" : "default" }}
@@ -342,7 +343,20 @@ function RecentVisitors({ rows }: { rows: VisitorRow[] }) {
                   <span className="dash-visit-when"> · {fmtWhen(v.last_seen_at)}</span>
                 </span>
                 <span className="dash-visit-l2">
-                  <span className="dash-chip">From: {prettyReferer(v.referer)}</span>
+                  {v.referer ? (
+                    <a
+                      className="dash-chip dash-chip--link"
+                      href={v.referer}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      title={v.referer}
+                    >
+                      From: {prettyReferer(v.referer)} ↗
+                    </a>
+                  ) : (
+                    <span className="dash-chip">From: Direct</span>
+                  )}
                   <span className="dash-chip">
                     {v.pageCount ?? 0} {(v.pageCount ?? 0) === 1 ? "page" : "pages"}
                   </span>
@@ -352,7 +366,7 @@ function RecentVisitors({ rows }: { rows: VisitorRow[] }) {
                   </span>
                 </span>
               </span>
-            </button>
+            </div>
             {isOpen && canExpand && (
               <ol className="dash-visit-pages">
                 {pages.map((p, i) => (
@@ -414,6 +428,8 @@ const dashCss = `
 .dash-visit-l2 { display: flex; flex-wrap: wrap; gap: 6px; }
 .dash-chip { font-size: 11px; font-weight: 700; letter-spacing: 0.02em; color: #333; background: #f3f3f3; padding: 3px 8px; }
 .dash-chip--muted { color: #777; background: transparent; padding-left: 0; }
+.dash-chip--link { color: #fff; background: #D75F68; text-decoration: none; cursor: pointer; }
+.dash-chip--link:hover { background: #b94e56; }
 .dash-visit-pages { list-style: none; margin: 0 0 12px; padding: 8px 0 8px 36px; }
 .dash-visit-pages li { display: flex; gap: 10px; padding: 4px 0; font-size: 12px; color: #444; }
 .dash-page-i { color: #bbb; font-weight: 800; font-variant-numeric: tabular-nums; min-width: 18px; }
