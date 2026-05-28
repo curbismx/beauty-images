@@ -266,6 +266,39 @@ export type Database = {
         }
         Relationships: []
       }
+      page_views: {
+        Row: {
+          city: string | null
+          country: string | null
+          created_at: string
+          id: string
+          ip: string
+          path: string | null
+          referer: string | null
+          session_id: string | null
+        }
+        Insert: {
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          id?: string
+          ip: string
+          path?: string | null
+          referer?: string | null
+          session_id?: string | null
+        }
+        Update: {
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          id?: string
+          ip?: string
+          path?: string | null
+          referer?: string | null
+          session_id?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
