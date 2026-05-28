@@ -151,13 +151,29 @@ function RootComponent() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (pathname.startsWith("/admin")) return;
-    const key = `bi_track_${new Date().toISOString().slice(0, 10)}`;
-    if (sessionStorage.getItem(key)) return;
-    sessionStorage.setItem(key, "1");
+
+    // Stable per-tab session id, so page views can be grouped into one visit.
+    let sid = sessionStorage.getItem("bi_sid");
+    if (!sid) {
+      sid =
+        typeof crypto !== "undefined" && crypto.randomUUID
+          ? crypto.randomUUID()
+          : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+      sessionStorage.setItem("bi_sid", sid);
+    }
+
+    // Don't double-log the same path back-to-back (React re-renders).
+    if (sessionStorage.getItem("bi_last_path") === pathname) return;
+    sessionStorage.setItem("bi_last_path", pathname);
+
     fetch("/api/public/track", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ path: pathname, referer: document.referrer || null }),
+      body: JSON.stringify({
+        path: pathname,
+        referer: document.referrer || null,
+        sessionId: sid,
+      }),
       keepalive: true,
     }).catch(() => {});
   }, [pathname]);
