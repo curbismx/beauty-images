@@ -9,6 +9,7 @@ export const Route = createFileRoute("/api/public/track")({
           const body = (await request.json().catch(() => ({}))) as {
             path?: string;
             referer?: string;
+            sessionId?: string;
           };
 
           const headers = request.headers;
@@ -79,6 +80,21 @@ export const Route = createFileRoute("/api/public/track")({
             .update({ last_seen_at: new Date().toISOString() })
             .eq("ip", ip)
             .eq("visit_date", today);
+
+          // Log an individual page view (powers pages-per-visit + time-on-site).
+          // Wrapped so a failure here can never affect the response or the visit.
+          try {
+            await supabaseAdmin.from("page_views").insert({
+              ip,
+              session_id: body.sessionId || null,
+              path,
+              referer,
+              country,
+              city,
+            });
+          } catch (e) {
+            console.error("page_view insert failed", e);
+          }
 
           return new Response(JSON.stringify({ ok: true }), {
             status: 200,
