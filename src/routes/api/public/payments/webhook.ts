@@ -77,6 +77,14 @@ async function sendOrderConfirmationEmail(
 
 async function handleCheckoutCompleted(session: any, env: StripeEnv) {
   const userId = session.metadata?.userId || null;
+  const agentId = session.metadata?.agent_id || null;
+  const agentCode = session.metadata?.agent_code || null;
+  const agentDiscountPct = Number(session.metadata?.agent_discount_pct) || 0;
+  // Per-line discount, derived from the post-discount amount we store.
+  const discountForLine = (amt: number): number | null =>
+    agentDiscountPct > 0 && agentDiscountPct < 100
+      ? Math.round(((amt * agentDiscountPct) / (100 - agentDiscountPct)) * 100) / 100
+      : null;
   const imageIds: string[] = session.metadata?.imageIds
     ? String(session.metadata.imageIds).split(",").filter(Boolean)
     : [];
@@ -153,6 +161,9 @@ async function handleCheckoutCompleted(session: any, env: StripeEnv) {
         stripe_payment_id: paymentId,
         stripe_session_id: sessionId,
         download_tier: p.tier,
+        agent_id: agentId,
+        agent_code: agentCode,
+        discount_amount: discountForLine(amountForTier(p.tier)),
       }))
     : imageIds.map((image_id) => ({
         image_id,
@@ -163,6 +174,9 @@ async function handleCheckoutCompleted(session: any, env: StripeEnv) {
         stripe_payment_id: paymentId,
         stripe_session_id: sessionId,
         download_tier: "medium",
+        agent_id: agentId,
+        agent_code: agentCode,
+        discount_amount: discountForLine(amountForTier("medium")),
       }));
 
   if (rows.length === 0) {
@@ -173,6 +187,9 @@ async function handleCheckoutCompleted(session: any, env: StripeEnv) {
       status: "completed",
       stripe_payment_id: paymentId,
       stripe_session_id: sessionId,
+      agent_id: agentId,
+      agent_code: agentCode,
+      discount_amount: discountForLine(amountTotal),
     });
     if (error) console.error("Failed to insert sale row:", error);
   } else {
