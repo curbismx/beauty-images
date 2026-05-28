@@ -10,6 +10,7 @@ interface BasketCheckoutProps {
   imageIds?: string[];
   imageTiers?: string;
   returnUrl?: string;
+  agentCode?: string;
 }
 
 export function StripeBasketCheckout({
@@ -19,6 +20,7 @@ export function StripeBasketCheckout({
   imageIds,
   imageTiers,
   returnUrl,
+  agentCode,
 }: BasketCheckoutProps) {
   const [error, setError] = useState<string | null>(null);
   const fetchClientSecret = useCallback(async (): Promise<string> => {
@@ -30,6 +32,7 @@ export function StripeBasketCheckout({
           userId,
           imageIds,
           imageTiers,
+          agentCode,
           returnUrl: returnUrl || `${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}`,
           environment: getStripeEnvironment(),
         },
@@ -41,7 +44,7 @@ export function StripeBasketCheckout({
       setError("Checkout could not load. Please close this window and try again.");
       throw err;
     }
-  }, [customerEmail, imageIds, imageTiers, items, returnUrl, userId]);
+  }, [customerEmail, imageIds, imageTiers, items, returnUrl, userId, agentCode]);
 
   // getStripe() throws if the payment token isn't configured for this
   // environment (the published site before go-live). Catch it so a payments
