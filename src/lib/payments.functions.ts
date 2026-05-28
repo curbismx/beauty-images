@@ -1,7 +1,50 @@
 import { createServerFn } from "@tanstack/react-start";
+import { createClient } from "@supabase/supabase-js";
 import { type StripeEnv, createStripeClient, ensureLicenseTaxCodes } from "@/lib/stripe.server";
 
 type LineItemInput = { priceId: string; quantity: number };
+
+const AGENT_CODE_RE = /^[A-Z0-9]{3,8}$/;
+
+// Re-create or reuse a single Stripe coupon per discount percentage.
+// Deterministic id (agent_pct_10) means it is created once and reused for
+// every agent on that rate.
+async function ensurePercentCoupon(
+  stripe: ReturnType<typeof createStripeClient>,
+  pct: number,
+): Promise<string> {
+  const id = `agent_pct_${pct}`;
+  try {
+    await stripe.coupons.retrieve(id);
+  } catch {
+    await stripe.coupons.create({
+      id,
+      percent_off: pct,
+      duration: "once",
+      name: `Agent referral ${pct}%`,
+    } as any);
+  }
+  return id;
+}
+
+// Server-side re-validation of an agent code. Never trust the client's claim
+// about the discount — look it up fresh here.
+async function lookupAgent(
+  code: string,
+): Promise<{ id: string; code: string; discount_pct: number } | null> {
+  if (!AGENT_CODE_RE.test(code)) return null;
+  const supabase = createClient(
+    process.env.SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  );
+  const { data } = await supabase
+    .from("agents")
+    .select("id, code, discount_pct, active")
+    .eq("code", code)
+    .maybeSingle();
+  if (!data || data.active !== true) return null;
+  return { id: data.id, code: data.code, discount_pct: Number(data.discount_pct) || 0 };
+}
 
 async function resolveOrCreateCustomer(
   stripe: ReturnType<typeof createStripeClient>,
@@ -45,9 +88,17 @@ export const createBasketCheckoutSession = createServerFn({ method: "POST" })
     imageTiers?: string;
     returnUrl: string;
     environment: StripeEnv;
+    agentCode?: string;
   }) => {
     if (!Array.isArray(data.items) || data.items.length === 0) {
       throw new Error("No items");
+    }
+    if (data.agentCode) {
+      data.agentCode = String(data.agentCode).trim().toUpperCase();
+      if (!AGENT_CODE_RE.test(data.agentCode)) {
+        // Ignore malformed codes rather than blocking the whole checkout.
+        data.agentCode = undefined;
+      }
     }
     for (const it of data.items) {
       if (!/^[a-zA-Z0-9_-]+$/.test(it.priceId)) throw new Error("Invalid priceId");
@@ -89,12 +140,19 @@ export const createBasketCheckoutSession = createServerFn({ method: "POST" })
 
     const description = `BEAUTYIMAGES license purchase (${data.items.reduce((s, i) => s + i.quantity, 0)} item${data.items.reduce((s, i) => s + i.quantity, 0) === 1 ? "" : "s"})`;
 
+    const agent = data.agentCode ? await lookupAgent(data.agentCode) : null;
+    const couponId =
+      agent && agent.discount_pct > 0
+        ? await ensurePercentCoupon(stripe, agent.discount_pct)
+        : null;
+
     const session = await stripe.checkout.sessions.create({
       line_items,
       mode: "payment",
       ui_mode: "embedded_page",
       return_url: data.returnUrl,
       ...(customerId && { customer: customerId }),
+      ...(couponId && { discounts: [{ coupon: couponId }] }),
       payment_intent_data: { description },
       managed_payments: { enabled: true },
       metadata: {
@@ -104,6 +162,11 @@ export const createBasketCheckoutSession = createServerFn({ method: "POST" })
           imageIds: data.imageIds.slice(0, 50).join(","),
         }),
         ...(data.imageTiers && { imageTiers: data.imageTiers }),
+        ...(agent && {
+          agent_id: agent.id,
+          agent_code: agent.code,
+          agent_discount_pct: String(agent.discount_pct),
+        }),
       },
     } as any);
 
