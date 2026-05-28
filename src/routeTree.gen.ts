@@ -39,6 +39,7 @@ import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminLibraryRouteImport } from './routes/admin.library'
 import { Route as AdminFeaturedRouteImport } from './routes/admin.featured'
 import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
+import { Route as AdminAgentsRouteImport } from './routes/admin.agents'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as ApiPublicTrackRouteImport } from './routes/api/public/track'
 import { Route as ApiPublicDownloadRouteImport } from './routes/api/public/download'
@@ -204,6 +205,11 @@ const AdminCustomersRoute = AdminCustomersRouteImport.update({
   path: '/customers',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminAgentsRoute = AdminAgentsRouteImport.update({
+  id: '/agents',
+  path: '/agents',
+  getParentRoute: () => AdminRoute,
+} as any)
 const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
   id: '/lovable/email/suppression',
   path: '/lovable/email/suppression',
@@ -300,6 +306,7 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/admin/agents': typeof AdminAgentsRoute
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/featured': typeof AdminFeaturedRoute
   '/admin/library': typeof AdminLibraryRoute
@@ -345,6 +352,7 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/admin/agents': typeof AdminAgentsRoute
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/featured': typeof AdminFeaturedRoute
   '/admin/library': typeof AdminLibraryRoute
@@ -392,6 +400,7 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/admin/agents': typeof AdminAgentsRoute
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/featured': typeof AdminFeaturedRoute
   '/admin/library': typeof AdminLibraryRoute
@@ -440,6 +449,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/sitemap.xml'
     | '/unsubscribe'
+    | '/admin/agents'
     | '/admin/customers'
     | '/admin/featured'
     | '/admin/library'
@@ -485,6 +495,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/sitemap.xml'
     | '/unsubscribe'
+    | '/admin/agents'
     | '/admin/customers'
     | '/admin/featured'
     | '/admin/library'
@@ -531,6 +542,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/sitemap.xml'
     | '/unsubscribe'
+    | '/admin/agents'
     | '/admin/customers'
     | '/admin/featured'
     | '/admin/library'
@@ -808,6 +820,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCustomersRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/agents': {
+      id: '/admin/agents'
+      path: '/agents'
+      fullPath: '/admin/agents'
+      preLoaderRoute: typeof AdminAgentsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/lovable/email/suppression': {
       id: '/lovable/email/suppression'
       path: '/lovable/email/suppression'
@@ -910,6 +929,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminRouteChildren {
+  AdminAgentsRoute: typeof AdminAgentsRoute
   AdminCustomersRoute: typeof AdminCustomersRoute
   AdminFeaturedRoute: typeof AdminFeaturedRoute
   AdminLibraryRoute: typeof AdminLibraryRoute
@@ -922,6 +942,7 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminAgentsRoute: AdminAgentsRoute,
   AdminCustomersRoute: AdminCustomersRoute,
   AdminFeaturedRoute: AdminFeaturedRoute,
   AdminLibraryRoute: AdminLibraryRoute,
