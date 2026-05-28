@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      agents: {
+        Row: {
+          active: boolean
+          bank_details: string | null
+          code: string
+          created_at: string
+          discount_pct: number
+          email: string | null
+          id: string
+          name: string
+          notes: string | null
+          split_pct: number
+          website: string | null
+        }
+        Insert: {
+          active?: boolean
+          bank_details?: string | null
+          code: string
+          created_at?: string
+          discount_pct?: number
+          email?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          split_pct?: number
+          website?: string | null
+        }
+        Update: {
+          active?: boolean
+          bank_details?: string | null
+          code?: string
+          created_at?: string
+          discount_pct?: number
+          email?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          split_pct?: number
+          website?: string | null
+        }
+        Relationships: []
+      }
       customers: {
         Row: {
           company: string | null
@@ -250,10 +292,13 @@ export type Database = {
       }
       sales: {
         Row: {
+          agent_code: string | null
+          agent_id: string | null
           amount: number | null
           created_at: string
           currency: string
           customer_id: string | null
+          discount_amount: number | null
           download_count: number
           download_tier: string | null
           duration_months: number | null
@@ -271,10 +316,13 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          agent_code?: string | null
+          agent_id?: string | null
           amount?: number | null
           created_at?: string
           currency?: string
           customer_id?: string | null
+          discount_amount?: number | null
           download_count?: number
           download_tier?: string | null
           duration_months?: number | null
@@ -292,10 +340,13 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          agent_code?: string | null
+          agent_id?: string | null
           amount?: number | null
           created_at?: string
           currency?: string
           customer_id?: string | null
+          discount_amount?: number | null
           download_count?: number
           download_tier?: string | null
           duration_months?: number | null
@@ -313,6 +364,13 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "sales_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "sales_customer_id_fkey"
             columns: ["customer_id"]
