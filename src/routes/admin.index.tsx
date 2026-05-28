@@ -1,8 +1,7 @@
-
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ComposableMap,
   Geographies,
@@ -11,7 +10,7 @@ import {
   ZoomableGroup,
 } from "react-simple-maps";
 import { PageHeader } from "./admin";
-import { getVisitors, type CountryCount, type VisitorRow } from "@/lib/visitors.functions";
+import { getVisitors, getRecentVisitors, type CountryCount, type VisitorRow } from "@/lib/visitors.functions";
 import { getImageStats } from "@/lib/images.functions";
 
 export const Route = createFileRoute("/admin/")({
@@ -134,6 +133,7 @@ function fmtWhen(iso: string): string {
 function Dashboard() {
   const fetchVisitors = useServerFn(getVisitors);
   const fetchImageStats = useServerFn(getImageStats);
+  const fetchRecent = useServerFn(getRecentVisitors);
 
   const { data, isLoading } = useQuery({
     queryKey: ["visitors"],
@@ -146,6 +146,38 @@ function Dashboard() {
     queryFn: () => fetchImageStats(),
     refetchInterval: 30_000,
   });
+
+  const [recentRows, setRecentRows] = useState<VisitorRow[]>([]);
+  const [cursor, setCursor] = useState<string | null>(null);
+  const [recentLoading, setRecentLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+
+  const loadFirst = useCallback(() => {
+    setRecentLoading(true);
+    fetchRecent({ data: { limit: 30 } })
+      .then((r) => {
+        setRecentRows(r.rows);
+        setCursor(r.nextCursor);
+      })
+      .catch(() => {})
+      .finally(() => setRecentLoading(false));
+  }, [fetchRecent]);
+
+  useEffect(() => {
+    loadFirst();
+  }, [loadFirst]);
+
+  const loadMore = useCallback(async () => {
+    if (!cursor || loadingMore) return;
+    setLoadingMore(true);
+    try {
+      const r = await fetchRecent({ data: { before: cursor, limit: 30 } });
+      setRecentRows((prev) => [...prev, ...r.rows]);
+      setCursor(r.nextCursor);
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [cursor, loadingMore, fetchRecent]);
 
   return (
     <>
@@ -169,12 +201,26 @@ function Dashboard() {
       </Panel>
 
       <Panel title="Recent visitors">
-        {isLoading ? (
+        <div className="dash-recent-bar">
+          <button className="dash-refresh" onClick={loadFirst} disabled={recentLoading}>
+            ↻ Refresh
+          </button>
+        </div>
+        {recentLoading ? (
           <div className="dash-empty">Loading…</div>
-        ) : !data?.recent?.length ? (
+        ) : recentRows.length === 0 ? (
           <div className="dash-empty">No visits yet</div>
         ) : (
-          <RecentVisitors rows={data.recent.slice(0, 30)} />
+          <>
+            <RecentVisitors rows={recentRows} />
+            {cursor ? (
+              <button className="dash-loadmore" onClick={loadMore} disabled={loadingMore}>
+                {loadingMore ? "Loading…" : "Load more"}
+              </button>
+            ) : (
+              <div className="dash-loadmore-end">— end of list —</div>
+            )}
+          </>
         )}
       </Panel>
     </>
@@ -434,6 +480,14 @@ const dashCss = `
 .dash-visit-pages li { display: flex; gap: 10px; padding: 4px 0; font-size: 12px; color: #444; }
 .dash-page-i { color: #bbb; font-weight: 800; font-variant-numeric: tabular-nums; min-width: 18px; }
 .dash-page-path { word-break: break-all; }
+.dash-recent-bar { display: flex; justify-content: flex-end; margin-bottom: 4px; }
+.dash-refresh { background: #fff; color: #000; border: 1px solid #000; padding: 6px 12px; font-size: 11px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; cursor: pointer; font-family: inherit; }
+.dash-refresh:hover { background: #000; color: #fff; }
+.dash-refresh:disabled { opacity: 0.5; cursor: default; }
+.dash-loadmore { display: block; width: 100%; margin-top: 12px; background: #000; color: #fff; border: 1px solid #000; padding: 12px; font-size: 12px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; font-family: inherit; }
+.dash-loadmore:hover { background: #D75F68; border-color: #D75F68; }
+.dash-loadmore:disabled { opacity: 0.6; cursor: default; }
+.dash-loadmore-end { text-align: center; margin-top: 12px; font-size: 10px; color: #aaa; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700; }
 
 @media (max-width: 768px) {
   .dash-stats { grid-template-columns: repeat(2, 1fr); }
