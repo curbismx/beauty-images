@@ -1280,7 +1280,7 @@ const PAGE_CSS = `
 .curbism-root .intro-text p { font-size: 18px; font-weight: 500; text-transform: none; letter-spacing: normal; line-height: 1.6; color: #555; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
 .curbism-root .intro-cta { margin-top: 32px; display: inline-block; background: #D75F68; color: #fff; border: none; padding: 16px 28px; font-size: 14px; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; cursor: pointer; border-radius: 0; transition: background 0.2s ease; }
 .curbism-root .intro-cta:hover { background: #000; }
-.curbism-root .intro-text p.intro-cta-note { margin-top: 16px; font-size: 16px !important; font-weight: 400 !important; letter-spacing: normal !important; line-height: 1.6; color: #555; text-transform: none !important; max-width: 66.666%; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif !important; }
+.curbism-root .intro-text p.intro-cta-note { margin-top: 16px; font-size: 16px !important; font-weight: 400 !important; letter-spacing: normal !important; line-height: 1.6; color: #555; text-transform: none !important; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif !important; }
 .curbism-root .line-faint { width: 100%; height: 1px; background: #eee; margin: 32px 0 0; }
 .curbism-root .art-prints-promo { margin-top: 32px; }
 .curbism-root .art-prints-promo__title { font-size: clamp(28px, 4.2vw, 56px); font-weight: 900; letter-spacing: -0.035em; line-height: 1.15; text-transform: uppercase; color: #111; margin: 0 0 10px; font-family: 'DIN Condensed', 'DIN Alternate', 'Barlow Condensed', 'Oswald', sans-serif; }
