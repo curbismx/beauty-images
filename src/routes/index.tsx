@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import artPrintsAsset from "@/assets/art-prints.png.asset.json";
+import artPrintsAsset from "@/assets/art-prints-2.png.asset.json";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Layers, LayoutGrid, Rows3, User } from "lucide-react";
