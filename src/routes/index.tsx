@@ -611,6 +611,25 @@ function Index() {
               >
                 SEARCH NOW
               </button>
+
+              <div className="art-prints-promo">
+                <p className="art-prints-promo__title">
+                  MUSEUM QUALITY ART PRINTS AVAILABLE OF CERTAIN IMAGES
+                </p>
+                <a
+                  href="https://hyweljones.pic-time.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="art-prints-promo__link"
+                >
+                  <img
+                    src={artPrintsAsset.url}
+                    alt="Museum quality art prints"
+                    className="art-prints-promo__img"
+                  />
+                  <span className="art-prints-promo__note">opens in a new window</span>
+                </a>
+              </div>
             </div>
 
             <FeaturedMasonry />
