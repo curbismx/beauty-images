@@ -1285,6 +1285,7 @@ const PAGE_CSS = `
   .curbism-root .intro-text { padding: 12px 24px 40px; max-width: 100%; }
   .curbism-root .intro-text h2 { font-size: clamp(24px, 6.5vw, 40px); }
   .curbism-root .intro-text p { font-size: clamp(24px, 6.5vw, 40px); }
+  .curbism-root .art-prints-promo__link { width: 100%; min-width: auto; max-width: none; }
 }
 
 .curbism-root .footer {
