@@ -1274,7 +1274,7 @@ const PAGE_CSS = `
 .curbism-root .intro-cta { margin-top: 32px; display: inline-block; background: #D75F68; color: #fff; border: none; padding: 16px 28px; font-size: 14px; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; cursor: pointer; border-radius: 0; transition: background 0.2s ease; }
 .curbism-root .intro-cta:hover { background: #000; }
 .curbism-root .art-prints-promo { margin-top: 48px; }
-.curbism-root .art-prints-promo__title { font-size: 20px; font-weight: 600; letter-spacing: 0.1em; text-transform: lowercase; color: #111; margin: 0 0 10px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+.curbism-root .art-prints-promo__title { font-size: clamp(28px, 4.2vw, 56px); font-weight: 900; letter-spacing: -0.035em; line-height: 1.15; text-transform: uppercase; color: #111; margin: 0 0 10px; font-family: 'DIN Condensed', 'DIN Alternate', 'Barlow Condensed', 'Oswald', sans-serif; }
 .curbism-root .art-prints-promo__link { display: inline-block; width: 55%; min-width: 280px; max-width: 600px; text-decoration: none; color: #6b6b6b; }
 .curbism-root .art-prints-promo__img { display: block; width: 100%; height: auto; }
 .curbism-root .art-prints-promo__note { display: block; margin-top: 6px; font-size: 14px; letter-spacing: 0.08em; text-transform: lowercase; color: #6b6b6b; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
