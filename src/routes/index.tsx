@@ -597,10 +597,10 @@ function Index() {
             <div className="intro-text">
               <h2>ADVERTISING DESIGN &amp; EDITORIAL IMAGES</h2>
               <p>
-                PROVIDING IMAGES TO HIGH-END PUBLICATIONS AND ADVERTISING FOR OVER 20 YEARS. ALL OUR
-                IMAGES ARE EXCLUSIVE TO BEAUTY IMAGES AND ARE SOLD ON A{" "}
-                <span style={{ color: "#D75F68" }}>RIGHTS MANAGED</span> BASIS. ALL REAL PEOPLE.
-                REAL PHOTOGRAPHY. WITH NO AI PRODUCTION AT ALL.
+                Providing images to high-end publications and advertising for over 20 years. All our
+                images are exclusive to Beauty Images and are sold on a{" "}
+                <span style={{ color: "#D75F68" }}>rights managed</span> basis. All real people.
+                Real photography. With no AI production at all.
               </p>
               <button
                 type="button"
