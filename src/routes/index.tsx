@@ -1276,7 +1276,7 @@ const PAGE_CSS = `
 .curbism-root .art-prints-promo { margin-top: 48px; }
 .curbism-root .art-prints-promo__title { font-size: clamp(28px, 4.2vw, 56px); font-weight: 900; letter-spacing: -0.035em; line-height: 1.15; text-transform: uppercase; color: #111; margin: 0 0 10px; font-family: 'DIN Condensed', 'DIN Alternate', 'Barlow Condensed', 'Oswald', sans-serif; }
 .curbism-root .art-prints-promo__link { display: inline-block; width: 55%; min-width: 280px; max-width: 600px; text-decoration: none; color: #6b6b6b; }
-.curbism-root .art-prints-promo__img { display: block; width: 100%; height: auto; }
+.curbism-root .art-prints-promo__img { display: block; width: 100%; height: auto; border: 1px solid #e8e8e8; }
 .curbism-root .art-prints-promo__note { display: block; margin-top: 6px; font-size: 14px; letter-spacing: 0.08em; text-transform: lowercase; color: #6b6b6b; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
 .curbism-root .art-prints-promo__link:hover .art-prints-promo__note { color: #D75F68; }
 @media (max-width: 768px) {
@@ -1285,6 +1285,7 @@ const PAGE_CSS = `
   .curbism-root .intro-text { padding: 12px 24px 40px; max-width: 100%; }
   .curbism-root .intro-text h2 { font-size: clamp(24px, 6.5vw, 40px); }
   .curbism-root .intro-text p { font-size: clamp(24px, 6.5vw, 40px); }
+  .curbism-root .art-prints-promo__link { width: 100%; min-width: auto; max-width: none; }
 }
 
 .curbism-root .footer {
