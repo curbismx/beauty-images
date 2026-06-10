@@ -614,7 +614,7 @@ function Index() {
 
               <div className="art-prints-promo">
                 <p className="art-prints-promo__title">
-                  Museum quality art prints available of certain images
+                  Museum quality art prints available
                 </p>
                 <a
                   href="https://hyweljones.pic-time.com"
