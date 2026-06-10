@@ -1277,7 +1277,7 @@ const PAGE_CSS = `
 @keyframes appeared-in-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 .curbism-root .intro-text { background: white; padding: 32px 40px 80px; font-family: 'DIN Condensed', 'DIN Alternate', 'Barlow Condensed', 'Oswald', sans-serif; }
 .curbism-root .intro-text h2 { font-size: clamp(28px, 4.2vw, 56px); font-weight: 900; text-transform: uppercase; letter-spacing: -0.035em; line-height: 1.15; color: #000; margin-bottom: 24px; }
-.curbism-root .intro-text p { font-size: 16px; font-weight: 400; text-transform: none; letter-spacing: normal; line-height: 1.6; color: #555; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+.curbism-root .intro-text p { font-size: 18px; font-weight: 500; text-transform: none; letter-spacing: normal; line-height: 1.6; color: #555; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
 .curbism-root .intro-cta { margin-top: 32px; display: inline-block; background: #D75F68; color: #fff; border: none; padding: 16px 28px; font-size: 14px; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; cursor: pointer; border-radius: 0; transition: background 0.2s ease; }
 .curbism-root .intro-cta:hover { background: #000; }
 .curbism-root .intro-text p.intro-cta-note { margin-top: 16px; font-size: 16px !important; font-weight: 400 !important; letter-spacing: normal !important; line-height: 1.6; color: #555; text-transform: none !important; max-width: 66.666%; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif !important; }
