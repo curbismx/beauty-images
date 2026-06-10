@@ -612,7 +612,7 @@ function Index() {
                 SEARCH NOW
               </button>
               <p className="intro-cta-note">
-                Images are delivered as Rights managed at three different sizes depending on what is chosen at checkout. Each image will be available as a download link immediately after payment, which is done through Stripe in all countries using numerous payment methods.
+                images are delivered as rights managed at three different sizes depending on what is chosen at checkout. each image will be available as a download link immediately after payment, which is done through stripe in all countries using numerous payment methods.
               </p>
 
               <div className="line-faint" />
@@ -1278,7 +1278,7 @@ const PAGE_CSS = `
 .curbism-root .intro-text p { font-size: clamp(28px, 4.2vw, 56px); font-weight: 900; text-transform: uppercase; letter-spacing: -0.035em; line-height: 1.15; color: #111; }
 .curbism-root .intro-cta { margin-top: 32px; display: inline-block; background: #D75F68; color: #fff; border: none; padding: 16px 28px; font-size: 14px; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; cursor: pointer; border-radius: 0; transition: background 0.2s ease; }
 .curbism-root .intro-cta:hover { background: #000; }
-.curbism-root .intro-text p.intro-cta-note { margin-top: 16px; font-size: 12px; font-weight: 400; letter-spacing: 0.02em; line-height: 1.6; color: #555; text-transform: none; max-width: 66.666%; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+.curbism-root .intro-text p.intro-cta-note { margin-top: 16px; font-size: 12px !important; font-weight: 400 !important; letter-spacing: normal !important; line-height: 1.6; color: #555; text-transform: none !important; max-width: 66.666%; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif !important; }
 .curbism-root .line-faint { width: 100%; height: 1px; background: #eee; margin: 32px 0 0; }
 .curbism-root .art-prints-promo { margin-top: 32px; }
 .curbism-root .art-prints-promo__title { font-size: clamp(28px, 4.2vw, 56px); font-weight: 900; letter-spacing: -0.035em; line-height: 1.15; text-transform: uppercase; color: #111; margin: 0 0 10px; font-family: 'DIN Condensed', 'DIN Alternate', 'Barlow Condensed', 'Oswald', sans-serif; }
