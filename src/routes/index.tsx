@@ -1277,7 +1277,7 @@ const PAGE_CSS = `
 .curbism-root .art-prints-promo__title { font-size: 20px; font-weight: 600; letter-spacing: 0.1em; text-transform: lowercase; color: #111; margin: 0 0 10px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
 .curbism-root .art-prints-promo__link { display: inline-block; width: 55%; min-width: 280px; max-width: 600px; text-decoration: none; color: #6b6b6b; }
 .curbism-root .art-prints-promo__img { display: block; width: 100%; height: auto; }
-.curbism-root .art-prints-promo__note { display: block; margin-top: 6px; font-size: 9px; letter-spacing: 0.08em; text-transform: lowercase; color: #6b6b6b; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+.curbism-root .art-prints-promo__note { display: block; margin-top: 6px; font-size: 14px; letter-spacing: 0.08em; text-transform: lowercase; color: #6b6b6b; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
 .curbism-root .art-prints-promo__link:hover .art-prints-promo__note { color: #D75F68; }
 @media (max-width: 768px) {
   .curbism-root .appeared-in { padding: 24px 24px 12px; }
