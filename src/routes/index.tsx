@@ -612,7 +612,7 @@ function Index() {
                 SEARCH NOW
               </button>
               <p className="intro-cta-note">
-                images are delivered as rights managed at three different sizes depending on what is chosen at checkout. each image will be available as a download link immediately after payment, which is done through stripe in all countries using numerous payment methods.
+                Images are delivered as rights managed at three different sizes depending on what is chosen at checkout. each image will be available as a download link immediately after payment, which is done through stripe in all countries using numerous payment methods.
               </p>
 
               <div className="line-faint" />
