@@ -601,7 +601,7 @@ function Index() {
                 images are exclusive to Beauty Images and are sold on a{" "}
                 <span style={{ color: "#D75F68" }}>rights managed</span> basis.
               </p>
-              <p>
+              <p className="intro-tagline">
                 All real people. Real photography. With no AI production at all.
               </p>
               <button
