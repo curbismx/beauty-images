@@ -599,8 +599,10 @@ function Index() {
               <p>
                 Providing images to high-end publications and advertising for over 20 years. All our
                 images are exclusive to Beauty Images and are sold on a{" "}
-                <span style={{ color: "#D75F68" }}>rights managed</span> basis. All real people.
-                Real photography. With no AI production at all.
+                <span style={{ color: "#D75F68" }}>rights managed</span> basis.
+              </p>
+              <p>
+                All real people. Real photography. With no AI production at all.
               </p>
               <button
                 type="button"
