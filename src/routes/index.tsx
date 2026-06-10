@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import artPrintsAsset from "@/assets/art-prints.png.asset.json";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Layers, LayoutGrid, Rows3, User } from "lucide-react";
@@ -610,6 +611,25 @@ function Index() {
               >
                 SEARCH NOW
               </button>
+
+              <div className="art-prints-promo">
+                <p className="art-prints-promo__title">
+                  MUSEUM QUALITY ART PRINTS AVAILABLE OF CERTAIN IMAGES
+                </p>
+                <a
+                  href="https://hyweljones.pic-time.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="art-prints-promo__link"
+                >
+                  <img
+                    src={artPrintsAsset.url}
+                    alt="Museum quality art prints"
+                    className="art-prints-promo__img"
+                  />
+                  <span className="art-prints-promo__note">opens in a new window</span>
+                </a>
+              </div>
             </div>
 
             <FeaturedMasonry />
@@ -1253,6 +1273,12 @@ const PAGE_CSS = `
 .curbism-root .intro-text p { font-size: clamp(28px, 4.2vw, 56px); font-weight: 900; text-transform: uppercase; letter-spacing: -0.035em; line-height: 1.15; color: #111; }
 .curbism-root .intro-cta { margin-top: 32px; display: inline-block; background: #D75F68; color: #fff; border: none; padding: 16px 28px; font-size: 14px; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; cursor: pointer; border-radius: 0; transition: background 0.2s ease; }
 .curbism-root .intro-cta:hover { background: #000; }
+.curbism-root .art-prints-promo { margin-top: 48px; }
+.curbism-root .art-prints-promo__title { font-size: 14px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: #111; margin: 0 0 14px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+.curbism-root .art-prints-promo__link { display: inline-block; width: 33%; min-width: 240px; max-width: 520px; text-decoration: none; color: #6b6b6b; }
+.curbism-root .art-prints-promo__img { display: block; width: 100%; height: auto; }
+.curbism-root .art-prints-promo__note { display: block; margin-top: 8px; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #6b6b6b; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+.curbism-root .art-prints-promo__link:hover .art-prints-promo__note { color: #D75F68; }
 @media (max-width: 768px) {
   .curbism-root .appeared-in { padding: 24px 24px 12px; }
   .curbism-root .appeared-in-track img { height: 28px; width: auto; max-width: none; padding-right: 0; margin-right: 25px; }
