@@ -624,7 +624,7 @@ function Index() {
                   MUSEUM QUALITY ART PRINTS AVAILABLE
                 </p>
                 <a
-                  href="https://hyweljones.pic-time.com"
+                  href="https://hyweljones.pic-time.com/art"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="art-prints-promo__link"
