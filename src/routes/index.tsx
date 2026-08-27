@@ -624,7 +624,7 @@ function Index() {
                   MUSEUM QUALITY ART PRINTS AVAILABLE
                 </p>
                 <a
-                  href="https://hyweljones.pic-time.com/art"
+                  href="https://www.saatchiart.com/en-gb/all?query=Hywel%20jones"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="art-prints-promo__link"
