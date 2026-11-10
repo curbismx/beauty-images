@@ -47,7 +47,6 @@ import { Route as ApiAdminUploadImageRouteImport } from './routes/api/admin/uplo
 import { Route as ApiPublicDownloadRouteImport } from './routes/api/public/download'
 import { Route as ApiPublicTrackRouteImport } from './routes/api/public/track'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
-import { Route as ApiPublicHooksKeywordPendingRouteImport } from './routes/api/public/hooks/keyword-pending'
 import { Route as ApiPublicHooksProcessPendingRouteImport } from './routes/api/public/hooks/process-pending'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as ApiPublicPreviewImageIdRouteImport } from './routes/api/public/preview-image.$id'
@@ -247,12 +246,6 @@ const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
   path: '/lovable/email/suppression',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicHooksKeywordPendingRoute =
-  ApiPublicHooksKeywordPendingRouteImport.update({
-    id: '/api/public/hooks/keyword-pending',
-    path: '/api/public/hooks/keyword-pending',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const ApiPublicHooksProcessPendingRoute =
   ApiPublicHooksProcessPendingRouteImport.update({
     id: '/api/public/hooks/process-pending',
@@ -338,7 +331,6 @@ export interface FileRoutesByFullPath {
   '/api/public/download': typeof ApiPublicDownloadRoute
   '/api/public/track': typeof ApiPublicTrackRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
-  '/api/public/hooks/keyword-pending': typeof ApiPublicHooksKeywordPendingRoute
   '/api/public/hooks/process-pending': typeof ApiPublicHooksProcessPendingRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/api/public/preview-image/$id': typeof ApiPublicPreviewImageIdRoute
@@ -386,7 +378,6 @@ export interface FileRoutesByTo {
   '/api/public/download': typeof ApiPublicDownloadRoute
   '/api/public/track': typeof ApiPublicTrackRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
-  '/api/public/hooks/keyword-pending': typeof ApiPublicHooksKeywordPendingRoute
   '/api/public/hooks/process-pending': typeof ApiPublicHooksProcessPendingRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/api/public/preview-image/$id': typeof ApiPublicPreviewImageIdRoute
@@ -436,7 +427,6 @@ export interface FileRoutesById {
   '/api/public/download': typeof ApiPublicDownloadRoute
   '/api/public/track': typeof ApiPublicTrackRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
-  '/api/public/hooks/keyword-pending': typeof ApiPublicHooksKeywordPendingRoute
   '/api/public/hooks/process-pending': typeof ApiPublicHooksProcessPendingRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/api/public/preview-image/$id': typeof ApiPublicPreviewImageIdRoute
@@ -487,7 +477,6 @@ export interface FileRouteTypes {
     | '/api/public/download'
     | '/api/public/track'
     | '/lovable/email/suppression'
-    | '/api/public/hooks/keyword-pending'
     | '/api/public/hooks/process-pending'
     | '/api/public/payments/webhook'
     | '/api/public/preview-image/$id'
@@ -535,7 +524,6 @@ export interface FileRouteTypes {
     | '/api/public/download'
     | '/api/public/track'
     | '/lovable/email/suppression'
-    | '/api/public/hooks/keyword-pending'
     | '/api/public/hooks/process-pending'
     | '/api/public/payments/webhook'
     | '/api/public/preview-image/$id'
@@ -584,7 +572,6 @@ export interface FileRouteTypes {
     | '/api/public/download'
     | '/api/public/track'
     | '/lovable/email/suppression'
-    | '/api/public/hooks/keyword-pending'
     | '/api/public/hooks/process-pending'
     | '/api/public/payments/webhook'
     | '/api/public/preview-image/$id'
@@ -623,7 +610,6 @@ export interface RootRouteChildren {
   ApiPublicDownloadRoute: typeof ApiPublicDownloadRoute
   ApiPublicTrackRoute: typeof ApiPublicTrackRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
-  ApiPublicHooksKeywordPendingRoute: typeof ApiPublicHooksKeywordPendingRoute
   ApiPublicHooksProcessPendingRoute: typeof ApiPublicHooksProcessPendingRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
   ApiPublicPreviewImageIdRoute: typeof ApiPublicPreviewImageIdRoute
@@ -902,13 +888,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailSuppressionRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/hooks/keyword-pending': {
-      id: '/api/public/hooks/keyword-pending'
-      path: '/api/public/hooks/keyword-pending'
-      fullPath: '/api/public/hooks/keyword-pending'
-      preLoaderRoute: typeof ApiPublicHooksKeywordPendingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/public/hooks/process-pending': {
       id: '/api/public/hooks/process-pending'
       path: '/api/public/hooks/process-pending'
@@ -1036,7 +1015,6 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicDownloadRoute: ApiPublicDownloadRoute,
   ApiPublicTrackRoute: ApiPublicTrackRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
-  ApiPublicHooksKeywordPendingRoute: ApiPublicHooksKeywordPendingRoute,
   ApiPublicHooksProcessPendingRoute: ApiPublicHooksProcessPendingRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
   ApiPublicPreviewImageIdRoute: ApiPublicPreviewImageIdRoute,

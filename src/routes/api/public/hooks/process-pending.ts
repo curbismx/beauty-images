@@ -257,7 +257,11 @@ export const Route = createFileRoute("/api/public/hooks/process-pending")({
         try {
           const previews = await processPreviews(supabase);
           const keywords = await processKeywords(supabase);
-          return Response.json({ ok: true, previews, keywords });
+          // Stop the every-minute schedule once no images are waiting.
+          // The database starts it again when new images arrive.
+          const { data: asleep, error: sleepErr } = await supabase.rpc("sleep_image_jobs");
+          if (sleepErr) console.error("sleep_image_jobs failed", sleepErr.message);
+          return Response.json({ ok: true, previews, keywords, asleep: asleep === true });
         } catch (e) {
           return Response.json({ ok: false, error: (e as Error).message }, { status: 500 });
         }
