@@ -1,5 +1,4 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import artPrintsAsset from "@/assets/art-prints-2.png.asset.json";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Layers, LayoutGrid, Rows3, User } from "lucide-react";
@@ -616,27 +615,6 @@ function Index() {
               <p className="intro-cta-note">
                 Images are delivered as rights managed at three different sizes. each image will be available as a download link immediately after payment through stripe.
               </p>
-
-              <div className="line-faint" />
-
-              <div className="art-prints-promo">
-                <p className="art-prints-promo__title">
-                  MUSEUM QUALITY ART PRINTS AVAILABLE
-                </p>
-                <a
-                  href="https://www.saatchiart.com/en-gb/all?query=Hywel%20jones"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="art-prints-promo__link"
-                >
-                  <img
-                    src={artPrintsAsset.url}
-                    alt="Museum quality art prints"
-                    className="art-prints-promo__img"
-                  />
-                  <span className="art-prints-promo__note">opens in a new window</span>
-                </a>
-              </div>
             </div>
 
             <FeaturedMasonry />
