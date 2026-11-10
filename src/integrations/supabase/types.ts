@@ -567,6 +567,7 @@ export type Database = {
         Returns: number
       }
       has_role: { Args: { _role: string; _user_id: string }; Returns: boolean }
+      image_jobs_waiting: { Args: never; Returns: boolean }
       move_to_dlq: {
         Args: {
           dlq_name: string
@@ -584,6 +585,8 @@ export type Database = {
           read_ct: number
         }[]
       }
+      sleep_image_jobs: { Args: never; Returns: boolean }
+      start_image_jobs: { Args: never; Returns: undefined }
     }
     Enums: {
       [_ in never]: never
