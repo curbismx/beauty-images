@@ -9,132 +9,57 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
-import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as SignupRouteImport } from './routes/signup'
-import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as RealPhotographyNoAiRouteImport } from './routes/real-photography-no-ai'
-import { Route as PrivacyRouteImport } from './routes/privacy'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as LightboxRouteImport } from './routes/lightbox'
-import { Route as LicensingRouteImport } from './routes/licensing'
-import { Route as LicenceRouteImport } from './routes/licence'
-import { Route as ImageSitemapDotxmlRouteImport } from './routes/image-sitemap[.]xml'
-import { Route as ContactRouteImport } from './routes/contact'
-import { Route as CollectionsRouteImport } from './routes/collections'
-import { Route as BasketRouteImport } from './routes/basket'
-import { Route as AdminRouteImport } from './routes/admin'
-import { Route as AccountRouteImport } from './routes/account'
-import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AboutRouteImport } from './routes/about'
+import { Route as AccountRouteImport } from './routes/account'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as BasketRouteImport } from './routes/basket'
+import { Route as CollectionsRouteImport } from './routes/collections'
+import { Route as ContactRouteImport } from './routes/contact'
+import { Route as ImageSitemapDotxmlRouteImport } from './routes/image-sitemap[.]xml'
+import { Route as LicenceRouteImport } from './routes/licence'
+import { Route as LicensingRouteImport } from './routes/licensing'
+import { Route as LightboxRouteImport } from './routes/lightbox'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as RealPhotographyNoAiRouteImport } from './routes/real-photography-no-ai'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as SignupRouteImport } from './routes/signup'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
-import { Route as StoreSplatRouteImport } from './routes/store.$'
-import { Route as ShopSplatRouteImport } from './routes/shop.$'
-import { Route as ImageIdRouteImport } from './routes/image.$id'
-import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
-import { Route as CollectionsSlugRouteImport } from './routes/collections.$slug'
-import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
-import { Route as AdminUploadRouteImport } from './routes/admin.upload'
-import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
-import { Route as AdminSalesRouteImport } from './routes/admin.sales'
-import { Route as AdminLoginRouteImport } from './routes/admin.login'
-import { Route as AdminLibraryRouteImport } from './routes/admin.library'
-import { Route as AdminFeaturedRouteImport } from './routes/admin.featured'
-import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
 import { Route as AdminAgentsRouteImport } from './routes/admin.agents'
-import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
-import { Route as ApiPublicTrackRouteImport } from './routes/api/public/track'
-import { Route as ApiPublicDownloadRouteImport } from './routes/api/public/download'
-import { Route as ApiAdminUploadImageRouteImport } from './routes/api/admin/upload-image'
+import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
+import { Route as AdminFeaturedRouteImport } from './routes/admin.featured'
+import { Route as AdminLibraryRouteImport } from './routes/admin.library'
+import { Route as AdminLoginRouteImport } from './routes/admin.login'
+import { Route as AdminSalesRouteImport } from './routes/admin.sales'
+import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
+import { Route as AdminUploadRouteImport } from './routes/admin.upload'
+import { Route as CheckoutReturnRouteImport } from './routes/checkout.return'
+import { Route as CollectionsSlugRouteImport } from './routes/collections.$slug'
+import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
+import { Route as ImageIdRouteImport } from './routes/image.$id'
+import { Route as ShopSplatRouteImport } from './routes/shop.$'
+import { Route as StoreSplatRouteImport } from './routes/store.$'
 import { Route as AdminImageIdRouteImport } from './routes/admin.image.$id'
-import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
-import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
-import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
-import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
-import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
-import { Route as ApiPublicPreviewImageIdRouteImport } from './routes/api/public/preview-image.$id'
-import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
-import { Route as ApiPublicHooksProcessPendingRouteImport } from './routes/api/public/hooks/process-pending'
+import { Route as ApiAdminUploadImageRouteImport } from './routes/api/admin/upload-image'
+import { Route as ApiPublicDownloadRouteImport } from './routes/api/public/download'
+import { Route as ApiPublicTrackRouteImport } from './routes/api/public/track'
+import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as ApiPublicHooksKeywordPendingRouteImport } from './routes/api/public/hooks/keyword-pending'
+import { Route as ApiPublicHooksProcessPendingRouteImport } from './routes/api/public/hooks/process-pending'
+import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
+import { Route as ApiPublicPreviewImageIdRouteImport } from './routes/api/public/preview-image.$id'
+import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
+import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
+import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
+import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
+import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 
-const UnsubscribeRoute = UnsubscribeRouteImport.update({
-  id: '/unsubscribe',
-  path: '/unsubscribe',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
-  id: '/sitemap.xml',
-  path: '/sitemap.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SignupRoute = SignupRouteImport.update({
-  id: '/signup',
-  path: '/signup',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ResetPasswordRoute = ResetPasswordRouteImport.update({
-  id: '/reset-password',
-  path: '/reset-password',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RealPhotographyNoAiRoute = RealPhotographyNoAiRouteImport.update({
-  id: '/real-photography-no-ai',
-  path: '/real-photography-no-ai',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PrivacyRoute = PrivacyRouteImport.update({
-  id: '/privacy',
-  path: '/privacy',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LightboxRoute = LightboxRouteImport.update({
-  id: '/lightbox',
-  path: '/lightbox',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LicensingRoute = LicensingRouteImport.update({
-  id: '/licensing',
-  path: '/licensing',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LicenceRoute = LicenceRouteImport.update({
-  id: '/licence',
-  path: '/licence',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ImageSitemapDotxmlRoute = ImageSitemapDotxmlRouteImport.update({
-  id: '/image-sitemap.xml',
-  path: '/image-sitemap.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ContactRoute = ContactRouteImport.update({
-  id: '/contact',
-  path: '/contact',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CollectionsRoute = CollectionsRouteImport.update({
-  id: '/collections',
-  path: '/collections',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BasketRoute = BasketRouteImport.update({
-  id: '/basket',
-  path: '/basket',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AccountRoute = AccountRouteImport.update({
-  id: '/account',
-  path: '/account',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -142,9 +67,84 @@ const AboutRoute = AboutRouteImport.update({
   path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const AccountRoute = AccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BasketRoute = BasketRouteImport.update({
+  id: '/basket',
+  path: '/basket',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CollectionsRoute = CollectionsRouteImport.update({
+  id: '/collections',
+  path: '/collections',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ImageSitemapDotxmlRoute = ImageSitemapDotxmlRouteImport.update({
+  id: '/image-sitemap.xml',
+  path: '/image-sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LicenceRoute = LicenceRouteImport.update({
+  id: '/licence',
+  path: '/licence',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LicensingRoute = LicensingRouteImport.update({
+  id: '/licensing',
+  path: '/licensing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LightboxRoute = LightboxRouteImport.update({
+  id: '/lightbox',
+  path: '/lightbox',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RealPhotographyNoAiRoute = RealPhotographyNoAiRouteImport.update({
+  id: '/real-photography-no-ai',
+  path: '/real-photography-no-ai',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UnsubscribeRoute = UnsubscribeRouteImport.update({
+  id: '/unsubscribe',
+  path: '/unsubscribe',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
@@ -152,64 +152,9 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminRoute,
 } as any)
-const StoreSplatRoute = StoreSplatRouteImport.update({
-  id: '/store/$',
-  path: '/store/$',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ShopSplatRoute = ShopSplatRouteImport.update({
-  id: '/shop/$',
-  path: '/shop/$',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ImageIdRoute = ImageIdRouteImport.update({
-  id: '/image/$id',
-  path: '/image/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
-  id: '/email/unsubscribe',
-  path: '/email/unsubscribe',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CollectionsSlugRoute = CollectionsSlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => CollectionsRoute,
-} as any)
-const CheckoutReturnRoute = CheckoutReturnRouteImport.update({
-  id: '/checkout/return',
-  path: '/checkout/return',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminUploadRoute = AdminUploadRouteImport.update({
-  id: '/upload',
-  path: '/upload',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminSettingsRoute = AdminSettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminSalesRoute = AdminSalesRouteImport.update({
-  id: '/sales',
-  path: '/sales',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminLoginRoute = AdminLoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminLibraryRoute = AdminLibraryRouteImport.update({
-  id: '/library',
-  path: '/library',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminFeaturedRoute = AdminFeaturedRouteImport.update({
-  id: '/featured',
-  path: '/featured',
+const AdminAgentsRoute = AdminAgentsRouteImport.update({
+  id: '/agents',
+  path: '/agents',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminCustomersRoute = AdminCustomersRouteImport.update({
@@ -217,29 +162,64 @@ const AdminCustomersRoute = AdminCustomersRouteImport.update({
   path: '/customers',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminAgentsRoute = AdminAgentsRouteImport.update({
-  id: '/agents',
-  path: '/agents',
+const AdminFeaturedRoute = AdminFeaturedRouteImport.update({
+  id: '/featured',
+  path: '/featured',
   getParentRoute: () => AdminRoute,
 } as any)
-const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
-  id: '/lovable/email/suppression',
-  path: '/lovable/email/suppression',
+const AdminLibraryRoute = AdminLibraryRouteImport.update({
+  id: '/library',
+  path: '/library',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSalesRoute = AdminSalesRouteImport.update({
+  id: '/sales',
+  path: '/sales',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSettingsRoute = AdminSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminUploadRoute = AdminUploadRouteImport.update({
+  id: '/upload',
+  path: '/upload',
+  getParentRoute: () => AdminRoute,
+} as any)
+const CheckoutReturnRoute = CheckoutReturnRouteImport.update({
+  id: '/checkout/return',
+  path: '/checkout/return',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicTrackRoute = ApiPublicTrackRouteImport.update({
-  id: '/api/public/track',
-  path: '/api/public/track',
+const CollectionsSlugRoute = CollectionsSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => CollectionsRoute,
+} as any)
+const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
+  id: '/email/unsubscribe',
+  path: '/email/unsubscribe',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicDownloadRoute = ApiPublicDownloadRouteImport.update({
-  id: '/api/public/download',
-  path: '/api/public/download',
+const ImageIdRoute = ImageIdRouteImport.update({
+  id: '/image/$id',
+  path: '/image/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiAdminUploadImageRoute = ApiAdminUploadImageRouteImport.update({
-  id: '/api/admin/upload-image',
-  path: '/api/admin/upload-image',
+const ShopSplatRoute = ShopSplatRouteImport.update({
+  id: '/shop/$',
+  path: '/shop/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StoreSplatRoute = StoreSplatRouteImport.update({
+  id: '/store/$',
+  path: '/store/$',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminImageIdRoute = AdminImageIdRouteImport.update({
@@ -247,43 +227,30 @@ const AdminImageIdRoute = AdminImageIdRouteImport.update({
   path: '/image/$id',
   getParentRoute: () => AdminRoute,
 } as any)
-const LovableEmailTransactionalSendRoute =
-  LovableEmailTransactionalSendRouteImport.update({
-    id: '/lovable/email/transactional/send',
-    path: '/lovable/email/transactional/send',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const LovableEmailTransactionalPreviewRoute =
-  LovableEmailTransactionalPreviewRouteImport.update({
-    id: '/lovable/email/transactional/preview',
-    path: '/lovable/email/transactional/preview',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const LovableEmailQueueProcessRoute =
-  LovableEmailQueueProcessRouteImport.update({
-    id: '/lovable/email/queue/process',
-    path: '/lovable/email/queue/process',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const LovableEmailAuthWebhookRoute = LovableEmailAuthWebhookRouteImport.update({
-  id: '/lovable/email/auth/webhook',
-  path: '/lovable/email/auth/webhook',
+const ApiAdminUploadImageRoute = ApiAdminUploadImageRouteImport.update({
+  id: '/api/admin/upload-image',
+  path: '/api/admin/upload-image',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
-  id: '/lovable/email/auth/preview',
-  path: '/lovable/email/auth/preview',
+const ApiPublicDownloadRoute = ApiPublicDownloadRouteImport.update({
+  id: '/api/public/download',
+  path: '/api/public/download',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicPreviewImageIdRoute = ApiPublicPreviewImageIdRouteImport.update({
-  id: '/api/public/preview-image/$id',
-  path: '/api/public/preview-image/$id',
+const ApiPublicTrackRoute = ApiPublicTrackRouteImport.update({
+  id: '/api/public/track',
+  path: '/api/public/track',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicPaymentsWebhookRoute =
-  ApiPublicPaymentsWebhookRouteImport.update({
-    id: '/api/public/payments/webhook',
-    path: '/api/public/payments/webhook',
+const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
+  id: '/lovable/email/suppression',
+  path: '/lovable/email/suppression',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicHooksKeywordPendingRoute =
+  ApiPublicHooksKeywordPendingRouteImport.update({
+    id: '/api/public/hooks/keyword-pending',
+    path: '/api/public/hooks/keyword-pending',
     getParentRoute: () => rootRouteImport,
   } as any)
 const ApiPublicHooksProcessPendingRoute =
@@ -292,10 +259,43 @@ const ApiPublicHooksProcessPendingRoute =
     path: '/api/public/hooks/process-pending',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiPublicHooksKeywordPendingRoute =
-  ApiPublicHooksKeywordPendingRouteImport.update({
-    id: '/api/public/hooks/keyword-pending',
-    path: '/api/public/hooks/keyword-pending',
+const ApiPublicPaymentsWebhookRoute =
+  ApiPublicPaymentsWebhookRouteImport.update({
+    id: '/api/public/payments/webhook',
+    path: '/api/public/payments/webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicPreviewImageIdRoute = ApiPublicPreviewImageIdRouteImport.update({
+  id: '/api/public/preview-image/$id',
+  path: '/api/public/preview-image/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
+  id: '/lovable/email/auth/preview',
+  path: '/lovable/email/auth/preview',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LovableEmailAuthWebhookRoute = LovableEmailAuthWebhookRouteImport.update({
+  id: '/lovable/email/auth/webhook',
+  path: '/lovable/email/auth/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LovableEmailQueueProcessRoute =
+  LovableEmailQueueProcessRouteImport.update({
+    id: '/lovable/email/queue/process',
+    path: '/lovable/email/queue/process',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const LovableEmailTransactionalPreviewRoute =
+  LovableEmailTransactionalPreviewRouteImport.update({
+    id: '/lovable/email/transactional/preview',
+    path: '/lovable/email/transactional/preview',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const LovableEmailTransactionalSendRoute =
+  LovableEmailTransactionalSendRouteImport.update({
+    id: '/lovable/email/transactional/send',
+    path: '/lovable/email/transactional/send',
     getParentRoute: () => rootRouteImport,
   } as any)
 
@@ -636,116 +636,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/unsubscribe': {
-      id: '/unsubscribe'
-      path: '/unsubscribe'
-      fullPath: '/unsubscribe'
-      preLoaderRoute: typeof UnsubscribeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sitemap.xml': {
-      id: '/sitemap.xml'
-      path: '/sitemap.xml'
-      fullPath: '/sitemap.xml'
-      preLoaderRoute: typeof SitemapDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/signup': {
-      id: '/signup'
-      path: '/signup'
-      fullPath: '/signup'
-      preLoaderRoute: typeof SignupRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/reset-password': {
-      id: '/reset-password'
-      path: '/reset-password'
-      fullPath: '/reset-password'
-      preLoaderRoute: typeof ResetPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/real-photography-no-ai': {
-      id: '/real-photography-no-ai'
-      path: '/real-photography-no-ai'
-      fullPath: '/real-photography-no-ai'
-      preLoaderRoute: typeof RealPhotographyNoAiRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/privacy': {
-      id: '/privacy'
-      path: '/privacy'
-      fullPath: '/privacy'
-      preLoaderRoute: typeof PrivacyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/lightbox': {
-      id: '/lightbox'
-      path: '/lightbox'
-      fullPath: '/lightbox'
-      preLoaderRoute: typeof LightboxRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/licensing': {
-      id: '/licensing'
-      path: '/licensing'
-      fullPath: '/licensing'
-      preLoaderRoute: typeof LicensingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/licence': {
-      id: '/licence'
-      path: '/licence'
-      fullPath: '/licence'
-      preLoaderRoute: typeof LicenceRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/image-sitemap.xml': {
-      id: '/image-sitemap.xml'
-      path: '/image-sitemap.xml'
-      fullPath: '/image-sitemap.xml'
-      preLoaderRoute: typeof ImageSitemapDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/contact': {
-      id: '/contact'
-      path: '/contact'
-      fullPath: '/contact'
-      preLoaderRoute: typeof ContactRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/collections': {
-      id: '/collections'
-      path: '/collections'
-      fullPath: '/collections'
-      preLoaderRoute: typeof CollectionsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/basket': {
-      id: '/basket'
-      path: '/basket'
-      fullPath: '/basket'
-      preLoaderRoute: typeof BasketRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/account': {
-      id: '/account'
-      path: '/account'
-      fullPath: '/account'
-      preLoaderRoute: typeof AccountRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -755,11 +650,116 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/account': {
+      id: '/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof AccountRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/basket': {
+      id: '/basket'
+      path: '/basket'
+      fullPath: '/basket'
+      preLoaderRoute: typeof BasketRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/collections': {
+      id: '/collections'
+      path: '/collections'
+      fullPath: '/collections'
+      preLoaderRoute: typeof CollectionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/image-sitemap.xml': {
+      id: '/image-sitemap.xml'
+      path: '/image-sitemap.xml'
+      fullPath: '/image-sitemap.xml'
+      preLoaderRoute: typeof ImageSitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/licence': {
+      id: '/licence'
+      path: '/licence'
+      fullPath: '/licence'
+      preLoaderRoute: typeof LicenceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/licensing': {
+      id: '/licensing'
+      path: '/licensing'
+      fullPath: '/licensing'
+      preLoaderRoute: typeof LicensingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lightbox': {
+      id: '/lightbox'
+      path: '/lightbox'
+      fullPath: '/lightbox'
+      preLoaderRoute: typeof LightboxRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/real-photography-no-ai': {
+      id: '/real-photography-no-ai'
+      path: '/real-photography-no-ai'
+      fullPath: '/real-photography-no-ai'
+      preLoaderRoute: typeof RealPhotographyNoAiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/unsubscribe': {
+      id: '/unsubscribe'
+      path: '/unsubscribe'
+      fullPath: '/unsubscribe'
+      preLoaderRoute: typeof UnsubscribeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/': {
@@ -769,88 +769,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/store/$': {
-      id: '/store/$'
-      path: '/store/$'
-      fullPath: '/store/$'
-      preLoaderRoute: typeof StoreSplatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/shop/$': {
-      id: '/shop/$'
-      path: '/shop/$'
-      fullPath: '/shop/$'
-      preLoaderRoute: typeof ShopSplatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/image/$id': {
-      id: '/image/$id'
-      path: '/image/$id'
-      fullPath: '/image/$id'
-      preLoaderRoute: typeof ImageIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/email/unsubscribe': {
-      id: '/email/unsubscribe'
-      path: '/email/unsubscribe'
-      fullPath: '/email/unsubscribe'
-      preLoaderRoute: typeof EmailUnsubscribeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/collections/$slug': {
-      id: '/collections/$slug'
-      path: '/$slug'
-      fullPath: '/collections/$slug'
-      preLoaderRoute: typeof CollectionsSlugRouteImport
-      parentRoute: typeof CollectionsRoute
-    }
-    '/checkout/return': {
-      id: '/checkout/return'
-      path: '/checkout/return'
-      fullPath: '/checkout/return'
-      preLoaderRoute: typeof CheckoutReturnRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/upload': {
-      id: '/admin/upload'
-      path: '/upload'
-      fullPath: '/admin/upload'
-      preLoaderRoute: typeof AdminUploadRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/settings': {
-      id: '/admin/settings'
-      path: '/settings'
-      fullPath: '/admin/settings'
-      preLoaderRoute: typeof AdminSettingsRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/sales': {
-      id: '/admin/sales'
-      path: '/sales'
-      fullPath: '/admin/sales'
-      preLoaderRoute: typeof AdminSalesRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/login': {
-      id: '/admin/login'
-      path: '/login'
-      fullPath: '/admin/login'
-      preLoaderRoute: typeof AdminLoginRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/library': {
-      id: '/admin/library'
-      path: '/library'
-      fullPath: '/admin/library'
-      preLoaderRoute: typeof AdminLibraryRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/featured': {
-      id: '/admin/featured'
-      path: '/featured'
-      fullPath: '/admin/featured'
-      preLoaderRoute: typeof AdminFeaturedRouteImport
+    '/admin/agents': {
+      id: '/admin/agents'
+      path: '/agents'
+      fullPath: '/admin/agents'
+      preLoaderRoute: typeof AdminAgentsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/customers': {
@@ -860,39 +783,88 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCustomersRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/admin/agents': {
-      id: '/admin/agents'
-      path: '/agents'
-      fullPath: '/admin/agents'
-      preLoaderRoute: typeof AdminAgentsRouteImport
+    '/admin/featured': {
+      id: '/admin/featured'
+      path: '/featured'
+      fullPath: '/admin/featured'
+      preLoaderRoute: typeof AdminFeaturedRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/lovable/email/suppression': {
-      id: '/lovable/email/suppression'
-      path: '/lovable/email/suppression'
-      fullPath: '/lovable/email/suppression'
-      preLoaderRoute: typeof LovableEmailSuppressionRouteImport
+    '/admin/library': {
+      id: '/admin/library'
+      path: '/library'
+      fullPath: '/admin/library'
+      preLoaderRoute: typeof AdminLibraryRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/login': {
+      id: '/admin/login'
+      path: '/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/sales': {
+      id: '/admin/sales'
+      path: '/sales'
+      fullPath: '/admin/sales'
+      preLoaderRoute: typeof AdminSalesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/settings': {
+      id: '/admin/settings'
+      path: '/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminSettingsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/upload': {
+      id: '/admin/upload'
+      path: '/upload'
+      fullPath: '/admin/upload'
+      preLoaderRoute: typeof AdminUploadRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/checkout/return': {
+      id: '/checkout/return'
+      path: '/checkout/return'
+      fullPath: '/checkout/return'
+      preLoaderRoute: typeof CheckoutReturnRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/track': {
-      id: '/api/public/track'
-      path: '/api/public/track'
-      fullPath: '/api/public/track'
-      preLoaderRoute: typeof ApiPublicTrackRouteImport
+    '/collections/$slug': {
+      id: '/collections/$slug'
+      path: '/$slug'
+      fullPath: '/collections/$slug'
+      preLoaderRoute: typeof CollectionsSlugRouteImport
+      parentRoute: typeof CollectionsRoute
+    }
+    '/email/unsubscribe': {
+      id: '/email/unsubscribe'
+      path: '/email/unsubscribe'
+      fullPath: '/email/unsubscribe'
+      preLoaderRoute: typeof EmailUnsubscribeRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/download': {
-      id: '/api/public/download'
-      path: '/api/public/download'
-      fullPath: '/api/public/download'
-      preLoaderRoute: typeof ApiPublicDownloadRouteImport
+    '/image/$id': {
+      id: '/image/$id'
+      path: '/image/$id'
+      fullPath: '/image/$id'
+      preLoaderRoute: typeof ImageIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/admin/upload-image': {
-      id: '/api/admin/upload-image'
-      path: '/api/admin/upload-image'
-      fullPath: '/api/admin/upload-image'
-      preLoaderRoute: typeof ApiAdminUploadImageRouteImport
+    '/shop/$': {
+      id: '/shop/$'
+      path: '/shop/$'
+      fullPath: '/shop/$'
+      preLoaderRoute: typeof ShopSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/store/$': {
+      id: '/store/$'
+      path: '/store/$'
+      fullPath: '/store/$'
+      preLoaderRoute: typeof StoreSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/image/$id': {
@@ -902,53 +874,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminImageIdRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/lovable/email/transactional/send': {
-      id: '/lovable/email/transactional/send'
-      path: '/lovable/email/transactional/send'
-      fullPath: '/lovable/email/transactional/send'
-      preLoaderRoute: typeof LovableEmailTransactionalSendRouteImport
+    '/api/admin/upload-image': {
+      id: '/api/admin/upload-image'
+      path: '/api/admin/upload-image'
+      fullPath: '/api/admin/upload-image'
+      preLoaderRoute: typeof ApiAdminUploadImageRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/lovable/email/transactional/preview': {
-      id: '/lovable/email/transactional/preview'
-      path: '/lovable/email/transactional/preview'
-      fullPath: '/lovable/email/transactional/preview'
-      preLoaderRoute: typeof LovableEmailTransactionalPreviewRouteImport
+    '/api/public/download': {
+      id: '/api/public/download'
+      path: '/api/public/download'
+      fullPath: '/api/public/download'
+      preLoaderRoute: typeof ApiPublicDownloadRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/lovable/email/queue/process': {
-      id: '/lovable/email/queue/process'
-      path: '/lovable/email/queue/process'
-      fullPath: '/lovable/email/queue/process'
-      preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
+    '/api/public/track': {
+      id: '/api/public/track'
+      path: '/api/public/track'
+      fullPath: '/api/public/track'
+      preLoaderRoute: typeof ApiPublicTrackRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/lovable/email/auth/webhook': {
-      id: '/lovable/email/auth/webhook'
-      path: '/lovable/email/auth/webhook'
-      fullPath: '/lovable/email/auth/webhook'
-      preLoaderRoute: typeof LovableEmailAuthWebhookRouteImport
+    '/lovable/email/suppression': {
+      id: '/lovable/email/suppression'
+      path: '/lovable/email/suppression'
+      fullPath: '/lovable/email/suppression'
+      preLoaderRoute: typeof LovableEmailSuppressionRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/lovable/email/auth/preview': {
-      id: '/lovable/email/auth/preview'
-      path: '/lovable/email/auth/preview'
-      fullPath: '/lovable/email/auth/preview'
-      preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/preview-image/$id': {
-      id: '/api/public/preview-image/$id'
-      path: '/api/public/preview-image/$id'
-      fullPath: '/api/public/preview-image/$id'
-      preLoaderRoute: typeof ApiPublicPreviewImageIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/payments/webhook': {
-      id: '/api/public/payments/webhook'
-      path: '/api/public/payments/webhook'
-      fullPath: '/api/public/payments/webhook'
-      preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
+    '/api/public/hooks/keyword-pending': {
+      id: '/api/public/hooks/keyword-pending'
+      path: '/api/public/hooks/keyword-pending'
+      fullPath: '/api/public/hooks/keyword-pending'
+      preLoaderRoute: typeof ApiPublicHooksKeywordPendingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/hooks/process-pending': {
@@ -958,11 +916,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksProcessPendingRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/hooks/keyword-pending': {
-      id: '/api/public/hooks/keyword-pending'
-      path: '/api/public/hooks/keyword-pending'
-      fullPath: '/api/public/hooks/keyword-pending'
-      preLoaderRoute: typeof ApiPublicHooksKeywordPendingRouteImport
+    '/api/public/payments/webhook': {
+      id: '/api/public/payments/webhook'
+      path: '/api/public/payments/webhook'
+      fullPath: '/api/public/payments/webhook'
+      preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/preview-image/$id': {
+      id: '/api/public/preview-image/$id'
+      path: '/api/public/preview-image/$id'
+      fullPath: '/api/public/preview-image/$id'
+      preLoaderRoute: typeof ApiPublicPreviewImageIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/auth/preview': {
+      id: '/lovable/email/auth/preview'
+      path: '/lovable/email/auth/preview'
+      fullPath: '/lovable/email/auth/preview'
+      preLoaderRoute: typeof LovableEmailAuthPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/auth/webhook': {
+      id: '/lovable/email/auth/webhook'
+      path: '/lovable/email/auth/webhook'
+      fullPath: '/lovable/email/auth/webhook'
+      preLoaderRoute: typeof LovableEmailAuthWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/queue/process': {
+      id: '/lovable/email/queue/process'
+      path: '/lovable/email/queue/process'
+      fullPath: '/lovable/email/queue/process'
+      preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/transactional/preview': {
+      id: '/lovable/email/transactional/preview'
+      path: '/lovable/email/transactional/preview'
+      fullPath: '/lovable/email/transactional/preview'
+      preLoaderRoute: typeof LovableEmailTransactionalPreviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lovable/email/transactional/send': {
+      id: '/lovable/email/transactional/send'
+      path: '/lovable/email/transactional/send'
+      fullPath: '/lovable/email/transactional/send'
+      preLoaderRoute: typeof LovableEmailTransactionalSendRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
