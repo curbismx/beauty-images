@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AdminSsoRouteImport } from './routes/admin-sso'
 import { Route as BasketRouteImport } from './routes/basket'
 import { Route as CollectionsRouteImport } from './routes/collections'
 import { Route as ContactRouteImport } from './routes/contact'
@@ -44,6 +45,7 @@ import { Route as ShopSplatRouteImport } from './routes/shop.$'
 import { Route as StoreSplatRouteImport } from './routes/store.$'
 import { Route as AdminImageIdRouteImport } from './routes/admin.image.$id'
 import { Route as ApiAdminUploadImageRouteImport } from './routes/api/admin/upload-image'
+import { Route as ApiPublicCurbismRouteImport } from './routes/api/public/curbism'
 import { Route as ApiPublicDownloadRouteImport } from './routes/api/public/download'
 import { Route as ApiPublicTrackRouteImport } from './routes/api/public/track'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
@@ -74,6 +76,11 @@ const AccountRoute = AccountRouteImport.update({
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminSsoRoute = AdminSsoRouteImport.update({
+  id: '/admin-sso',
+  path: '/admin-sso',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BasketRoute = BasketRouteImport.update({
@@ -231,6 +238,11 @@ const ApiAdminUploadImageRoute = ApiAdminUploadImageRouteImport.update({
   path: '/api/admin/upload-image',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicCurbismRoute = ApiPublicCurbismRouteImport.update({
+  id: '/api/public/curbism',
+  path: '/api/public/curbism',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicDownloadRoute = ApiPublicDownloadRouteImport.update({
   id: '/api/public/download',
   path: '/api/public/download',
@@ -297,6 +309,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/account': typeof AccountRoute
   '/admin': typeof AdminRouteWithChildren
+  '/admin-sso': typeof AdminSsoRoute
   '/basket': typeof BasketRoute
   '/collections': typeof CollectionsRouteWithChildren
   '/contact': typeof ContactRoute
@@ -328,6 +341,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/admin/image/$id': typeof AdminImageIdRoute
   '/api/admin/upload-image': typeof ApiAdminUploadImageRoute
+  '/api/public/curbism': typeof ApiPublicCurbismRoute
   '/api/public/download': typeof ApiPublicDownloadRoute
   '/api/public/track': typeof ApiPublicTrackRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -344,6 +358,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/account': typeof AccountRoute
+  '/admin-sso': typeof AdminSsoRoute
   '/basket': typeof BasketRoute
   '/collections': typeof CollectionsRouteWithChildren
   '/contact': typeof ContactRoute
@@ -375,6 +390,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/admin/image/$id': typeof AdminImageIdRoute
   '/api/admin/upload-image': typeof ApiAdminUploadImageRoute
+  '/api/public/curbism': typeof ApiPublicCurbismRoute
   '/api/public/download': typeof ApiPublicDownloadRoute
   '/api/public/track': typeof ApiPublicTrackRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -393,6 +409,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/account': typeof AccountRoute
   '/admin': typeof AdminRouteWithChildren
+  '/admin-sso': typeof AdminSsoRoute
   '/basket': typeof BasketRoute
   '/collections': typeof CollectionsRouteWithChildren
   '/contact': typeof ContactRoute
@@ -424,6 +441,7 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/admin/image/$id': typeof AdminImageIdRoute
   '/api/admin/upload-image': typeof ApiAdminUploadImageRoute
+  '/api/public/curbism': typeof ApiPublicCurbismRoute
   '/api/public/download': typeof ApiPublicDownloadRoute
   '/api/public/track': typeof ApiPublicTrackRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -443,6 +461,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/account'
     | '/admin'
+    | '/admin-sso'
     | '/basket'
     | '/collections'
     | '/contact'
@@ -474,6 +493,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/admin/image/$id'
     | '/api/admin/upload-image'
+    | '/api/public/curbism'
     | '/api/public/download'
     | '/api/public/track'
     | '/lovable/email/suppression'
@@ -490,6 +510,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/account'
+    | '/admin-sso'
     | '/basket'
     | '/collections'
     | '/contact'
@@ -521,6 +542,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin/image/$id'
     | '/api/admin/upload-image'
+    | '/api/public/curbism'
     | '/api/public/download'
     | '/api/public/track'
     | '/lovable/email/suppression'
@@ -538,6 +560,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/account'
     | '/admin'
+    | '/admin-sso'
     | '/basket'
     | '/collections'
     | '/contact'
@@ -569,6 +592,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/admin/image/$id'
     | '/api/admin/upload-image'
+    | '/api/public/curbism'
     | '/api/public/download'
     | '/api/public/track'
     | '/lovable/email/suppression'
@@ -587,6 +611,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   AccountRoute: typeof AccountRoute
   AdminRoute: typeof AdminRouteWithChildren
+  AdminSsoRoute: typeof AdminSsoRoute
   BasketRoute: typeof BasketRoute
   CollectionsRoute: typeof CollectionsRouteWithChildren
   ContactRoute: typeof ContactRoute
@@ -607,6 +632,7 @@ export interface RootRouteChildren {
   ShopSplatRoute: typeof ShopSplatRoute
   StoreSplatRoute: typeof StoreSplatRoute
   ApiAdminUploadImageRoute: typeof ApiAdminUploadImageRoute
+  ApiPublicCurbismRoute: typeof ApiPublicCurbismRoute
   ApiPublicDownloadRoute: typeof ApiPublicDownloadRoute
   ApiPublicTrackRoute: typeof ApiPublicTrackRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
@@ -648,6 +674,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-sso': {
+      id: '/admin-sso'
+      path: '/admin-sso'
+      fullPath: '/admin-sso'
+      preLoaderRoute: typeof AdminSsoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/basket': {
@@ -867,6 +900,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAdminUploadImageRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/curbism': {
+      id: '/api/public/curbism'
+      path: '/api/public/curbism'
+      fullPath: '/api/public/curbism'
+      preLoaderRoute: typeof ApiPublicCurbismRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/download': {
       id: '/api/public/download'
       path: '/api/public/download'
@@ -992,6 +1032,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   AccountRoute: AccountRoute,
   AdminRoute: AdminRouteWithChildren,
+  AdminSsoRoute: AdminSsoRoute,
   BasketRoute: BasketRoute,
   CollectionsRoute: CollectionsRouteWithChildren,
   ContactRoute: ContactRoute,
@@ -1012,6 +1053,7 @@ const rootRouteChildren: RootRouteChildren = {
   ShopSplatRoute: ShopSplatRoute,
   StoreSplatRoute: StoreSplatRoute,
   ApiAdminUploadImageRoute: ApiAdminUploadImageRoute,
+  ApiPublicCurbismRoute: ApiPublicCurbismRoute,
   ApiPublicDownloadRoute: ApiPublicDownloadRoute,
   ApiPublicTrackRoute: ApiPublicTrackRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
