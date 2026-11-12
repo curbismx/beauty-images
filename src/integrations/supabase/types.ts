@@ -56,6 +56,63 @@ export type Database = {
         }
         Relationships: []
       }
+      art_contacts: {
+        Row: {
+          apollo_id: string | null
+          created_at: string
+          details: Json
+          id: string
+          last_emailed_at: string | null
+          name: string
+          notes: string
+          photo_path: string | null
+          unsubscribed_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          apollo_id?: string | null
+          created_at?: string
+          details?: Json
+          id?: string
+          last_emailed_at?: string | null
+          name?: string
+          notes?: string
+          photo_path?: string | null
+          unsubscribed_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          apollo_id?: string | null
+          created_at?: string
+          details?: Json
+          id?: string
+          last_emailed_at?: string | null
+          name?: string
+          notes?: string
+          photo_path?: string | null
+          unsubscribed_at?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      art_settings: {
+        Row: {
+          fields: Json
+          id: number
+          updated_at: string
+        }
+        Insert: {
+          fields: Json
+          id?: number
+          updated_at?: string
+        }
+        Update: {
+          fields?: Json
+          id?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       customers: {
         Row: {
           company: string | null
