@@ -557,6 +557,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      curbism_visits: { Args: { p_days: number }; Returns: Json }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean

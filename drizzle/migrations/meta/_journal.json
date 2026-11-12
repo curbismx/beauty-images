@@ -8,6 +8,13 @@
       "when": 1794332017011,
       "tag": "0000_20261110170000_image_jobs_on_demand",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1794489656267,
+      "tag": "0001_curbism_admin_visits",
+      "breakpoints": true
     }
   ]
 }
