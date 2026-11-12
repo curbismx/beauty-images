@@ -86,13 +86,19 @@ async function summary() {
   const [v, published, saleRows, profileCount] = await Promise.all([
     sb.rpc("curbism_visits", { p_days: 30 }),
     sb.from("images").select("id", { count: "exact", head: true }).eq("public", true),
-    sb.from("sales").select("amount, currency, created_at, status").limit(1000),
+    sb.from("sales").select("amount, currency, created_at, status, stripe_session_id").limit(1000),
     sb.from("profiles").select("id", { count: "exact", head: true }),
   ]);
   if (v.error) throw new Error(v.error.message);
 
-  const rows = (saleRows.data ?? []) as { amount: number | null; currency: string; created_at: string; status: string }[];
-  const done = rows.filter((r) => r.status === "completed");
+  const rows = (saleRows.data ?? []) as {
+    amount: number | null;
+    currency: string;
+    created_at: string;
+    status: string;
+    stripe_session_id: string | null;
+  }[];
+  const done = rows.filter((r) => r.status === "completed" && isLive(r.stripe_session_id));
   const monthTotals: Record<string, number> = {};
   for (const r of done) {
     if (new Date(r.created_at) >= monthStart) {
@@ -186,6 +192,7 @@ async function sales() {
     .select(
       "id, created_at, amount, currency, status, image_id, user_id, customer_id, usage_type, territory, duration_months, exclusivity, download_tier, license_starts, license_ends, discount_amount, agent_code, download_count",
     )
+    .like("stripe_session_id", "cs_live_%")
     .order("created_at", { ascending: false })
     .limit(500);
   if (error) throw new Error(error.message);
@@ -234,7 +241,7 @@ async function customers() {
   const [profs, custs, saleRows] = await Promise.all([
     sb.from("profiles").select("id, email, full_name, created_at").order("created_at", { ascending: false }).limit(1000),
     sb.from("customers").select("id, email, name, company, industry, created_at").order("created_at", { ascending: false }).limit(1000),
-    sb.from("sales").select("user_id, customer_id, amount, currency, status, created_at").limit(1000),
+    sb.from("sales").select("user_id, customer_id, amount, currency, status, created_at, stripe_session_id").limit(1000),
   ]);
 
   type Person = {
@@ -277,8 +284,16 @@ async function customers() {
       });
     }
   }
-  for (const s of (saleRows.data ?? []) as { user_id: string | null; customer_id: string | null; amount: number | null; currency: string; status: string; created_at: string }[]) {
-    if (s.status !== "completed") continue;
+  for (const s of (saleRows.data ?? []) as {
+    user_id: string | null;
+    customer_id: string | null;
+    amount: number | null;
+    currency: string;
+    status: string;
+    created_at: string;
+    stripe_session_id: string | null;
+  }[]) {
+    if (s.status !== "completed" || !isLive(s.stripe_session_id)) continue;
     const e = (s.customer_id && custEmail.get(s.customer_id)) || (s.user_id && userEmail.get(s.user_id)) || null;
     const who = e ? people.get(e) : undefined;
     if (!who) continue;
@@ -303,6 +318,13 @@ async function signInLink(next: string) {
   if (!token) throw new Error("No sign-in link was made.");
   const url = `${SITE_URL}/admin-sso?t=${encodeURIComponent(token)}&next=${encodeURIComponent(page)}`;
   return { url };
+}
+
+// Only payments taken through Stripe's live mode count as sales. Test
+// payments (made while the checkout was being set up) have session ids that
+// start "cs_test_", live ones "cs_live_".
+function isLive(sessionId: unknown): boolean {
+  return typeof sessionId === "string" && sessionId.startsWith("cs_live_");
 }
 
 function uniq(list: (string | null)[]): string[] {
