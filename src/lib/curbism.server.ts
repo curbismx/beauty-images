@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import * as art from "./artDirectors.server";
 
 // The private link the Curbism admin (curbism.com/admin) uses to read this
 // site's figures. Only the Curbism server can call it: every request must
@@ -39,7 +40,7 @@ function sameKey(a: string, b: string): boolean {
   return diff === 0;
 }
 
-type Body = { action?: string; days?: number; next?: string };
+type Body = { action?: string; days?: number; next?: string } & Record<string, unknown>;
 
 export async function handleCurbism(request: Request): Promise<Response> {
   const key = process.env.CURBISM_LINK_KEY;
@@ -66,10 +67,23 @@ export async function handleCurbism(request: Request): Promise<Response> {
         return json(await customers());
       case "sso":
         return json(await signInLink(String(body.next ?? "/admin")));
+      case "art_list":
+        return json(await art.list());
+      case "art_search":
+        return json(await art.search(body));
+      case "art_bring_in":
+        return json(await art.bringIn(body));
+      case "art_update":
+        return json(await art.update(body));
+      case "art_delete":
+        return json(await art.remove(body));
+      case "art_settings":
+        return json(await art.saveSettings(body));
       default:
         return json({ error: "Unknown action." }, 400);
     }
   } catch (e) {
+    if (e instanceof art.ArtError) return json({ error: e.message }, e.status);
     console.error("[curbism]", e);
     return json({ error: e instanceof Error ? e.message : "Something went wrong." }, 500);
   }
@@ -83,11 +97,12 @@ async function summary() {
   monthStart.setUTCDate(1);
   monthStart.setUTCHours(0, 0, 0, 0);
 
-  const [v, published, saleRows, profileCount] = await Promise.all([
+  const [v, published, saleRows, profileCount, artDirectors] = await Promise.all([
     sb.rpc("curbism_visits", { p_days: 30 }),
     sb.from("images").select("id", { count: "exact", head: true }).eq("public", true),
     sb.from("sales").select("amount, currency, created_at, status, stripe_session_id").limit(1000),
     sb.from("profiles").select("id", { count: "exact", head: true }),
+    art.count(),
   ]);
   if (v.error) throw new Error(v.error.message);
 
@@ -114,6 +129,7 @@ async function summary() {
     salesCount: done.length,
     salesMonth: monthTotals,
     accounts: profileCount.count ?? 0,
+    artDirectors,
   };
 }
 
