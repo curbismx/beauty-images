@@ -15,6 +15,13 @@
       "when": 1794489656267,
       "tag": "0001_curbism_admin_visits",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794502128634,
+      "tag": "0002_art_directors",
+      "breakpoints": true
     }
   ]
 }
