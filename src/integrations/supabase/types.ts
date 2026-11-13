@@ -59,6 +59,8 @@ export type Database = {
       art_contacts: {
         Row: {
           apollo_id: string | null
+          bounce_note: string | null
+          bounced_at: string | null
           created_at: string
           details: Json
           id: string
@@ -66,11 +68,14 @@ export type Database = {
           name: string
           notes: string
           photo_path: string | null
+          queued_at: string | null
           unsubscribed_at: string | null
           updated_at: string
         }
         Insert: {
           apollo_id?: string | null
+          bounce_note?: string | null
+          bounced_at?: string | null
           created_at?: string
           details?: Json
           id?: string
@@ -78,11 +83,14 @@ export type Database = {
           name?: string
           notes?: string
           photo_path?: string | null
+          queued_at?: string | null
           unsubscribed_at?: string | null
           updated_at?: string
         }
         Update: {
           apollo_id?: string | null
+          bounce_note?: string | null
+          bounced_at?: string | null
           created_at?: string
           details?: Json
           id?: string
@@ -90,10 +98,106 @@ export type Database = {
           name?: string
           notes?: string
           photo_path?: string | null
+          queued_at?: string | null
           unsubscribed_at?: string | null
           updated_at?: string
         }
         Relationships: []
+      }
+      art_outreach: {
+        Row: {
+          daily_limit: number
+          footer: string
+          from_email: string
+          from_name: string
+          html: string
+          id: number
+          last_note: string
+          last_run_at: string | null
+          mail_uid: number
+          reply_to: string
+          running_at: string | null
+          secret: string
+          sending: boolean
+          subject: string
+          test_to: string
+          updated_at: string
+        }
+        Insert: {
+          daily_limit?: number
+          footer?: string
+          from_email?: string
+          from_name?: string
+          html?: string
+          id?: number
+          last_note?: string
+          last_run_at?: string | null
+          mail_uid?: number
+          reply_to?: string
+          running_at?: string | null
+          secret?: string
+          sending?: boolean
+          subject?: string
+          test_to?: string
+          updated_at?: string
+        }
+        Update: {
+          daily_limit?: number
+          footer?: string
+          from_email?: string
+          from_name?: string
+          html?: string
+          id?: number
+          last_note?: string
+          last_run_at?: string | null
+          mail_uid?: number
+          reply_to?: string
+          running_at?: string | null
+          secret?: string
+          sending?: boolean
+          subject?: string
+          test_to?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      art_sends: {
+        Row: {
+          contact_id: string
+          id: number
+          note: string
+          sent_at: string
+          status: string
+          subject: string
+          to_email: string
+        }
+        Insert: {
+          contact_id: string
+          id?: never
+          note?: string
+          sent_at?: string
+          status: string
+          subject?: string
+          to_email: string
+        }
+        Update: {
+          contact_id?: string
+          id?: never
+          note?: string
+          sent_at?: string
+          status?: string
+          subject?: string
+          to_email?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "art_sends_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "art_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       art_settings: {
         Row: {

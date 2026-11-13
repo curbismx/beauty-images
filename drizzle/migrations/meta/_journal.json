@@ -22,6 +22,13 @@
       "when": 1794502128634,
       "tag": "0002_art_directors",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1794585328120,
+      "tag": "0003_art_outreach",
+      "breakpoints": true
     }
   ]
 }
