@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import * as art from "./artDirectors.server";
+import * as outreach from "./outreach.server";
 
 // The private link the Curbism admin (curbism.com/admin) uses to read this
 // site's figures. Only the Curbism server can call it: every request must
@@ -79,6 +80,18 @@ export async function handleCurbism(request: Request): Promise<Response> {
         return json(await art.remove(body));
       case "art_settings":
         return json(await art.saveSettings(body));
+      case "art_outreach":
+        return json(await outreach.settings());
+      case "art_outreach_save":
+        return json(await outreach.saveSettings(body));
+      case "art_queue":
+        return json(await outreach.queue(body));
+      case "art_unqueue":
+        return json(await outreach.unqueue(body));
+      case "art_outreach_test":
+        return json(await outreach.sendTest(body));
+      case "art_outreach_run":
+        return json(await outreach.run(true));
       default:
         return json({ error: "Unknown action." }, 400);
     }

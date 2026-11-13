@@ -47,7 +47,9 @@ import { Route as AdminImageIdRouteImport } from './routes/admin.image.$id'
 import { Route as ApiAdminUploadImageRouteImport } from './routes/api/admin/upload-image'
 import { Route as ApiPublicCurbismRouteImport } from './routes/api/public/curbism'
 import { Route as ApiPublicDownloadRouteImport } from './routes/api/public/download'
+import { Route as ApiPublicOutreachRouteImport } from './routes/api/public/outreach'
 import { Route as ApiPublicTrackRouteImport } from './routes/api/public/track'
+import { Route as ApiPublicUnsubscribeRouteImport } from './routes/api/public/unsubscribe'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as ApiPublicHooksProcessPendingRouteImport } from './routes/api/public/hooks/process-pending'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
@@ -248,9 +250,19 @@ const ApiPublicDownloadRoute = ApiPublicDownloadRouteImport.update({
   path: '/api/public/download',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicOutreachRoute = ApiPublicOutreachRouteImport.update({
+  id: '/api/public/outreach',
+  path: '/api/public/outreach',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicTrackRoute = ApiPublicTrackRouteImport.update({
   id: '/api/public/track',
   path: '/api/public/track',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicUnsubscribeRoute = ApiPublicUnsubscribeRouteImport.update({
+  id: '/api/public/unsubscribe',
+  path: '/api/public/unsubscribe',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
@@ -343,7 +355,9 @@ export interface FileRoutesByFullPath {
   '/api/admin/upload-image': typeof ApiAdminUploadImageRoute
   '/api/public/curbism': typeof ApiPublicCurbismRoute
   '/api/public/download': typeof ApiPublicDownloadRoute
+  '/api/public/outreach': typeof ApiPublicOutreachRoute
   '/api/public/track': typeof ApiPublicTrackRoute
+  '/api/public/unsubscribe': typeof ApiPublicUnsubscribeRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/hooks/process-pending': typeof ApiPublicHooksProcessPendingRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -392,7 +406,9 @@ export interface FileRoutesByTo {
   '/api/admin/upload-image': typeof ApiAdminUploadImageRoute
   '/api/public/curbism': typeof ApiPublicCurbismRoute
   '/api/public/download': typeof ApiPublicDownloadRoute
+  '/api/public/outreach': typeof ApiPublicOutreachRoute
   '/api/public/track': typeof ApiPublicTrackRoute
+  '/api/public/unsubscribe': typeof ApiPublicUnsubscribeRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/hooks/process-pending': typeof ApiPublicHooksProcessPendingRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -443,7 +459,9 @@ export interface FileRoutesById {
   '/api/admin/upload-image': typeof ApiAdminUploadImageRoute
   '/api/public/curbism': typeof ApiPublicCurbismRoute
   '/api/public/download': typeof ApiPublicDownloadRoute
+  '/api/public/outreach': typeof ApiPublicOutreachRoute
   '/api/public/track': typeof ApiPublicTrackRoute
+  '/api/public/unsubscribe': typeof ApiPublicUnsubscribeRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/api/public/hooks/process-pending': typeof ApiPublicHooksProcessPendingRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -495,7 +513,9 @@ export interface FileRouteTypes {
     | '/api/admin/upload-image'
     | '/api/public/curbism'
     | '/api/public/download'
+    | '/api/public/outreach'
     | '/api/public/track'
+    | '/api/public/unsubscribe'
     | '/lovable/email/suppression'
     | '/api/public/hooks/process-pending'
     | '/api/public/payments/webhook'
@@ -544,7 +564,9 @@ export interface FileRouteTypes {
     | '/api/admin/upload-image'
     | '/api/public/curbism'
     | '/api/public/download'
+    | '/api/public/outreach'
     | '/api/public/track'
+    | '/api/public/unsubscribe'
     | '/lovable/email/suppression'
     | '/api/public/hooks/process-pending'
     | '/api/public/payments/webhook'
@@ -594,7 +616,9 @@ export interface FileRouteTypes {
     | '/api/admin/upload-image'
     | '/api/public/curbism'
     | '/api/public/download'
+    | '/api/public/outreach'
     | '/api/public/track'
+    | '/api/public/unsubscribe'
     | '/lovable/email/suppression'
     | '/api/public/hooks/process-pending'
     | '/api/public/payments/webhook'
@@ -634,7 +658,9 @@ export interface RootRouteChildren {
   ApiAdminUploadImageRoute: typeof ApiAdminUploadImageRoute
   ApiPublicCurbismRoute: typeof ApiPublicCurbismRoute
   ApiPublicDownloadRoute: typeof ApiPublicDownloadRoute
+  ApiPublicOutreachRoute: typeof ApiPublicOutreachRoute
   ApiPublicTrackRoute: typeof ApiPublicTrackRoute
+  ApiPublicUnsubscribeRoute: typeof ApiPublicUnsubscribeRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicHooksProcessPendingRoute: typeof ApiPublicHooksProcessPendingRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
@@ -914,11 +940,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicDownloadRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/outreach': {
+      id: '/api/public/outreach'
+      path: '/api/public/outreach'
+      fullPath: '/api/public/outreach'
+      preLoaderRoute: typeof ApiPublicOutreachRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/track': {
       id: '/api/public/track'
       path: '/api/public/track'
       fullPath: '/api/public/track'
       preLoaderRoute: typeof ApiPublicTrackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/unsubscribe': {
+      id: '/api/public/unsubscribe'
+      path: '/api/public/unsubscribe'
+      fullPath: '/api/public/unsubscribe'
+      preLoaderRoute: typeof ApiPublicUnsubscribeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/lovable/email/suppression': {
@@ -1055,7 +1095,9 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAdminUploadImageRoute: ApiAdminUploadImageRoute,
   ApiPublicCurbismRoute: ApiPublicCurbismRoute,
   ApiPublicDownloadRoute: ApiPublicDownloadRoute,
+  ApiPublicOutreachRoute: ApiPublicOutreachRoute,
   ApiPublicTrackRoute: ApiPublicTrackRoute,
+  ApiPublicUnsubscribeRoute: ApiPublicUnsubscribeRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicHooksProcessPendingRoute: ApiPublicHooksProcessPendingRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
