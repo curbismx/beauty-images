@@ -42,7 +42,7 @@ const strings = (v: unknown, most = 25) =>
 
 /* ------------------------------------------------------------ fields */
 
-export type FieldType = "text" | "number" | "email" | "phone" | "link" | "date" | "choice" | "tick" | "picture";
+export type FieldType = "text" | "number" | "email" | "phone" | "link" | "date" | "choice" | "tick" | "picture" | "light";
 
 export interface Field {
   id: string;
@@ -61,6 +61,8 @@ export interface Field {
 /** What the folder starts with: Apollo's details, the most useful in the list. */
 export const DEFAULT_FIELDS: Field[] = [
   { id: "picture", name: "Picture", type: "picture", on: true, list: true, apollo: true },
+  // Where the email to them is: waiting, sent, come back, or no more. Set by the sending, not by hand.
+  { id: "email_status", name: "Email", type: "light", on: true, list: true, apollo: true },
   { id: "title", name: "Job title", type: "text", on: true, list: true, apollo: true },
   { id: "company", name: "Company", type: "text", on: true, list: true, apollo: true },
   { id: "email", name: "Email address", type: "email", on: true, list: false, apollo: true },
@@ -72,7 +74,7 @@ export const DEFAULT_FIELDS: Field[] = [
   { id: "website", name: "Website", type: "link", on: true, list: false, apollo: true },
 ];
 
-const TYPES: FieldType[] = ["text", "number", "email", "phone", "link", "date", "choice", "tick", "picture"];
+const TYPES: FieldType[] = ["text", "number", "email", "phone", "link", "date", "choice", "tick", "picture", "light"];
 
 /** The settings as sent, checked: Apollo's fields always there, nothing odd let through. */
 function cleanFields(raw: unknown): Field[] {
@@ -85,7 +87,7 @@ function cleanFields(raw: unknown): Field[] {
     if (!/^[a-z0-9_]{1,40}$/.test(id) || seen.has(id)) continue;
     const known = DEFAULT_FIELDS.find((d) => d.id === id);
     const type = known ? known.type : (str(f["type"]) as FieldType);
-    if (!TYPES.includes(type) || (type === "picture" && !known)) continue;
+    if (!TYPES.includes(type) || ((type === "picture" || type === "light") && !known)) continue;
     const name = str(f["name"]).slice(0, 60) || known?.name || "Untitled";
     const field: Field = { id, name, type, on: f["on"] !== false, list: f["list"] === true };
     if (known) field.apollo = true;
@@ -95,8 +97,15 @@ function cleanFields(raw: unknown): Field[] {
     seen.add(id);
     out.push(field);
   }
-  // Apollo's own can be hidden, never lost.
-  for (const d of DEFAULT_FIELDS) if (!seen.has(d.id)) out.push({ ...d, on: false, list: false });
+  // Apollo's own can be hidden, never lost. The Email light, when it is new
+  // to these settings, goes in near the top, shown.
+  for (const d of DEFAULT_FIELDS) {
+    if (seen.has(d.id)) continue;
+    if (d.id === "email_status") {
+      const at = out.findIndex((f) => f.id === "picture") + 1;
+      out.splice(at, 0, { ...d });
+    } else out.push({ ...d, on: false, list: false });
+  }
   return out;
 }
 
@@ -131,12 +140,15 @@ interface Row {
   photo_path: string | null;
   last_emailed_at: string | null;
   unsubscribed_at: string | null;
+  queued_at: string | null;
+  bounced_at: string | null;
+  bounce_note: string | null;
   created_at: string;
   updated_at: string;
 }
 
 const COLUMNS =
-  "id, apollo_id, name, details, notes, photo_path, last_emailed_at, unsubscribed_at, created_at, updated_at";
+  "id, apollo_id, name, details, notes, photo_path, last_emailed_at, unsubscribed_at, queued_at, bounced_at, bounce_note, created_at, updated_at";
 
 /** A row as the Curbism admin takes it: its details as "values", and a link to its photo. */
 function shape(r: Row, photos: Map<string, string>) {
