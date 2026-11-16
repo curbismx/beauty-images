@@ -1,5 +1,5 @@
-# beauty13
-- [x] Install supplied source files and email banner.
-- [x] Apply supplied art-designs migration.
+# beauty14
+- [x] Install supplied files.
+- [x] Apply supplied emailed-status update.
 - [x] Verify installation.
 - [x] Request publishing.

@@ -5,7 +5,7 @@
 // OUTREACH_SMTP_PASSWORD) and never leaves the server. Server only.
 
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import { ArtError } from "./artDirectors.server";
+import { ArtError, EMAILED_LIGHT } from "./artDirectors.server";
 
 type Json = Record<string, unknown>;
 
@@ -213,6 +213,14 @@ interface Person {
   bounced_at: string | null;
 }
 
+/** After an email goes: out of the queue, dated, and the Email light switched to Emailed if it was off. */
+async function markEmailed(sb: SupabaseClient, p: Pick<Person, "id" | "details">): Promise<void> {
+  const details = { ...(p.details ?? {}) } as Record<string, unknown>;
+  if (!str(details["email_status"])) details["email_status"] = EMAILED_LIGHT;
+  const { error } = await sb.from("art_contacts").update({ queued_at: null, last_emailed_at: new Date().toISOString(), details }).eq("id", p.id);
+  if (error) throw new Error(error.message);
+}
+
 const emailOf = (p: Person) => {
   const e = str(p.details?.["email"]).toLowerCase();
   return EMAIL.test(e) ? e : "";
@@ -414,6 +422,39 @@ export async function sendTest(body: Json): Promise<{ sent: string }> {
   return { sent: to };
 }
 
+/** The saved email to one person, now, from their page. Outside the queue and the daily count. */
+export async function sendOne(body: Json): Promise<{ sent: string }> {
+  const id = str(body["id"]);
+  if (!UUID.test(id)) throw new ArtError("Which person?");
+  const sb = db();
+  const row = await readRow(sb);
+  if (!row.subject.trim() || !row.html.trim()) throw new ArtError("Write the subject and the email first.");
+  if (!process.env["OUTREACH_SMTP_USER"] || !process.env["OUTREACH_SMTP_PASSWORD"]) throw new ArtError("The mailbox's sign-in isn't in Lovable yet.", 503);
+  const { data, error } = await sb
+    .from("art_contacts")
+    .select("id, name, details, queued_at, last_emailed_at, unsubscribed_at, bounced_at")
+    .eq("id", id)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!data) throw new ArtError("That person has gone.", 404);
+  const p = data as Person;
+  const to = emailOf(p);
+  if (!to) throw new ArtError("They have no email address.");
+  if (p.unsubscribed_at) throw new ArtError("They unsubscribed, so no more emails to them.");
+  if (p.bounced_at) throw new ArtError("Their address bounced last time, so it won't be tried again.");
+  const built = await build(row, p);
+  try {
+    await deliver(row, to, built);
+  } catch (e) {
+    const err = e instanceof Error ? e : new Error(String(e));
+    await sb.from("art_sends").insert({ contact_id: p.id, to_email: to, subject: built.subject, status: "failed", note: err.message.slice(0, 300), key: built.key });
+    throw new ArtError(`It didn't send. ${err.message}`, 502);
+  }
+  await sb.from("art_sends").insert({ contact_id: p.id, to_email: to, subject: built.subject, status: "sent", key: built.key });
+  await markEmailed(sb, p);
+  return { sent: to };
+}
+
 /* ------------------------------------------------------------ the hourly run */
 
 export interface RunResult {
@@ -459,7 +500,7 @@ export async function run(force = false): Promise<RunResult> {
           try {
             await deliver(row, to, built);
             await sb.from("art_sends").insert({ contact_id: p.id, to_email: to, subject: built.subject, status: "sent", key: built.key });
-            await sb.from("art_contacts").update({ queued_at: null, last_emailed_at: new Date().toISOString() }).eq("id", p.id);
+            await markEmailed(sb, p);
             result.sent++;
           } catch (e) {
             const { SmtpError } = await import("./smtp.server");
