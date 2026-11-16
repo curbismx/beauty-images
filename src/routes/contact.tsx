@@ -51,9 +51,7 @@ const css = `
 .bi-contact-footer .cf-links a { color: #111; text-decoration: none; transition: color 0.15s ease; }
 .bi-contact-footer .cf-links a:hover { color: #D75F68; }
 .bi-contact-footer .cf-dot { color: #ccc; }
-.bi-contact-footer .cf-curbism { display: flex; align-items: center; justify-content: flex-end; padding: 0 36px 24px; font-size: 11px; letter-spacing: 0.06em; color: #999; text-decoration: none; transition: color 0.15s ease; }
-.bi-contact-footer .cf-curbism:hover { color: #D75F68; }
-@media (max-width: 768px) { .bi-contact { padding: 110px 22px 60px; } .bi-contact-logo { top: 40px; height: 36px; } .bi-contact-footer .cf-main { flex-direction: column; align-items: flex-start; gap: 26px; padding: 36px 24px; } .bi-contact-footer .cf-brand { margin-left: -24px; } .bi-contact-footer .cf-curbism { align-items: flex-start; padding: 0 24px 24px; } }
+@media (max-width: 768px) { .bi-contact { padding: 110px 22px 60px; } .bi-contact-logo { top: 40px; height: 36px; } .bi-contact-footer .cf-main { flex-direction: column; align-items: flex-start; gap: 26px; padding: 36px 24px; } .bi-contact-footer .cf-brand { margin-left: -24px; } }
 `
 
 function ContactPage() {
@@ -94,10 +92,8 @@ function ContactPage() {
           <div className="bi-contact-inner">
             <h1>Contact</h1>
             <p className="intro">
-              Any queries or support issues please contact us direct through the management company
-              <span className="mgmt-block">CURBISM</span>
-              <span className="mgmt-block"><a href="https://www.curbism.com" target="_blank" rel="noopener noreferrer">www.curbism.com</a></span>
-              <span className="mgmt-block"><a href="mailto:mail@curbism.com">mail@curbism.com</a></span>
+              Any queries or support issues, please email us direct at
+              <span className="mgmt-block"><a href="mailto:mail@beautyimages.com">mail@beautyimages.com</a></span>
               <span className="mgmt-block" style={{ marginTop: 12 }}>or fill in the form below.</span>
             </p>
             <form onSubmit={onSubmit}>
@@ -135,14 +131,6 @@ function ContactPage() {
               <Link to="/licence">Licence Agreement</Link>
             </nav>
           </div>
-          <a
-            className="cf-curbism"
-            href="https://www.curbism.com"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <span>Designed by www.curbism.com</span>
-          </a>
         </footer>
       </div>
     </>

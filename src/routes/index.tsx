@@ -612,9 +612,27 @@ function Index() {
               >
                 SEARCH NOW
               </button>
-              <p className="intro-cta-note">
-                Images are delivered as rights managed at three different sizes. each image will be available as a download link immediately after payment through stripe.
-              </p>
+              <div className="intro-cta-note">
+                <p>
+                  Every image is exclusive to Beauty Images and licensed on a rights managed basis,
+                  with four licences to choose from on each picture.
+                </p>
+                <p>
+                  Small, at 800 pixels, covers websites, social media, blogs and online editorial.
+                  Medium, at 2000 pixels, covers magazine and newspaper pages in print and online,
+                  brochures and packaging mock ups. Large, at the highest resolution we hold, covers
+                  full page print, commercial websites, brochures and presentations.
+                </p>
+                <p>
+                  Advertising, at the highest resolution, covers paid advertising in any medium,
+                  product packaging and point of sale. For the twelve months of an Advertising
+                  licence the picture comes off sale, so it is yours alone.
+                </p>
+                <p>
+                  Every licence runs for twelve months, worldwide, in print and digital. Pay online
+                  through Stripe and your download link is ready the moment payment goes through.
+                </p>
+              </div>
             </div>
 
             <FeaturedMasonry />
@@ -1259,7 +1277,9 @@ const PAGE_CSS = `
 .curbism-root .intro-text p.intro-tagline { font-weight: 700; }
 .curbism-root .intro-cta { margin-top: 32px; display: inline-block; background: #D75F68; color: #fff; border: none; padding: 16px 28px; font-size: 14px; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; cursor: pointer; border-radius: 0; transition: background 0.2s ease; }
 .curbism-root .intro-cta:hover { background: #000; }
-.curbism-root .intro-text p.intro-cta-note { margin-top: 36px; font-size: 16px !important; font-weight: 400 !important; letter-spacing: normal !important; line-height: 1.6; color: #555; text-transform: none !important; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif !important; }
+.curbism-root .intro-text .intro-cta-note { margin-top: 40px; max-width: 960px; }
+.curbism-root .intro-text .intro-cta-note p { font-size: 22px; font-weight: 500; letter-spacing: normal; line-height: 1.5; color: #333; text-transform: none; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; margin: 0 0 20px; }
+.curbism-root .intro-text .intro-cta-note p:last-child { margin-bottom: 0; }
 .curbism-root .line-faint { width: 100%; height: 1px; background: #eee; margin: 32px 0 0; }
 .curbism-root .art-prints-promo { margin-top: 32px; }
 .curbism-root .intro-text p.art-prints-promo__title { font-family: inherit; font-size: clamp(22px, 3.4vw, 44px); font-weight: 900; letter-spacing: -0.035em; line-height: 1.15; color: #111; margin: 0 0 10px; }
@@ -1273,6 +1293,8 @@ const PAGE_CSS = `
   .curbism-root .intro-text { padding: 12px 24px 40px; max-width: 100%; }
   .curbism-root .intro-text h2 { font-size: clamp(24px, 6.5vw, 40px); }
   .curbism-root .intro-text p { font-size: 16px; }
+  .curbism-root .intro-text .intro-cta-note { margin-top: 28px; }
+  .curbism-root .intro-text .intro-cta-note p { font-size: 18px; margin-bottom: 16px; }
   .curbism-root .art-prints-promo__link { width: 100%; min-width: auto; max-width: none; }
 }
 

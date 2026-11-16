@@ -62,7 +62,7 @@ export const template = {
   component: ContactFormEmail,
   subject: 'New contact form submission — BEAUTYIMAGES',
   displayName: 'Contact form submission',
-  to: 'mail@curbism.com',
+  to: 'mail@beautyimages.com',
   previewData: {
     name: 'Jane Doe',
     email: 'jane@example.com',
