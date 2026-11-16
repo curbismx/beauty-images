@@ -614,23 +614,14 @@ function Index() {
               </button>
               <div className="intro-cta-note">
                 <p>
-                  Every image is exclusive to Beauty Images and licensed on a rights managed basis,
-                  with four licences to choose from on each picture.
+                  Every image is exclusive to Beauty Images and licensed on a rights managed basis.
+                  Small is for web and social, Medium for editorial print and online, Large for full
+                  page print and commercial use, and Advertising for paid advertising and packaging,
+                  with the picture off sale for twelve months so it is yours alone.
                 </p>
                 <p>
-                  Small, at 800 pixels, covers websites, social media, blogs and online editorial.
-                  Medium, at 2000 pixels, covers magazine and newspaper pages in print and online,
-                  brochures and packaging mock ups. Large, at the highest resolution we hold, covers
-                  full page print, commercial websites, brochures and presentations.
-                </p>
-                <p>
-                  Advertising, at the highest resolution, covers paid advertising in any medium,
-                  product packaging and point of sale. For the twelve months of an Advertising
-                  licence the picture comes off sale, so it is yours alone.
-                </p>
-                <p>
-                  Every licence runs for twelve months, worldwide, in print and digital. Pay online
-                  through Stripe and your download link is ready the moment payment goes through.
+                  Every licence runs for twelve months, worldwide, in print and digital, with your
+                  download link ready the moment payment goes through Stripe.
                 </p>
               </div>
             </div>
@@ -1277,8 +1268,8 @@ const PAGE_CSS = `
 .curbism-root .intro-text p.intro-tagline { font-weight: 700; }
 .curbism-root .intro-cta { margin-top: 32px; display: inline-block; background: #D75F68; color: #fff; border: none; padding: 16px 28px; font-size: 14px; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; cursor: pointer; border-radius: 0; transition: background 0.2s ease; }
 .curbism-root .intro-cta:hover { background: #000; }
-.curbism-root .intro-text .intro-cta-note { margin-top: 40px; max-width: 960px; }
-.curbism-root .intro-text .intro-cta-note p { font-size: 22px; font-weight: 500; letter-spacing: normal; line-height: 1.5; color: #333; text-transform: none; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; margin: 0 0 20px; }
+.curbism-root .intro-text .intro-cta-note { margin-top: 36px; }
+.curbism-root .intro-text .intro-cta-note p { margin: 0 0 16px; }
 .curbism-root .intro-text .intro-cta-note p:last-child { margin-bottom: 0; }
 .curbism-root .line-faint { width: 100%; height: 1px; background: #eee; margin: 32px 0 0; }
 .curbism-root .art-prints-promo { margin-top: 32px; }
@@ -1294,7 +1285,6 @@ const PAGE_CSS = `
   .curbism-root .intro-text h2 { font-size: clamp(24px, 6.5vw, 40px); }
   .curbism-root .intro-text p { font-size: 16px; }
   .curbism-root .intro-text .intro-cta-note { margin-top: 28px; }
-  .curbism-root .intro-text .intro-cta-note p { font-size: 18px; margin-bottom: 16px; }
   .curbism-root .art-prints-promo__link { width: 100%; min-width: auto; max-width: none; }
 }
 
