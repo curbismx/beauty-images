@@ -50,6 +50,13 @@
       "when": 1794848978346,
       "tag": "0006_bi_advertising_hold",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1794862480569,
+      "tag": "0007_bi_art_designs",
+      "breakpoints": true
     }
   ]
 }

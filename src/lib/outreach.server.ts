@@ -148,6 +148,59 @@ export async function saveSettings(body: Json): Promise<{ settings: Settings; st
   return settings();
 }
 
+/* ---------------------------------------------------------- the designs */
+
+export interface Design {
+  id: string;
+  name: string;
+  html: string;
+  created_at: string;
+}
+
+const DESIGNS_MOST = 30;
+const NAME_MOST = 80;
+
+/** The saved designs, newest first. */
+export async function designs(): Promise<{ designs: Design[] }> {
+  const { data, error } = await db().from("art_designs").select("id, name, html, created_at").order("created_at", { ascending: false }).limit(DESIGNS_MOST);
+  if (error) throw new Error(error.message);
+  return { designs: (data ?? []) as Design[] };
+}
+
+/** Keeps an uploaded design under its file name; the same name again replaces it. */
+export async function saveDesign(body: Json): Promise<{ designs: Design[]; id: string }> {
+  const name = str(body["name"]).replace(/\.html?$/i, "").slice(0, NAME_MOST);
+  const html = typeof body["html"] === "string" ? body["html"] : "";
+  if (!name) throw new ArtError("The design needs a name.");
+  if (!html.trim()) throw new ArtError("That file is empty.");
+  if (html.length > HTML_MOST) throw new ArtError("The design's HTML is too long.");
+  const sb = db();
+  const { data: had, error: findError } = await sb.from("art_designs").select("id").ilike("name", name).maybeSingle();
+  if (findError) throw new Error(findError.message);
+  let id: string;
+  if (had) {
+    const { error } = await sb.from("art_designs").update({ html, name, created_at: new Date().toISOString() }).eq("id", had.id);
+    if (error) throw new Error(error.message);
+    id = had.id as string;
+  } else {
+    const { count: n, error: countError } = await sb.from("art_designs").select("id", { count: "exact", head: true });
+    if (countError) throw new Error(countError.message);
+    if ((n ?? 0) >= DESIGNS_MOST) throw new ArtError(`That's ${DESIGNS_MOST} designs already. Delete one first.`);
+    const { data, error } = await sb.from("art_designs").insert({ name, html }).select("id").single();
+    if (error) throw new Error(error.message);
+    id = data.id as string;
+  }
+  return { ...(await designs()), id };
+}
+
+export async function deleteDesign(body: Json): Promise<{ designs: Design[] }> {
+  const id = str(body["id"]);
+  if (!UUID.test(id)) throw new ArtError("Which design?");
+  const { error } = await db().from("art_designs").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+  return designs();
+}
+
 /* ------------------------------------------------------------ the queue */
 
 interface Person {
@@ -275,18 +328,45 @@ async function sign(secret: string, id: string): Promise<string> {
 
 const unsubscribeUrl = async (secret: string, id: string) => `${SITE}/api/public/unsubscribe?c=${id}&t=${await sign(secret, id)}`;
 
+/** The link that logs a click against one email, then sends the reader on. */
+const clickUrl = async (secret: string, key: string, url: string) =>
+  `${SITE}/api/public/c?k=${key}&u=${encodeURIComponent(url)}&t=${await sign(secret, `click:${key}:${url}`)}`;
+
+/** The invisible picture that logs an open. */
+const openPixel = async (secret: string, key: string) =>
+  `<img src="${SITE}/api/public/o?k=${key}&amp;t=${await sign(secret, `open:${key}`)}" width="1" height="1" alt="" style="display:block;width:1px;height:1px;border:0;">`;
+
+/** Every web link in the design goes through the click log. Mail links and the unsubscribe link are left alone. */
+async function trackLinks(secret: string, key: string, html: string): Promise<string> {
+  const links = [...html.matchAll(/href="(https?:\/\/[^"]+)"/gi)];
+  const seen = new Map<string, string>();
+  for (const m of links) {
+    const url = m[1]!.replace(/&amp;/g, "&");
+    if (!seen.has(url)) seen.set(url, await clickUrl(secret, key, url));
+  }
+  return html.replace(/href="(https?:\/\/[^"]+)"/gi, (whole, raw: string) => {
+    const tracked = seen.get(raw.replace(/&amp;/g, "&"));
+    return tracked ? `href="${escapeHtml(tracked)}"` : whole;
+  });
+}
+
 interface Built {
   subject: string;
   html: string;
   text: string;
   unsubscribe: string;
+  key: string;
 }
 
-/** The email for one person: subject and design filled in, the footer and the unsubscribe link underneath. */
+/** The email for one person: subject and design filled in, links and an open pixel tracked, the footer and the unsubscribe link underneath. */
 async function build(row: Row, p: { id: string; name: string; details: Record<string, unknown> | null }): Promise<Built> {
+  const key = crypto.randomUUID();
   const unsubscribe = await unsubscribeUrl(row.secret, p.id);
   const subject = fill(row.subject, p, false);
-  let html = fill(row.html, p, true);
+  let html = await trackLinks(row.secret, key, fill(row.html, p, true));
+  const pixel = await openPixel(row.secret, key);
+  if (/<\/body>/i.test(html)) html = html.replace(/<\/body>/i, `${pixel}</body>`);
+  else html += pixel;
   const footerHtml = `<p style="margin:28px 0 0;font:12px/1.6 -apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;color:#8e8e93">${
     row.footer ? `${escapeHtml(row.footer)}<br>` : ""
   }<a href="${unsubscribe}" style="color:#8e8e93">Unsubscribe</a></p>`;
@@ -294,7 +374,7 @@ async function build(row: Row, p: { id: string; name: string; details: Record<st
   else if (/<\/body>/i.test(html)) html = html.replace(/<\/body>/i, `${footerHtml}</body>`);
   else html += footerHtml;
   const text = `${textOf(fill(row.html, p, false))}\n\n${row.footer ? `${row.footer}\n` : ""}Unsubscribe: ${unsubscribe}`;
-  return { subject, html, text, unsubscribe };
+  return { subject, html, text, unsubscribe, key };
 }
 
 /** Sends one email, or throws. */
@@ -378,14 +458,14 @@ export async function run(force = false): Promise<RunResult> {
           const built = await build(row, p);
           try {
             await deliver(row, to, built);
-            await sb.from("art_sends").insert({ contact_id: p.id, to_email: to, subject: built.subject, status: "sent" });
+            await sb.from("art_sends").insert({ contact_id: p.id, to_email: to, subject: built.subject, status: "sent", key: built.key });
             await sb.from("art_contacts").update({ queued_at: null, last_emailed_at: new Date().toISOString() }).eq("id", p.id);
             result.sent++;
           } catch (e) {
             const { SmtpError } = await import("./smtp.server");
             const err = e instanceof Error ? e : new Error(String(e));
             const stage = e instanceof SmtpError ? e.stage : "";
-            await sb.from("art_sends").insert({ contact_id: p.id, to_email: to, subject: built.subject, status: "failed", note: err.message.slice(0, 300) });
+            await sb.from("art_sends").insert({ contact_id: p.id, to_email: to, subject: built.subject, status: "failed", note: err.message.slice(0, 300), key: built.key });
             result.failed++;
             if (stage === "to") {
               // Their address was refused: it has come back before it went.
@@ -477,6 +557,130 @@ async function checkBounces(sb: SupabaseClient, row: Row): Promise<{ read: numbe
 }
 
 /* ------------------------------------------------------------ unsubscribe */
+
+/* --------------------------------------------------------- opens and clicks */
+
+/** An email's open pixel loaded: logged when the key and token are real, silently otherwise. */
+export async function opened(key: string, token: string): Promise<void> {
+  if (!UUID.test(key)) return;
+  const sb = db();
+  const row = await readRow(sb);
+  if (token !== (await sign(row.secret, `open:${key}`))) return;
+  const { data } = await sb.from("art_sends").select("id, opens, opened_at").eq("key", key).maybeSingle();
+  if (!data) return;
+  await sb
+    .from("art_sends")
+    .update({ opens: ((data.opens as number) ?? 0) + 1, opened_at: (data.opened_at as string | null) ?? new Date().toISOString() })
+    .eq("id", data.id);
+}
+
+/** A tracked link clicked: the real address to send the reader on to, or null when the link isn't ours. */
+export async function clicked(key: string, url: string, token: string): Promise<string | null> {
+  if (!UUID.test(key) || !/^https?:\/\//i.test(url) || url.length > 2000) return null;
+  const sb = db();
+  const row = await readRow(sb);
+  if (token !== (await sign(row.secret, `click:${key}:${url}`))) return null;
+  const { data } = await sb.from("art_sends").select("id, clicks, clicked_at, opened_at").eq("key", key).maybeSingle();
+  if (data) {
+    const now = new Date().toISOString();
+    await sb
+      .from("art_sends")
+      .update({
+        clicks: ((data.clicks as number) ?? 0) + 1,
+        clicked_at: (data.clicked_at as string | null) ?? now,
+        last_url: url.slice(0, 500),
+        // A click is an open too, whether or not the pictures loaded.
+        opened_at: (data.opened_at as string | null) ?? now,
+      })
+      .eq("id", data.id);
+  }
+  return url;
+}
+
+/* ------------------------------------------------------------ the sends list */
+
+export interface SendRow {
+  id: number;
+  contact_id: string;
+  name: string;
+  company: string;
+  to_email: string;
+  subject: string;
+  status: string;
+  note: string;
+  sent_at: string;
+  opened_at: string | null;
+  opens: number;
+  clicked_at: string | null;
+  clicks: number;
+  last_url: string;
+  unsubscribed_at: string | null;
+}
+
+export interface SendTotals {
+  sent: number;
+  opened: number;
+  clicked: number;
+  failed: number;
+  bounced: number;
+  unsubscribed: number;
+}
+
+const SENDS_MOST = 2000;
+
+/** Every email that went out, newest first, with its opens and clicks, for the admin's Emails page. */
+export async function sends(): Promise<{ sends: SendRow[]; totals: SendTotals }> {
+  const sb = db();
+  const { data, error } = await sb
+    .from("art_sends")
+    .select("id, contact_id, to_email, subject, status, note, sent_at, opened_at, opens, clicked_at, clicks, last_url, art_contacts ( name, details, unsubscribed_at )")
+    .neq("status", "test")
+    .order("sent_at", { ascending: false })
+    .limit(SENDS_MOST);
+  if (error) throw new Error(error.message);
+  type Raw = {
+    id: number;
+    contact_id: string;
+    to_email: string;
+    subject: string;
+    status: string;
+    note: string;
+    sent_at: string;
+    opened_at: string | null;
+    opens: number;
+    clicked_at: string | null;
+    clicks: number;
+    last_url: string;
+    art_contacts: { name: string; details: Record<string, unknown> | null; unsubscribed_at: string | null } | null;
+  };
+  const rows = ((data ?? []) as unknown as Raw[]).map((r): SendRow => ({
+    id: r.id,
+    contact_id: r.contact_id,
+    name: r.art_contacts?.name ?? "",
+    company: str(r.art_contacts?.details?.["company"]),
+    to_email: r.to_email,
+    subject: r.subject,
+    status: r.status,
+    note: r.note,
+    sent_at: r.sent_at,
+    opened_at: r.opened_at,
+    opens: r.opens ?? 0,
+    clicked_at: r.clicked_at,
+    clicks: r.clicks ?? 0,
+    last_url: r.last_url ?? "",
+    unsubscribed_at: r.art_contacts?.unsubscribed_at ?? null,
+  }));
+  const sent = rows.filter((r) => r.status === "sent");
+  const totals: SendTotals = {
+    sent: sent.length,
+    opened: sent.filter((r) => r.opened_at).length,
+    clicked: sent.filter((r) => r.clicked_at).length,
+    failed: rows.filter((r) => r.status === "failed").length,
+    bounced: rows.filter((r) => r.status === "bounced").length,
+    unsubscribed: new Set(sent.filter((r) => r.unsubscribed_at).map((r) => r.contact_id)).size,
+  };
+  return { sends: rows, totals };
+}
 
 /** The link under every email: the person asked for no more. */
 export async function unsubscribe(contactId: string, token: string): Promise<boolean> {

@@ -91,6 +91,14 @@ export async function handleCurbism(request: Request): Promise<Response> {
         return json(await outreach.unqueue(body));
       case "art_outreach_test":
         return json(await outreach.sendTest(body));
+      case "art_designs":
+        return json(await outreach.designs());
+      case "art_design_save":
+        return json(await outreach.saveDesign(body));
+      case "art_design_delete":
+        return json(await outreach.deleteDesign(body));
+      case "art_sends":
+        return json(await outreach.sends());
       case "art_outreach_run":
         return json(await outreach.run(true));
       default:
