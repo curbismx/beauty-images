@@ -363,8 +363,8 @@ export type Database = {
           category: string | null
           created_at: string
           featured: boolean
-          filename: string
           held_until: string | null
+          filename: string
           id: string
           image_number: number
           keyworded_at: string | null
@@ -387,8 +387,8 @@ export type Database = {
           category?: string | null
           created_at?: string
           featured?: boolean
-          filename: string
           held_until?: string | null
+          filename: string
           id?: string
           image_number: number
           keyworded_at?: string | null
@@ -411,8 +411,8 @@ export type Database = {
           category?: string | null
           created_at?: string
           featured?: boolean
-          filename?: string
           held_until?: string | null
+          filename?: string
           id?: string
           image_number?: number
           keyworded_at?: string | null
@@ -753,7 +753,6 @@ export type Database = {
           read_ct: number
         }[]
       }
-      release_held_images: { Args: never; Returns: number }
       sleep_image_jobs: { Args: never; Returns: boolean }
       start_image_jobs: { Args: never; Returns: undefined }
     }
