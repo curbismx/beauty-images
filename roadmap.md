@@ -1,5 +1,5 @@
 # beauty14
 - [x] Install supplied files.
-- [ ] Apply supplied emailed-status update.
-- [ ] Verify installation.
+- [x] Apply supplied emailed-status update.
+- [x] Verify installation.
 - [ ] Request publishing.
