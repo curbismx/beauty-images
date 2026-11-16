@@ -17,7 +17,7 @@ export const submitContactForm = createServerFn({ method: 'POST' })
     const result = await sendTransactionalEmail({
       supabase: supabaseAdmin,
       templateName: 'contact-form',
-      recipientEmail: 'mail@curbism.com',
+      recipientEmail: 'mail@beautyimages.com',
       idempotencyKey,
       templateData: {
         name: data.name,
@@ -28,7 +28,7 @@ export const submitContactForm = createServerFn({ method: 'POST' })
 
     if (!result.success && result.reason !== 'already_queued') {
       console.error('Contact form email failed', result)
-      throw new Error('Failed to send message. Please try again or email mail@curbism.com directly.')
+      throw new Error('Failed to send message. Please try again or email mail@beautyimages.com directly.')
     }
 
     return { success: true }
