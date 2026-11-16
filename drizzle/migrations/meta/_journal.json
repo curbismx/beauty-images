@@ -43,6 +43,13 @@
       "when": 1794837627473,
       "tag": "0005_bi_people_only",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794848978346,
+      "tag": "0006_bi_advertising_hold",
+      "breakpoints": true
     }
   ]
 }
