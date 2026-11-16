@@ -675,6 +675,7 @@ export type Database = {
           first_seen_at: string
           id: string
           ip: string
+          is_bot: boolean
           last_seen_at: string
           path: string | null
           referer: string | null
@@ -689,6 +690,7 @@ export type Database = {
           first_seen_at?: string
           id?: string
           ip: string
+          is_bot?: boolean
           last_seen_at?: string
           path?: string | null
           referer?: string | null
@@ -703,6 +705,7 @@ export type Database = {
           first_seen_at?: string
           id?: string
           ip?: string
+          is_bot?: boolean
           last_seen_at?: string
           path?: string | null
           referer?: string | null

@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { isBot } from "@/lib/browser";
 
 export const Route = createFileRoute("/api/public/track")({
   server: {
@@ -23,6 +24,13 @@ export const Route = createFileRoute("/api/public/track")({
           let city = headers.get("cf-ipcity") || null;
           let region = headers.get("cf-region") || null;
           const userAgent = headers.get("user-agent") || null;
+          // Robots, crawlers, link previewers, monitors and scripts are not visitors.
+          if (isBot(userAgent)) {
+            return new Response(JSON.stringify({ ok: true }), {
+              status: 200,
+              headers: { "content-type": "application/json" },
+            });
+          }
           const referer = body.referer || headers.get("referer") || null;
           const path = body.path || null;
 
@@ -51,22 +59,20 @@ export const Route = createFileRoute("/api/public/track")({
           const today = new Date().toISOString().slice(0, 10);
 
           // Upsert: one row per ip per day
-          const { error } = await supabaseAdmin
-            .from("visitors")
-            .upsert(
-              {
-                ip,
-                visit_date: today,
-                country,
-                city,
-                region,
-                user_agent: userAgent,
-                referer,
-                path,
-                last_seen_at: new Date().toISOString(),
-              },
-              { onConflict: "ip,visit_date", ignoreDuplicates: false },
-            );
+          const { error } = await supabaseAdmin.from("visitors").upsert(
+            {
+              ip,
+              visit_date: today,
+              country,
+              city,
+              region,
+              user_agent: userAgent,
+              referer,
+              path,
+              last_seen_at: new Date().toISOString(),
+            },
+            { onConflict: "ip,visit_date", ignoreDuplicates: false },
+          );
 
           if (error) {
             // increment visit_count on conflict by separate update

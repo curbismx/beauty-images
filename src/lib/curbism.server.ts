@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import * as art from "./artDirectors.server";
 import * as outreach from "./outreach.server";
+import { browserLabel } from "./browser";
 
 // The private link the Curbism admin (curbism.com/admin) uses to read this
 // site's figures. Only the Curbism server can call it: every request must
@@ -153,6 +154,7 @@ type VisitorRow = {
   visit_date: string;
   country: string | null;
   city: string | null;
+  user_agent: string | null;
   referer: string | null;
   path: string | null;
   first_seen_at: string;
@@ -168,7 +170,10 @@ async function visits(days: number) {
     sb.rpc("curbism_visits", { p_days: n }),
     sb
       .from("visitors")
-      .select("ip, visit_date, country, city, referer, path, first_seen_at, last_seen_at")
+      .select(
+        "ip, visit_date, country, city, user_agent, referer, path, first_seen_at, last_seen_at",
+      )
+      .eq("is_bot", false)
       .order("last_seen_at", { ascending: false })
       .limit(50),
   ]);
@@ -197,12 +202,16 @@ async function visits(days: number) {
       const list = (byKey.get(`${r.ip}|${r.visit_date}`) ?? []).slice().reverse();
       const seconds =
         list.length >= 2
-          ? Math.max(0, Math.round((Date.parse(list[list.length - 1].at) - Date.parse(list[0].at)) / 1000))
+          ? Math.max(
+              0,
+              Math.round((Date.parse(list[list.length - 1].at) - Date.parse(list[0].at)) / 1000),
+            )
           : 0;
       return {
         when: r.last_seen_at,
         country: r.country,
         city: r.city,
+        browser: browserLabel(r.user_agent),
         referer: r.referer,
         firstPage: r.path,
         pages: list.map((x) => x.path),
@@ -242,9 +251,27 @@ async function sales() {
       ? sb.from("customers").select("id, email, name, company").in("id", customerIds)
       : Promise.resolve({ data: [] }),
   ]);
-  const img = new Map(((imgs.data ?? []) as { id: string; image_number: number; title: string | null }[]).map((i) => [i.id, i]));
-  const prof = new Map(((profs.data ?? []) as { id: string; email: string | null; full_name: string | null }[]).map((p) => [p.id, p]));
-  const cust = new Map(((custs.data ?? []) as { id: string; email: string; name: string | null; company: string | null }[]).map((c) => [c.id, c]));
+  const img = new Map(
+    ((imgs.data ?? []) as { id: string; image_number: number; title: string | null }[]).map((i) => [
+      i.id,
+      i,
+    ]),
+  );
+  const prof = new Map(
+    ((profs.data ?? []) as { id: string; email: string | null; full_name: string | null }[]).map(
+      (p) => [p.id, p],
+    ),
+  );
+  const cust = new Map(
+    (
+      (custs.data ?? []) as {
+        id: string;
+        email: string;
+        name: string | null;
+        company: string | null;
+      }[]
+    ).map((c) => [c.id, c]),
+  );
 
   return {
     sales: rows.map((r) => {
@@ -268,9 +295,20 @@ async function sales() {
 async function customers() {
   const sb = db();
   const [profs, custs, saleRows] = await Promise.all([
-    sb.from("profiles").select("id, email, full_name, created_at").order("created_at", { ascending: false }).limit(1000),
-    sb.from("customers").select("id, email, name, company, industry, created_at").order("created_at", { ascending: false }).limit(1000),
-    sb.from("sales").select("user_id, customer_id, amount, currency, status, created_at, stripe_session_id").limit(1000),
+    sb
+      .from("profiles")
+      .select("id, email, full_name, created_at")
+      .order("created_at", { ascending: false })
+      .limit(1000),
+    sb
+      .from("customers")
+      .select("id, email, name, company, industry, created_at")
+      .order("created_at", { ascending: false })
+      .limit(1000),
+    sb
+      .from("sales")
+      .select("user_id, customer_id, amount, currency, status, created_at, stripe_session_id")
+      .limit(1000),
   ]);
 
   type Person = {
@@ -288,16 +326,35 @@ async function customers() {
   const userEmail = new Map<string, string>();
   const custEmail = new Map<string, string>();
 
-  for (const p of (profs.data ?? []) as { id: string; email: string | null; full_name: string | null; created_at: string }[]) {
+  for (const p of (profs.data ?? []) as {
+    id: string;
+    email: string | null;
+    full_name: string | null;
+    created_at: string;
+  }[]) {
     if (!p.email) continue;
     const e = p.email.toLowerCase();
     userEmail.set(p.id, e);
     people.set(e, {
-      email: p.email, name: p.full_name, company: null, industry: null, joined: p.created_at,
-      account: true, purchases: 0, spent: {}, lastPurchase: null,
+      email: p.email,
+      name: p.full_name,
+      company: null,
+      industry: null,
+      joined: p.created_at,
+      account: true,
+      purchases: 0,
+      spent: {},
+      lastPurchase: null,
     });
   }
-  for (const c of (custs.data ?? []) as { id: string; email: string; name: string | null; company: string | null; industry: string | null; created_at: string }[]) {
+  for (const c of (custs.data ?? []) as {
+    id: string;
+    email: string;
+    name: string | null;
+    company: string | null;
+    industry: string | null;
+    created_at: string;
+  }[]) {
     const e = c.email.toLowerCase();
     custEmail.set(c.id, e);
     const had = people.get(e);
@@ -308,8 +365,15 @@ async function customers() {
       if (c.created_at < had.joined) had.joined = c.created_at;
     } else {
       people.set(e, {
-        email: c.email, name: c.name, company: c.company, industry: c.industry, joined: c.created_at,
-        account: false, purchases: 0, spent: {}, lastPurchase: null,
+        email: c.email,
+        name: c.name,
+        company: c.company,
+        industry: c.industry,
+        joined: c.created_at,
+        account: false,
+        purchases: 0,
+        spent: {},
+        lastPurchase: null,
       });
     }
   }
@@ -323,7 +387,10 @@ async function customers() {
     stripe_session_id: string | null;
   }[]) {
     if (s.status !== "completed" || !isLive(s.stripe_session_id)) continue;
-    const e = (s.customer_id && custEmail.get(s.customer_id)) || (s.user_id && userEmail.get(s.user_id)) || null;
+    const e =
+      (s.customer_id && custEmail.get(s.customer_id)) ||
+      (s.user_id && userEmail.get(s.user_id)) ||
+      null;
     const who = e ? people.get(e) : undefined;
     if (!who) continue;
     who.purchases += 1;
@@ -341,7 +408,10 @@ async function customers() {
 
 async function signInLink(next: string) {
   const page = ADMIN_PAGES.has(next) ? next : "/admin";
-  const { data, error } = await db().auth.admin.generateLink({ type: "magiclink", email: ADMIN_EMAIL });
+  const { data, error } = await db().auth.admin.generateLink({
+    type: "magiclink",
+    email: ADMIN_EMAIL,
+  });
   if (error) throw new Error(error.message);
   const token = data.properties?.hashed_token;
   if (!token) throw new Error("No sign-in link was made.");
