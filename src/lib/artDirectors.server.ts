@@ -54,8 +54,43 @@ export interface Field {
   list: boolean;
   /** A Choice field's choices, in order. */
   choices?: string[];
+  /** A traffic light's lights, in the order they are offered; unset means the one light, Emailed. */
+  lights?: LightChoice[];
   /** One of Apollo's own: it can be hidden but not deleted. */
   apollo?: boolean;
+}
+
+export type LightColour = "red" | "orange" | "yellow" | "green" | "blue" | "purple" | "grey" | "black";
+const LIGHT_COLOURS: LightColour[] = ["red", "orange", "yellow", "green", "blue", "purple", "grey", "black"];
+
+/** One of a traffic light's lights: its colour, and what it stands for. */
+export interface LightChoice {
+  id: string;
+  colour: LightColour;
+  name: string;
+}
+
+/** The light the sending switches on when someone is emailed and has no light yet. */
+export const EMAILED_LIGHT = "emailed";
+
+/** What the Email light starts with: the one light the sending sets. Hywel adds his own after it. */
+export const DEFAULT_LIGHTS: LightChoice[] = [{ id: EMAILED_LIGHT, colour: "red", name: "Emailed" }];
+
+export const lightsOf = (field: Pick<Field, "lights">): LightChoice[] => (field.lights && field.lights.length > 0 ? field.lights : DEFAULT_LIGHTS);
+
+function cleanLights(raw: unknown): LightChoice[] | undefined {
+  if (!Array.isArray(raw)) return undefined;
+  const out: LightChoice[] = [];
+  const seen = new Set<string>();
+  for (const r of raw.slice(0, 12)) {
+    const l = (r ?? {}) as Json;
+    const id = str(l["id"]);
+    const colour = str(l["colour"]) as LightColour;
+    if (!/^[a-z0-9_]{1,40}$/.test(id) || seen.has(id) || !LIGHT_COLOURS.includes(colour)) continue;
+    seen.add(id);
+    out.push({ id, colour, name: str(l["name"]).slice(0, 60) || colour });
+  }
+  return out.length > 0 ? out : undefined;
 }
 
 /** What the folder starts with: Apollo's details, the most useful in the list. */
@@ -93,6 +128,10 @@ function cleanFields(raw: unknown): Field[] {
     if (known) field.apollo = true;
     if (type === "choice") {
       field.choices = strings(f["choices"], 30).map((c) => c.slice(0, 60));
+    }
+    if (type === "light") {
+      const lights = cleanLights(f["lights"]);
+      if (lights) field.lights = lights;
     }
     seen.add(id);
     out.push(field);
@@ -206,6 +245,10 @@ function cleanValue(field: Field, v: unknown): string | number | boolean | null 
     case "choice": {
       const s = str(v);
       return field.choices?.includes(s) ? s : null;
+    }
+    case "light": {
+      const s = str(v);
+      return lightsOf(field).some((l) => l.id === s) ? s : null;
     }
     case "picture":
       return null;
