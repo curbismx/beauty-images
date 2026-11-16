@@ -104,6 +104,27 @@ export type Database = {
         }
         Relationships: []
       }
+      art_designs: {
+        Row: {
+          created_at: string
+          html: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          html: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          html?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       art_outreach: {
         Row: {
           daily_limit: number
@@ -163,27 +184,45 @@ export type Database = {
       }
       art_sends: {
         Row: {
+          clicked_at: string | null
+          clicks: number
           contact_id: string
           id: number
+          key: string
+          last_url: string
           note: string
+          opened_at: string | null
+          opens: number
           sent_at: string
           status: string
           subject: string
           to_email: string
         }
         Insert: {
+          clicked_at?: string | null
+          clicks?: number
           contact_id: string
           id?: never
+          key?: string
+          last_url?: string
           note?: string
+          opened_at?: string | null
+          opens?: number
           sent_at?: string
           status: string
           subject?: string
           to_email: string
         }
         Update: {
+          clicked_at?: string | null
+          clicks?: number
           contact_id?: string
           id?: never
+          key?: string
+          last_url?: string
           note?: string
+          opened_at?: string | null
+          opens?: number
           sent_at?: string
           status?: string
           subject?: string

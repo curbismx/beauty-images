@@ -45,8 +45,10 @@ import { Route as ShopSplatRouteImport } from './routes/shop.$'
 import { Route as StoreSplatRouteImport } from './routes/store.$'
 import { Route as AdminImageIdRouteImport } from './routes/admin.image.$id'
 import { Route as ApiAdminUploadImageRouteImport } from './routes/api/admin/upload-image'
+import { Route as ApiPublicCRouteImport } from './routes/api/public/c'
 import { Route as ApiPublicCurbismRouteImport } from './routes/api/public/curbism'
 import { Route as ApiPublicDownloadRouteImport } from './routes/api/public/download'
+import { Route as ApiPublicORouteImport } from './routes/api/public/o'
 import { Route as ApiPublicOutreachRouteImport } from './routes/api/public/outreach'
 import { Route as ApiPublicTrackRouteImport } from './routes/api/public/track'
 import { Route as ApiPublicUnsubscribeRouteImport } from './routes/api/public/unsubscribe'
@@ -240,6 +242,11 @@ const ApiAdminUploadImageRoute = ApiAdminUploadImageRouteImport.update({
   path: '/api/admin/upload-image',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicCRoute = ApiPublicCRouteImport.update({
+  id: '/api/public/c',
+  path: '/api/public/c',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicCurbismRoute = ApiPublicCurbismRouteImport.update({
   id: '/api/public/curbism',
   path: '/api/public/curbism',
@@ -248,6 +255,11 @@ const ApiPublicCurbismRoute = ApiPublicCurbismRouteImport.update({
 const ApiPublicDownloadRoute = ApiPublicDownloadRouteImport.update({
   id: '/api/public/download',
   path: '/api/public/download',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicORoute = ApiPublicORouteImport.update({
+  id: '/api/public/o',
+  path: '/api/public/o',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicOutreachRoute = ApiPublicOutreachRouteImport.update({
@@ -353,8 +365,10 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/admin/image/$id': typeof AdminImageIdRoute
   '/api/admin/upload-image': typeof ApiAdminUploadImageRoute
+  '/api/public/c': typeof ApiPublicCRoute
   '/api/public/curbism': typeof ApiPublicCurbismRoute
   '/api/public/download': typeof ApiPublicDownloadRoute
+  '/api/public/o': typeof ApiPublicORoute
   '/api/public/outreach': typeof ApiPublicOutreachRoute
   '/api/public/track': typeof ApiPublicTrackRoute
   '/api/public/unsubscribe': typeof ApiPublicUnsubscribeRoute
@@ -404,8 +418,10 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/admin/image/$id': typeof AdminImageIdRoute
   '/api/admin/upload-image': typeof ApiAdminUploadImageRoute
+  '/api/public/c': typeof ApiPublicCRoute
   '/api/public/curbism': typeof ApiPublicCurbismRoute
   '/api/public/download': typeof ApiPublicDownloadRoute
+  '/api/public/o': typeof ApiPublicORoute
   '/api/public/outreach': typeof ApiPublicOutreachRoute
   '/api/public/track': typeof ApiPublicTrackRoute
   '/api/public/unsubscribe': typeof ApiPublicUnsubscribeRoute
@@ -457,8 +473,10 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/admin/image/$id': typeof AdminImageIdRoute
   '/api/admin/upload-image': typeof ApiAdminUploadImageRoute
+  '/api/public/c': typeof ApiPublicCRoute
   '/api/public/curbism': typeof ApiPublicCurbismRoute
   '/api/public/download': typeof ApiPublicDownloadRoute
+  '/api/public/o': typeof ApiPublicORoute
   '/api/public/outreach': typeof ApiPublicOutreachRoute
   '/api/public/track': typeof ApiPublicTrackRoute
   '/api/public/unsubscribe': typeof ApiPublicUnsubscribeRoute
@@ -511,8 +529,10 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/admin/image/$id'
     | '/api/admin/upload-image'
+    | '/api/public/c'
     | '/api/public/curbism'
     | '/api/public/download'
+    | '/api/public/o'
     | '/api/public/outreach'
     | '/api/public/track'
     | '/api/public/unsubscribe'
@@ -562,8 +582,10 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin/image/$id'
     | '/api/admin/upload-image'
+    | '/api/public/c'
     | '/api/public/curbism'
     | '/api/public/download'
+    | '/api/public/o'
     | '/api/public/outreach'
     | '/api/public/track'
     | '/api/public/unsubscribe'
@@ -614,8 +636,10 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/admin/image/$id'
     | '/api/admin/upload-image'
+    | '/api/public/c'
     | '/api/public/curbism'
     | '/api/public/download'
+    | '/api/public/o'
     | '/api/public/outreach'
     | '/api/public/track'
     | '/api/public/unsubscribe'
@@ -656,8 +680,10 @@ export interface RootRouteChildren {
   ShopSplatRoute: typeof ShopSplatRoute
   StoreSplatRoute: typeof StoreSplatRoute
   ApiAdminUploadImageRoute: typeof ApiAdminUploadImageRoute
+  ApiPublicCRoute: typeof ApiPublicCRoute
   ApiPublicCurbismRoute: typeof ApiPublicCurbismRoute
   ApiPublicDownloadRoute: typeof ApiPublicDownloadRoute
+  ApiPublicORoute: typeof ApiPublicORoute
   ApiPublicOutreachRoute: typeof ApiPublicOutreachRoute
   ApiPublicTrackRoute: typeof ApiPublicTrackRoute
   ApiPublicUnsubscribeRoute: typeof ApiPublicUnsubscribeRoute
@@ -926,6 +952,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAdminUploadImageRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/c': {
+      id: '/api/public/c'
+      path: '/api/public/c'
+      fullPath: '/api/public/c'
+      preLoaderRoute: typeof ApiPublicCRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/curbism': {
       id: '/api/public/curbism'
       path: '/api/public/curbism'
@@ -938,6 +971,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/download'
       fullPath: '/api/public/download'
       preLoaderRoute: typeof ApiPublicDownloadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/o': {
+      id: '/api/public/o'
+      path: '/api/public/o'
+      fullPath: '/api/public/o'
+      preLoaderRoute: typeof ApiPublicORouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/outreach': {
@@ -1093,8 +1133,10 @@ const rootRouteChildren: RootRouteChildren = {
   ShopSplatRoute: ShopSplatRoute,
   StoreSplatRoute: StoreSplatRoute,
   ApiAdminUploadImageRoute: ApiAdminUploadImageRoute,
+  ApiPublicCRoute: ApiPublicCRoute,
   ApiPublicCurbismRoute: ApiPublicCurbismRoute,
   ApiPublicDownloadRoute: ApiPublicDownloadRoute,
+  ApiPublicORoute: ApiPublicORoute,
   ApiPublicOutreachRoute: ApiPublicOutreachRoute,
   ApiPublicTrackRoute: ApiPublicTrackRoute,
   ApiPublicUnsubscribeRoute: ApiPublicUnsubscribeRoute,
