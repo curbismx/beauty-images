@@ -130,6 +130,7 @@ const adminCss = `
 .bi-input:focus, .bi-textarea:focus, .bi-select:focus { border-color: #D75F68; }
 .bi-textarea { min-height: 120px; resize: vertical; }
 .bi-label { display: block; font-size: 12px; font-weight: 800; letter-spacing: 0.02em; text-transform: uppercase; margin-bottom: 8px; }
+.bi-help { font-size: 13px; line-height: 1.5; color: #666; }
 .bi-btn { background: #000; color: #fff; border: 1px solid #000; padding: 12px 18px; font-size: 14px; font-weight: 800; letter-spacing: 0.02em; text-transform: uppercase; cursor: pointer; font-family: inherit; }
 .bi-btn:hover { background: #fff; color: #000; }
 .bi-btn--accent { background: #D75F68; border-color: #D75F68; color: #fff; }

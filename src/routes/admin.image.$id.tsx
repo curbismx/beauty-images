@@ -22,6 +22,14 @@ function ImageEdit() {
     queryKey: ["image", id],
     queryFn: () => fetchImage({ data: { id } }),
   });
+  // The date an Advertising licence's hold ends, as dd.mm.yyyy, while it is still ahead.
+  const heldUntil = (() => {
+    const raw = imageQ.data?.held_until;
+    const at = raw ? Date.parse(raw) : NaN;
+    if (!Number.isFinite(at) || at <= Date.now()) return null;
+    const d = new Date(at);
+    return `${String(d.getUTCDate()).padStart(2, "0")}.${String(d.getUTCMonth() + 1).padStart(2, "0")}.${d.getUTCFullYear()}`;
+  })();
 
   // Use the "ready" filter for next/prev navigation (after keywording, before publish)
   const listQ = useQuery({
@@ -241,6 +249,12 @@ function ImageEdit() {
               />{" "}
               Published to site
             </label>
+            {heldUntil && (
+              <div className="bi-help" style={{ marginTop: 6 }}>
+                Off sale until {heldUntil}: an Advertising licence was bought, so the picture is
+                exclusive to that client until then. It goes back on sale by itself.
+              </div>
+            )}
           </div>
           <div className="bi-field">
             <label className="bi-label">Admin notes</label>

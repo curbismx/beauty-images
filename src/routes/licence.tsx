@@ -4,7 +4,7 @@ export const Route = createFileRoute("/licence")({
   head: () => ({
     meta: [
       { title: "Licence Agreement — Beauty Images" },
-      { name: "description", content: "The full terms governing rights-managed licensing of images from Beauty Images — Small, Medium and Large licence tiers, worldwide 12-month digital rights." },
+      { name: "description", content: "The full terms governing rights-managed licensing of images from Beauty Images — Small, Medium, Large and Advertising licence tiers, 12 months worldwide in print and digital." },
       { property: "og:title", content: "Licence Agreement — Beauty Images" },
       { property: "og:description", content: "The full terms governing rights-managed licensing of images from Beauty Images." },
       { property: "og:url", content: "https://beautyimages.com/licence" },
@@ -87,18 +87,40 @@ function LicencePage() {
           <h2>3. Grant of licence</h2>
           <p>
             Subject to full payment and to the terms of this Agreement, we grant you a
-            non-exclusive, non-transferable licence to use the licensed Image for the use
-            associated with the licence tier you purchase. The licence takes effect once payment
+            non-transferable licence to use the licensed Image for the use associated with the
+            licence tier you purchase. Small, Medium and Large licences are non-exclusive; the
+            Advertising licence is exclusive for its 12 months, as set out in section 4. The licence takes effect once payment
             is complete and the Image has been delivered to you.
           </p>
 
           <h2>4. Licence tiers</h2>
           <p>
-            We offer Small, Medium and Large licence tiers. The tier determines the maximum
-            resolution of the file supplied and the scale of use permitted. You are responsible
-            for selecting a tier appropriate to your intended use; details of each tier are shown
-            at the point of purchase. If you are unsure which tier you need, contact us before
-            purchasing.
+            We offer Small, Medium, Large and Advertising licence tiers. The tier determines the
+            maximum resolution of the file supplied and the use permitted. Every tier runs for 12
+            months from purchase, worldwide, in print and digital media. In summary:
+          </p>
+          <ul>
+            <li>Small: websites, social media, blogs and online editorial use.</li>
+            <li>
+              Medium: magazine and newspaper pages in print and online, brochures and packaging
+              mock-ups.
+            </li>
+            <li>
+              Large: full-page print, commercial websites, brochures, presentations and packaging
+              mock-ups.
+            </li>
+            <li>
+              Advertising: paid advertising in any medium, product packaging and point of sale.
+              For the 12 months of an Advertising licence the Image is withdrawn from sale and we
+              grant no further licence of it to anyone else. It returns to sale when the 12 months
+              end.
+            </li>
+          </ul>
+          <p>
+            Paid advertising and product packaging require the Advertising tier whatever the file
+            size. You are responsible for selecting a tier appropriate to your intended use;
+            details of each tier are shown at the point of purchase. If you are unsure which tier
+            you need, contact us before purchasing.
           </p>
 
           <h2>5. Restrictions</h2>

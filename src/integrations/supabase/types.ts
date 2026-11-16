@@ -363,6 +363,7 @@ export type Database = {
           category: string | null
           created_at: string
           featured: boolean
+          held_until: string | null
           filename: string
           id: string
           image_number: number
@@ -386,6 +387,7 @@ export type Database = {
           category?: string | null
           created_at?: string
           featured?: boolean
+          held_until?: string | null
           filename: string
           id?: string
           image_number: number
@@ -409,6 +411,7 @@ export type Database = {
           category?: string | null
           created_at?: string
           featured?: boolean
+          held_until?: string | null
           filename?: string
           id?: string
           image_number?: number

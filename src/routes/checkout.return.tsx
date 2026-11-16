@@ -18,8 +18,8 @@ export const Route = createFileRoute("/checkout/return")({
   component: CheckoutReturn,
 });
 
-const TIER_LABEL: Record<string, string> = { small: "S", medium: "M", large: "L" };
-const TIER_NAME: Record<string, string> = { small: "Small", medium: "Medium", large: "Large" };
+const TIER_LABEL: Record<string, string> = { small: "S", medium: "M", large: "L", advertising: "A" };
+const TIER_NAME: Record<string, string> = { small: "Small", medium: "Medium", large: "Large", advertising: "Advertising" };
 
 function fmtPrice(p: number, ccy = "GBP") {
   const symbol = ccy === "GBP" ? "£" : ccy === "USD" ? "$" : ccy === "EUR" ? "€" : "";

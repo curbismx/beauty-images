@@ -14,7 +14,25 @@ function getSupabase(): SupabaseClient {
   return _supabase;
 }
 
-const TIER_FROM_CODE: Record<string, string> = { s: "small", m: "medium", l: "large" };
+const TIER_FROM_CODE: Record<string, string> = { s: "small", m: "medium", l: "large", a: "advertising" };
+/** How long a picture comes off sale after an Advertising licence. */
+const ADVERTISING_HOLD_MONTHS = 12;
+
+/**
+ * An Advertising licence takes the picture off sale for twelve months: it
+ * stops being public and carries the date it comes back, which the daily
+ * database job watches. Best effort; never blocks the webhook.
+ */
+async function holdForAdvertising(imageIds: string[]) {
+  if (imageIds.length === 0) return;
+  const until = new Date();
+  until.setUTCMonth(until.getUTCMonth() + ADVERTISING_HOLD_MONTHS);
+  const { error } = await getSupabase()
+    .from("images")
+    .update({ public: false, held_until: until.toISOString() })
+    .in("id", imageIds);
+  if (error) console.error("Could not hold pictures after an Advertising licence:", error);
+}
 const ROOT_DOMAIN = "beautyimages.com";
 
 async function sendOrderConfirmationEmail(
@@ -133,7 +151,9 @@ async function handleCheckoutCompleted(session: any, env: StripeEnv) {
     });
     for (const li of lineItems.data) {
       const lookup = String((li.price as any)?.lookup_key || "").toLowerCase();
-      const tier = lookup.includes("small")
+      const tier = lookup.includes("advertising")
+        ? "advertising"
+        : lookup.includes("small")
         ? "small"
         : lookup.includes("medium")
           ? "medium"
@@ -195,6 +215,9 @@ async function handleCheckoutCompleted(session: any, env: StripeEnv) {
   } else {
     const { error } = await getSupabase().from("sales").insert(rows);
     if (error) console.error("Failed to insert sales rows:", error);
+    await holdForAdvertising(
+      Array.from(new Set(rows.filter((r) => r.download_tier === "advertising").map((r) => r.image_id))),
+    );
   }
 
   // Send order confirmation email (best-effort — never block the webhook ack)

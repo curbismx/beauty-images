@@ -84,8 +84,12 @@ export const Route = createFileRoute("/image/$id")({
       };
       scripts.push({ type: "application/ld+json", children: JSON.stringify(imageObject) });
 
-      // Product + 3 Offers for the licence tiers. Currency uses GBP as the
+      // Product + 4 Offers for the licence tiers. Currency uses GBP as the
       // canonical price (the per-region currency is resolved client-side).
+      // Off sale after an Advertising licence: the offers stay listed but out of stock.
+      const availability = img.held_until && Date.parse(img.held_until) > Date.now()
+        ? "https://schema.org/OutOfStock"
+        : "https://schema.org/InStock";
       const product = {
         "@context": "https://schema.org",
         "@type": "Product",
@@ -95,9 +99,10 @@ export const Route = createFileRoute("/image/$id")({
         sku: img.id,
         brand: { "@type": "Brand", name: SITE_NAME },
         offers: [
-          { "@type": "Offer", name: "Small licence", price: "95.00", priceCurrency: "GBP", url, availability: "https://schema.org/InStock" },
-          { "@type": "Offer", name: "Medium licence", price: "195.00", priceCurrency: "GBP", url, availability: "https://schema.org/InStock" },
-          { "@type": "Offer", name: "Large licence", price: "275.00", priceCurrency: "GBP", url, availability: "https://schema.org/InStock" },
+          { "@type": "Offer", name: "Small licence", price: "49.00", priceCurrency: "GBP", url, availability },
+          { "@type": "Offer", name: "Medium licence", price: "99.00", priceCurrency: "GBP", url, availability },
+          { "@type": "Offer", name: "Large licence", price: "199.00", priceCurrency: "GBP", url, availability },
+          { "@type": "Offer", name: "Advertising licence", price: "799.00", priceCurrency: "GBP", url, availability },
         ],
       };
       scripts.push({ type: "application/ld+json", children: JSON.stringify(product) });
@@ -136,25 +141,31 @@ const TIERS: Array<{
   {
     id: "small",
     label: "Small",
-    sub: "800 px max width",
+    sub: "800 px max edge",
     description:
-      "A Small image delivers an image with maximum edge 800px as a JPG download. These images will be ideal for small usage on websites, social media, blog and small editorial usage. Digital rights will last for 12 months worldwide license.",
+      "A JPG with a longest edge of 800 px, for websites, social media, blogs and online editorial use. 12 months, worldwide.",
   },
   {
     id: "medium",
     label: "Medium",
-    sub: "2000 px max width",
+    sub: "2000 px max edge",
     description:
-      "A Medium image delivers an image with maximum edge 2000px as a JPG download. These images will be suited to magazine spreads, brochures, packaging mock-ups and quarter-page print. Digital rights will last for 12 months worldwide license.",
+      "A JPG with a longest edge of 2000 px, for magazine and newspaper pages in print and online, brochures and packaging mock-ups. Print and digital, 12 months, worldwide.",
   },
   {
     id: "large",
     label: "Large",
     sub: "Highest resolution",
     description:
-      "A Large image delivers the highest available resolution as a JPG download. These images will be suited to for full-page print, posters, billboards and high-end advertising campaigns. Digital rights will last for 12 months worldwide license.",
+      "The highest resolution we hold, for full page print, commercial websites, brochures, presentations and packaging mock-ups. Print and digital, 12 months, worldwide. Paid advertising and product packaging need the Advertising licence.",
   },
-
+  {
+    id: "advertising",
+    label: "Advertising",
+    sub: "Highest resolution, exclusive",
+    description:
+      "The highest resolution we hold, for paid advertising in any medium, product packaging and point of sale. 12 months, worldwide, and for those 12 months the picture comes off sale: nobody else can license it.",
+  },
 ];
 
 function ImageDetail() {
@@ -234,6 +245,15 @@ function ImageDetail() {
   }, [img, fetchSimilar]);
 
   const activeTier = TIERS.find((t) => t.id === tier)!;
+  // Off sale after an Advertising licence: the date it comes back, as dd.mm.yyyy.
+  const heldUntil = (() => {
+    const at = img?.held_until ? Date.parse(img.held_until) : NaN;
+    if (!Number.isFinite(at) || at <= Date.now()) return null;
+    const d = new Date(at);
+    const dd = String(d.getUTCDate()).padStart(2, "0");
+    const mm = String(d.getUTCMonth() + 1).padStart(2, "0");
+    return `${dd}.${mm}.${d.getUTCFullYear()}`;
+  })();
 
 
 
@@ -317,7 +337,19 @@ function ImageDetail() {
                   )}
                 </div>
               </div>
-              {imgReady && (
+              {imgReady && heldUntil && (
+                <div className="lc-detail lc-detail--under">
+                  <div className="lc-detail-eyebrow">LICENSED EXCLUSIVELY</div>
+                  <div className="lc-detail-head">
+                    <span className="lc-detail-tier">OFF SALE UNTIL {heldUntil}</span>
+                  </div>
+                  <p className="lc-detail-text">
+                    This picture is licensed exclusively to one client and comes back on sale on
+                    the date above. Contact us if you would like to be told when it does.
+                  </p>
+                </div>
+              )}
+              {imgReady && !heldUntil && (
                 <div className="lc-detail lc-detail--under">
                   <div className="lc-btn-row">
                     {TIERS.map((t) => {

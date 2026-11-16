@@ -5,9 +5,11 @@ const TIER_MAX_EDGE: Record<string, number> = {
   small: 800,
   medium: 2000,
   large: 0,
+  advertising: 0,
 };
 
-const TIER_PRICE: Record<string, number> = { small: 150, medium: 275, large: 375 };
+// Fallback only, when a sale row carries no amount: the sterling list prices.
+const TIER_PRICE: Record<string, number> = { small: 49, medium: 99, large: 199, advertising: 799 };
 
 export interface OrderItem {
   sale_id: string;
