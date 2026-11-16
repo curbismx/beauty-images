@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { detectCountry, getCachedCountry, regionFromCountry, type PricingRegion } from "./region";
 
-export type Tier = "small" | "medium" | "large";
+export type Tier = "small" | "medium" | "large" | "advertising";
 
 export interface TierPricing {
   amount: number; // major units
@@ -10,16 +10,21 @@ export interface TierPricing {
   priceId: string;
 }
 
+// The amounts here are what the site shows and what the basket adds up. The
+// amount actually charged is the Stripe price with the same lookup key, so
+// the two must be kept in step: a change here is a change in Stripe too.
 const UK_PRICING: Record<Tier, TierPricing> = {
-  small:  { amount: 95,  currency: "GBP", symbol: "£", priceId: "license_small_gbp"  },
-  medium: { amount: 195, currency: "GBP", symbol: "£", priceId: "license_medium_gbp" },
-  large:  { amount: 275, currency: "GBP", symbol: "£", priceId: "license_large_gbp"  },
+  small:       { amount: 49,  currency: "GBP", symbol: "£", priceId: "license_small_gbp"       },
+  medium:      { amount: 99,  currency: "GBP", symbol: "£", priceId: "license_medium_gbp"      },
+  large:       { amount: 199, currency: "GBP", symbol: "£", priceId: "license_large_gbp"       },
+  advertising: { amount: 799, currency: "GBP", symbol: "£", priceId: "license_advertising_gbp" },
 };
 
 const ROW_PRICING: Record<Tier, TierPricing> = {
-  small:  { amount: 150, currency: "USD", symbol: "$", priceId: "license_small_usd"  },
-  medium: { amount: 275, currency: "USD", symbol: "$", priceId: "license_medium_usd" },
-  large:  { amount: 375, currency: "USD", symbol: "$", priceId: "license_large_usd"  },
+  small:       { amount: 65,  currency: "USD", symbol: "$", priceId: "license_small_usd"       },
+  medium:      { amount: 129, currency: "USD", symbol: "$", priceId: "license_medium_usd"      },
+  large:       { amount: 259, currency: "USD", symbol: "$", priceId: "license_large_usd"       },
+  advertising: { amount: 999, currency: "USD", symbol: "$", priceId: "license_advertising_usd" },
 };
 
 export function pricingFor(region: PricingRegion): Record<Tier, TierPricing> {

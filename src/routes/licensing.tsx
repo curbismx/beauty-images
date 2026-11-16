@@ -4,7 +4,7 @@ import { SITE_URL, SITE_NAME, breadcrumbJsonLd } from "@/lib/seo";
 const URL = `${SITE_URL}/licensing`;
 const TITLE = "Image Licensing — How Rights-Managed Beauty Image Licences Work | Beauty Images";
 const DESC =
-  "Licence rights-managed beauty photography directly from Beauty Images. Small, Medium and Large tiers, worldwide 12-month digital rights, simple online checkout for advertising and editorial buyers.";
+  "Licence rights-managed beauty photography directly from Beauty Images. Small, Medium, Large and Advertising tiers, 12 months worldwide in print and digital, simple online checkout for editorial, commercial and advertising buyers.";
 
 const FAQ: Array<{ q: string; a: string }> = [
   {
@@ -12,8 +12,8 @@ const FAQ: Array<{ q: string; a: string }> = [
     a: "A rights-managed licence grants you specific usage for an image — covering medium, market, duration and territory. Unlike royalty-free stock, rights-managed pricing reflects the use itself, and protects the image's commercial value for everyone who licenses it.",
   },
   {
-    q: "What do the Small, Medium and Large licences cover?",
-    a: "Small (800px max edge) suits websites, social media, blogs and small editorial use. Medium (2000px max edge) suits magazine spreads, brochures, packaging mock-ups and quarter-page print. Large (highest available resolution) suits full-page print, posters, billboards and high-end advertising campaigns. All three include a 12-month worldwide digital licence.",
+    q: "What do the Small, Medium, Large and Advertising licences cover?",
+    a: "Small (800px max edge) covers websites, social media, blogs and online editorial use. Medium (2000px max edge) covers magazine and newspaper pages in print and online, brochures and packaging mock-ups. Large (highest resolution) covers full-page print, commercial websites, brochures, presentations and packaging mock-ups. Advertising (highest resolution) covers paid advertising in any medium, product packaging and point of sale, and takes the picture off sale for 12 months so nobody else can license it. Every licence runs for 12 months, worldwide, print and digital.",
   },
   {
     q: "Is every image really exclusive to Beauty Images?",
@@ -25,7 +25,7 @@ const FAQ: Array<{ q: string; a: string }> = [
   },
   {
     q: "How do I licence an image?",
-    a: "Find the image you want, choose Small, Medium or Large, add it to your basket and check out online. You can also contact us for custom usage briefs or bulk requests.",
+    a: "Find the image you want, choose Small, Medium, Large or Advertising, add it to your basket and check out online. You can also contact us for custom usage briefs or bulk requests.",
   },
 ];
 
@@ -105,26 +105,31 @@ function LicensingPage() {
           <p className="lic-eyebrow">Licensing</p>
           <h1>Licence beauty photography directly online.</h1>
           <p className="lic-lede">
-            Every image at {SITE_NAME} is exclusive, rights-managed, and licensed directly through this site. Three
-            licence tiers cover web, print and high-end campaign use, all with a 12-month worldwide digital licence
-            as standard.
+            Every image at {SITE_NAME} is exclusive, rights-managed, and licensed directly through this site. Four
+            licence tiers cover web, print, commercial and advertising use, every one for 12 months, worldwide,
+            print and digital.
           </p>
 
           <div className="lic-tiers">
             <div className="lic-tier">
               <h3>Small</h3>
               <p className="lic-tier-sub">800 px max edge</p>
-              <p>Websites, social media, blogs and small editorial use. JPG download, 12-month worldwide digital licence.</p>
+              <p>Websites, social media, blogs and online editorial use. JPG download, 12 months, worldwide.</p>
             </div>
             <div className="lic-tier">
               <h3>Medium</h3>
               <p className="lic-tier-sub">2000 px max edge</p>
-              <p>Magazine spreads, brochures, packaging mock-ups, quarter-page print. JPG download, 12-month worldwide digital licence.</p>
+              <p>Magazine and newspaper pages in print and online, brochures, packaging mock-ups. JPG download, print and digital, 12 months, worldwide.</p>
             </div>
             <div className="lic-tier">
               <h3>Large</h3>
               <p className="lic-tier-sub">Highest resolution</p>
-              <p>Full-page print, posters, billboards, high-end advertising campaigns. JPG download, 12-month worldwide digital licence.</p>
+              <p>Full-page print, commercial websites, brochures, presentations, packaging mock-ups. JPG download, print and digital, 12 months, worldwide.</p>
+            </div>
+            <div className="lic-tier">
+              <h3>Advertising</h3>
+              <p className="lic-tier-sub">Highest resolution, exclusive</p>
+              <p>Paid advertising in any medium, product packaging, point of sale. The picture comes off sale for the 12 months of the licence: nobody else can license it. Worldwide.</p>
             </div>
           </div>
 

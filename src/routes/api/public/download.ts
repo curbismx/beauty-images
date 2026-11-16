@@ -2,8 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
 
 // Full tier word used in the download filename.
-const TIER_LABEL: Record<string, string> = { small: "SMALL", medium: "MEDIUM", large: "LARGE" };
-// Pre-generated derivative folder per tier. "large" has no derivative — it is
+const TIER_LABEL: Record<string, string> = { small: "SMALL", medium: "MEDIUM", large: "LARGE", advertising: "ADVERTISING" };
+// Pre-generated derivative folder per tier. "large" and "advertising" have no derivative: each is
 // served as the untouched original.
 const TIER_FOLDER: Record<string, string> = { small: "small", medium: "medium" };
 

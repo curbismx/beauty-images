@@ -79,7 +79,7 @@ export async function verifyWebhook(req: Request, env: StripeEnv): Promise<{ typ
 
 // One-time idempotent tax-code setup for our license products.
 // All three license products are general digital goods.
-const LICENSE_PRODUCT_IDS = ['license_small', 'license_medium', 'license_large'];
+const LICENSE_PRODUCT_IDS = ['license_small', 'license_medium', 'license_large', 'license_advertising'];
 const DIGITAL_GOODS_TAX_CODE = 'txcd_10000000';
 let taxCodesEnsured = false;
 

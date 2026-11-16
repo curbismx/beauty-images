@@ -28,6 +28,8 @@ export type PublicImageDetail = {
   category: string | null;
   pricing_tier: string | null;
   signed_url: string | null;
+  /** Set while the picture is off sale after an Advertising licence; null otherwise. */
+  held_until: string | null;
 };
 
 export const searchPublicImages = createServerFn({ method: "POST" })
@@ -170,16 +172,19 @@ export const searchPublicImages = createServerFn({ method: "POST" })
 export const getPublicImage = createServerFn({ method: "POST" })
   .inputValidator(z.object({ id: z.string().uuid() }).parse)
   .handler(async ({ data }): Promise<PublicImageDetail | null> => {
+    // A picture off sale after an Advertising licence is no longer public,
+    // but its page still opens so a saved link says when it comes back.
     const { data: row, error } = await supabaseAdmin
       .from("images")
-      .select("id, image_number, title, caption, keywords, category, pricing_tier, preview_path")
+      .select("id, image_number, title, caption, keywords, category, pricing_tier, preview_path, public, held_until")
       .eq("id", data.id)
-      .eq("public", true)
       .eq("featured", false)
       .not("preview_path", "is", null)
       .maybeSingle();
     if (error) throw new Error(error.message);
     if (!row || !row.preview_path) return null;
+    const held = row.held_until && Date.parse(row.held_until) > Date.now() ? row.held_until : null;
+    if (!row.public && !held) return null;
     return {
       id: row.id,
       image_number: row.image_number as number,
@@ -189,6 +194,7 @@ export const getPublicImage = createServerFn({ method: "POST" })
       category: row.category,
       pricing_tier: row.pricing_tier,
       signed_url: previewUrl(row.id),
+      held_until: held,
     };
   });
 

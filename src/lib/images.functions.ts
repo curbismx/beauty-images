@@ -386,6 +386,8 @@ export type ImageDetail = {
   admin_notes: string | null;
   featured: boolean;
   public: boolean;
+  /** Off sale after an Advertising licence until this date; null otherwise. */
+  held_until: string | null;
   keyworded_at: string | null;
   created_at: string;
   signed_url: string | null;
@@ -419,6 +421,7 @@ export const getImage = createServerFn({ method: "GET" })
       admin_notes: row.admin_notes,
       featured: row.featured,
       public: row.public,
+      held_until: (row as { held_until?: string | null }).held_until ?? null,
       keyworded_at: row.keyworded_at,
       created_at: row.created_at,
       signed_url: signed.data?.signedUrl ?? null,

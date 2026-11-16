@@ -79,6 +79,22 @@ async function resolveOrCreateCustomer(
   return created.id;
 }
 
+/** The ids among `imageIds` that are off sale right now (after an Advertising licence). */
+async function heldImages(imageIds: string[]): Promise<string[]> {
+  if (imageIds.length === 0) return [];
+  const supabase = createClient(
+    process.env.SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  );
+  const { data, error } = await supabase
+    .from("images")
+    .select("id")
+    .in("id", imageIds)
+    .gt("held_until", new Date().toISOString());
+  if (error) throw new Error(error.message);
+  return (data ?? []).map((r) => r.id as string);
+}
+
 export const createBasketCheckoutSession = createServerFn({ method: "POST" })
   .inputValidator((data: {
     items: LineItemInput[];
@@ -113,6 +129,13 @@ export const createBasketCheckoutSession = createServerFn({ method: "POST" })
     return data;
   })
   .handler(async ({ data }) => {
+    // A picture off sale after an Advertising licence can't be in a basket,
+    // however long ago it was put there.
+    const held = await heldImages(data.imageIds ?? []);
+    if (held.length > 0) {
+      throw new Error("A picture in your basket is licensed exclusively and off sale for now. Please remove it and try again.");
+    }
+
     const stripe = createStripeClient(data.environment);
 
     // Ensure products have a tax code (idempotent, runs once per process).

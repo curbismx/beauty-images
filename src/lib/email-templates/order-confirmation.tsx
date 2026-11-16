@@ -41,7 +41,9 @@ const tierLabel = (tier?: string) => {
     case 'small':
       return 'Small (800px)'
     case 'large':
-      return 'Large (5400px)'
+      return 'Large (highest resolution)'
+    case 'advertising':
+      return 'Advertising (highest resolution, exclusive for 12 months)'
     default:
       return 'Medium (2000px)'
   }
@@ -104,11 +106,11 @@ export const template = {
   previewData: {
     siteName: 'BEAUTYIMAGES',
     downloadUrl: 'https://beautyimages.com/checkout/return?session_id=cs_test_example',
-    total: 425,
+    total: 148,
     currency: 'GBP',
     items: [
-      { image_number: 12, title: 'Morning Light', tier: 'medium', price: 275 },
-      { image_number: 47, title: 'Coastal Bloom', tier: 'small', price: 150 },
+      { image_number: 12, title: 'Morning Light', tier: 'medium', price: 99 },
+      { image_number: 47, title: 'Coastal Bloom', tier: 'small', price: 49 },
     ],
   },
 } satisfies TemplateEntry
