@@ -2,4 +2,4 @@
 - [x] Install supplied files.
 - [x] Apply supplied emailed-status update.
 - [x] Verify installation.
-- [ ] Request publishing.
+- [x] Request publishing.
