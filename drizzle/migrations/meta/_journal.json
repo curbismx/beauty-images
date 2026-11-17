@@ -57,6 +57,13 @@
       "when": 1794862480569,
       "tag": "0007_bi_art_designs",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1794922625703,
+      "tag": "0008_bi_outreach_clock_timeout",
+      "breakpoints": true
     }
   ]
 }
